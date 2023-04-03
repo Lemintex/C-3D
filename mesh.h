@@ -11,13 +11,11 @@ typedef struct triangle {
 } triangle_t;
 
 typedef struct mesh {
-	struct triangle* triangles;
+	triangle_t* triangles;
 	int triangleCount;
 	struct mesh* self;
 } mesh_t;
 
 mesh_t* CreateCube();
-
-triangle_t CreateTriangle(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3); 
 
 #endif
