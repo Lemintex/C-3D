@@ -23,12 +23,12 @@ matrix_4x4_t* GetTranformationMatrix(float width, float height) {
 }
 
 
-void MultiplyMatrixByVector(vec3d_t in, vec3d_t* out, matrix_4x4_t* mat) {
-	out->x = in.x * mat->m[0][0] + in.y * mat->m[1][0] + in.z * mat->m[2][0] + mat->m[3][0];
-	out->y = in.x * mat->m[0][1] + in.y * mat->m[1][1] + in.z * mat->m[2][1] + mat->m[3][1];
-	out->z = in.x * mat->m[0][2] + in.y * mat->m[1][2] + in.z * mat->m[2][2] + mat->m[3][2];
+void MultiplyMatrixByVector(vec3d_t in, vec3d_t* out, matrix_4x4_t mat) {
+	out->x = in.x * mat.m[0][0] + in.y * mat.m[1][0] + in.z * mat.m[2][0] + mat.m[3][0];
+	out->y = in.x * mat.m[0][1] + in.y * mat.m[1][1] + in.z * mat.m[2][1] + mat.m[3][1];
+	out->z = in.x * mat.m[0][2] + in.y * mat.m[1][2] + in.z * mat.m[2][2] + mat.m[3][2];
 
-	float w = in.x * mat->m[0][3] + in.y * mat->m[1][3] + in.z * mat->m[2][3] +mat->m[3][3];
+	float w = in.x * mat.m[0][3] + in.y * mat.m[1][3] + in.z * mat.m[2][3] + mat.m[3][3];
 
 	if (w != 0) {
 		out->x /= w;

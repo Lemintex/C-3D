@@ -14,6 +14,6 @@ matrix_4x4_t* CreateEmptyMatrix();
 
 matrix_4x4_t* GetTranformationMatrix(float width, float height);
 
-void MultiplyMatrixByVector(vec3d_t in, vec3d_t* out, matrix_4x4_t* mat);
+void MultiplyMatrixByVector(vec3d_t in, vec3d_t* out, matrix_4x4_t mat);
 
 #endif
