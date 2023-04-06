@@ -7,6 +7,7 @@ matrix_4x4_t* CreateEmptyMatrix() {
 
 matrix_4x4_t* GetTranformationMatrix(float width, float height) {
 	matrix_4x4_t* matrix = CreateEmptyMatrix();
+
 	float fNear = 0.1;
 	float fFar = 1000;
 	float fFov = 90;
@@ -19,6 +20,7 @@ matrix_4x4_t* GetTranformationMatrix(float width, float height) {
 	matrix->m[3][2] = (-fFar * fNear) / (fFar - fNear);
 	matrix->m[2][3] = 1.0;
 	matrix->m[3][3] = 0.0; 
+
 	return matrix;
 }
 

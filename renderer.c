@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
-static	float delta= 0;
+	static float delta = 0;
 	matrix_4x4_t matRotZ = {0};
 	matrix_4x4_t matRotX = {0};
 
@@ -16,7 +16,6 @@ static	float delta= 0;
 	matRotZ.m[2][2] = 1;
 	matRotZ.m[3][3] = 1;
 
-			// Rotation X
 	matRotX.m[0][0] = 1;
 	matRotX.m[1][1] = cosf(delta * 0.5f);
 	matRotX.m[1][2] = sinf(delta * 0.5f);
@@ -45,9 +44,6 @@ static	float delta= 0;
 		MultiplyMatrixByVector(triangleRotatedZ.verts[0], &(triangleRotatedZX.verts[0]), matRotX);
 		MultiplyMatrixByVector(triangleRotatedZ.verts[1], &(triangleRotatedZX.verts[1]), matRotX);
 		MultiplyMatrixByVector(triangleRotatedZ.verts[2], &(triangleRotatedZX.verts[2]), matRotX);
-
-
-
 
 		//triangleTranslated = triangle; 
 		triangleTranslated = triangleRotatedZX; 
@@ -89,5 +85,6 @@ void DrawTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 	SDL_RenderDrawLine(renderer, triangle->verts[0].x, triangle->verts[0].y, triangle->verts[1].x, triangle->verts[1].y);
 	SDL_RenderDrawLine(renderer, triangle->verts[1].x, triangle->verts[1].y, triangle->verts[2].x, triangle->verts[2].y);
 	SDL_RenderDrawLine(renderer, triangle->verts[2].x, triangle->verts[2].y, triangle->verts[0].x, triangle->verts[0].y);
+
 	printf("%f, %f, %f, %f, %f, %f \n", triangle->verts[0].x, triangle->verts[0].y, triangle->verts[1].x, triangle->verts[1].y, triangle->verts[2].x, triangle->verts[2].y);
 }

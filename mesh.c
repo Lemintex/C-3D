@@ -28,5 +28,6 @@ mesh_t* CreateCube() {
 		// BOTTOM                                                    
 	cube->triangles[10] = (triangle_t){ 1.0, 0.0, 1.0,    0.0, 0.0, 1.0,    0.0, 0.0, 0.0 };
 	cube->triangles[11] = (triangle_t){ 1.0, 0.0, 1.0,    0.0, 0.0, 0.0,    1.0, 0.0, 0.0 };
+
 	return cube;
 }
