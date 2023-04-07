@@ -45,8 +45,12 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		MultiplyMatrixByVector(triangleRotatedZ.verts[1], &(triangleRotatedZX.verts[1]), matRotX);
 		MultiplyMatrixByVector(triangleRotatedZ.verts[2], &(triangleRotatedZX.verts[2]), matRotX);
 
-		//triangleTranslated = triangle; 
-		triangleTranslated = triangleRotatedZX; 
+		triangleTranslated = triangle; 
+
+		printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[0].x, triangleTranslated.verts[0].y, triangleTranslated.verts[0].z);
+		printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[1].x, triangleTranslated.verts[1].y, triangleTranslated.verts[1].z);
+		printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[2].x, triangleTranslated.verts[2].y, triangleTranslated.verts[2].z);
+		//triangleTranslated = triangleRotatedZX; 
 
 		triangleTranslated.verts[0].z += 3.0;
 		triangleTranslated.verts[1].z += 3.0;
