@@ -7,12 +7,11 @@ typedef struct vec3d {
 } vec3d_t;
 
 typedef struct triangle {
-	unsigned int vertIndex[3];
+	vec3d_t verts[3];
 } triangle_t;
 
 typedef struct mesh {
-	vec3d_t* vertices;
-	triangle_t* triangles;	
+	triangle_t* triangles;
 	int triangleCount;
 	struct mesh* self;
 } mesh_t;
