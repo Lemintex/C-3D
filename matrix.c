@@ -1,6 +1,6 @@
 #include "matrix.h"
 matrix_4x4_t* CreateEmptyMatrix() {
-	matrix_4x4_t* matrix = (matrix_4x4_t*)malloc(sizeof(matrix_4x4_t));
+	matrix_4x4_t* matrix = (matrix_4x4_t*)calloc(1, sizeof(matrix_4x4_t));
 	return matrix;
 }
 
