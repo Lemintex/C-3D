@@ -56,6 +56,24 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		triangleTranslated.verts[1].z += 3.0;
 		triangleTranslated.verts[2].z += 3.0;
 
+		vec3d_t normal, l1, l2;
+		l1.x = triangleTranslated.verts[1].x - triangleTranslated.verts[0].x;
+		l1.y = triangleTranslated.verts[1].y - triangleTranslated.verts[0].y;
+		l1.z = triangleTranslated.verts[1].z - triangleTranslated.verts[0].z;
+
+		l2.x = triangleTranslated.verts[2].x - triangleTranslated.verts[0].x;
+		l2.y = triangleTranslated.verts[2].y - triangleTranslated.verts[0].y;
+		l2.z = triangleTranslated.verts[2].z - triangleTranslated.verts[0].z;
+
+		normal.x = l1.y * l2.z - l1.z * l2.y;
+		normal.y = l1.z * l2.x - l1.x * l2.z;
+		normal.z = l1.x * l2.y - l1.y * l2.x;
+
+		float length = sqrt(pow(normal.x, 2) + pow(normal.y , 2) + pow(normal.z, 2));
+		normal.x /= length; normal.y /= length; normal.z /= length;
+
+		if (normal.z > 0) continue;
+		// transform 3D->2D
 		MultiplyMatrixByVector(triangleTranslated.verts[0], &(triangleProjected.verts[0]), *transformationMatrix);
 		MultiplyMatrixByVector(triangleTranslated.verts[1], &(triangleProjected.verts[1]), *transformationMatrix);
 		MultiplyMatrixByVector(triangleTranslated.verts[2], &(triangleProjected.verts[2]), *transformationMatrix);
