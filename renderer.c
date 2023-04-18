@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+extern vec3d_t camera;
+
 void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 	static float delta = 0;
 	matrix_4x4_t matRotZ = {0};
@@ -72,7 +74,10 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		float length = sqrt(pow(normal.x, 2) + pow(normal.y , 2) + pow(normal.z, 2));
 		normal.x /= length; normal.y /= length; normal.z /= length;
 
-		if (normal.z > 0) continue;
+		if (normal.x * (triangleTranslated.verts[0].x - camera.x) +
+			normal.y * (triangleTranslated.verts[0].y - camera.y) +
+			normal.z * (triangleTranslated.verts[0].z - camera.z) >= 0) continue;
+//		if (normal.z > 0) continue;
 		// transform 3D->2D
 		MultiplyMatrixByVector(triangleTranslated.verts[0], &(triangleProjected.verts[0]), *transformationMatrix);
 		MultiplyMatrixByVector(triangleTranslated.verts[1], &(triangleProjected.verts[1]), *transformationMatrix);

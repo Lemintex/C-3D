@@ -7,14 +7,18 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_surface.h>
 
+SDL_Renderer* renderer;
+vec3d_t camera;
+
 int main() {
+	camera = (vec3d_t){0, 0, 0};
 	char title[] = "Test";
 	int width = 640, height = 480;
 	if(SDL_Init(SDL_INIT_VIDEO)) {
 		printf("Error");
 	}
 	SDL_Window* window = SDL_CreateWindow(title, 0, 0, width, height, SDL_WINDOW_SHOWN);
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
 	SDL_Surface* screen = SDL_GetWindowSurface(window);
  
