@@ -30,7 +30,13 @@ int main() {
 			switch( event.type ){
 				case SDL_QUIT:
 					SDL_DestroyWindow(window);
-					return 0; 
+					return 0;
+
+				case SDL_KEYDOWN:
+					if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+						SDL_DestroyWindow(window);
+						return 0;
+				}
 			}
 		}
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
