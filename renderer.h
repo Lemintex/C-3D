@@ -5,11 +5,12 @@
 
 #include "mesh.h"
 
-
 void Render();
 
 void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh);
 
 void DrawTriangle(SDL_Renderer* renderer, triangle_t* triangle);
+
+void FillTriangle(SDL_Renderer* renderer, triangle_t* triangle);
 
 #endif

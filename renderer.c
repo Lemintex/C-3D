@@ -1,6 +1,7 @@
 #include "renderer.h"
 #include "matrix.h"
 #include "mesh.h"
+#include <SDL2/SDL_render.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -102,6 +103,8 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		triangleProjected.verts[2].y *= 0.5 * 500;
 
 
+		FillTriangle(renderer, &triangleProjected);
+
 		DrawTriangle(renderer, &triangleProjected);
 	}
 	free(transformationMatrix);
@@ -113,5 +116,52 @@ void DrawTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 	SDL_RenderDrawLine(renderer, triangle->verts[1].x, triangle->verts[1].y, triangle->verts[2].x, triangle->verts[2].y);
 	SDL_RenderDrawLine(renderer, triangle->verts[2].x, triangle->verts[2].y, triangle->verts[0].x, triangle->verts[0].y);
 
-	printf("%f, %f, %f, %f, %f, %f \n", triangle->verts[0].x, triangle->verts[0].y, triangle->verts[1].x, triangle->verts[1].y, triangle->verts[2].x, triangle->verts[2].y);
+	//printf("%f, %f, %f, %f, %f, %f \n", triangle->verts[0].x, triangle->verts[0].y, triangle->verts[1].x, triangle->verts[1].y, triangle->verts[2].x, triangle->verts[2].y);
+}
+
+void FillTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
+
+	int maxY = 0;
+	int minY = 0;
+	for(int i = 1; i < 3; i++) {
+		if(triangle->verts[i].y > triangle->verts[maxY].y) maxY = i;
+		else if(triangle->verts[i].y < triangle->verts[minY].y) minY = i;
+	}
+	int midY = 3 - minY - maxY; // it works!
+
+	vec3d_t vMax = {triangle->verts[maxY].x, triangle->verts[maxY].y, 0};
+
+	vec3d_t vMid = {triangle->verts[midY].x, triangle->verts[midY].y, 0};
+
+	vec3d_t vMin = {triangle->verts[minY].x, triangle->verts[minY].y, 0};
+	// TOP
+
+	float slopeHypot;
+	float slopeA;
+	float x1;
+	float x2;
+	slopeHypot = (vMax.x - vMin.x) / (vMax.y - vMin.y);
+	x1 = vMin.x;
+	x2 = vMin.x;
+	if (vMid.y - vMin.y > 1) {
+		slopeA = (vMid.x - vMin.x) / (vMid.y - vMin.y);
+		for(int i = vMin.y; i < vMid.y; i++) {
+			SDL_RenderDrawLine(renderer, x1, i, x2, i);
+			x1 += slopeHypot;
+			x2 += slopeA;
+		}
+	}
+
+	if (vMax.y - vMid.y > 1) {	
+		slopeA = (vMax.x - vMid.x) / (vMax.y - vMid.y);
+
+		x2 = vMid.x;
+		
+		for(int i = vMid.y; i < vMax.y; i++) {
+			SDL_RenderDrawLine(renderer, x1, i, x2, i);
+			x1 += slopeHypot;
+
+			x2 += slopeA;
+		}
+	}
 }
