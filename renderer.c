@@ -78,6 +78,16 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		if (normal.x * (triangleTranslated.verts[0].x - camera.x) +
 			normal.y * (triangleTranslated.verts[0].y - camera.y) +
 			normal.z * (triangleTranslated.verts[0].z - camera.z) >= 0) continue;
+
+		vec3d_t light_direction = {0, 0, -1};
+
+		float l = sqrt(light_direction.x * light_direction.x + light_direction.y * light_direction.y + light_direction.z * light_direction.z);
+		light_direction.x /= l; light_direction.y /= l; light_direction.z /= l;
+
+		float dp = normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z;
+
+		SDL_SetRenderDrawColor(renderer, dp * 255, dp * 255, dp * 255, SDL_ALPHA_OPAQUE);
+
 //		if (normal.z > 0) continue;
 		// transform 3D->2D
 		MultiplyMatrixByVector(triangleTranslated.verts[0], &(triangleProjected.verts[0]), *transformationMatrix);
