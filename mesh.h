@@ -2,9 +2,7 @@
 #define _MESH_H
 
 #include <stdlib.h>
-typedef struct vec3d {
-	float x, y, z;
-} vec3d_t;
+#include "vec.h"
 
 typedef struct triangle {
 	vec3d_t verts[3];
