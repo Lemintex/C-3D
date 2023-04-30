@@ -147,68 +147,21 @@ void FillTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 	vec2d_t vMin = {triangle->verts[minY].x, triangle->verts[minY].y};
 	// TOP
 
-	float slopeHypot;
-	slopeHypot = (vMax.x - vMin.x) / (vMax.y - vMin.y);
+	float slopeHypot = (vMax.x - vMin.x) / (vMax.y - vMin.y);
 	float xHyp = vMin.x;
-printf("%s", "filling top");
+
 	FillTriangleTop(renderer, &vMin, &vMid, slopeHypot, &xHyp);
+
 	FillTriangleBottom(renderer, &vMid, &vMax, slopeHypot, &xHyp);
-
-	return;
-
-
-
-
-
-
-	float slopeA;
-	float x1;
-	float x2;
-	x1 = vMin.x;
-	x2 = vMin.x;
-	if (1){//vMid.y - vMin.y > 1) {
-		slopeA = (vMid.x - vMin.x) / (vMid.y - vMin.y);
-		if (x1 > x2) {
-			float temp = x1;
-			x1 = x2;
-			x2 = temp;
-		}
-		for(int i = vMin.y; i < vMid.y; i++) {
-			printf("%s", "test");
-			for(int j = x1; j < x2; j++) {
-				SDL_RenderDrawPoint(renderer, j, i);
-			}
-			x1 += slopeHypot;
-			x2 += slopeA;
-		}
-	}
-
-	if (1){//vMax.y - vMid.y > 1) {	
-		slopeA = (vMax.x - vMid.x) / (vMax.y - vMid.y);
-		x2 = vMid.x;
-		if (x1 > x2) {
-			float temp = x1;
-			x1 = x2;
-			x2 = temp;
-		}
-		
-		for(int i = vMid.y; i < vMax.y; i++) {
-			for(int j = x1; j < x2; j++) {
-				SDL_RenderDrawPoint(renderer, j, i);
-			}
-			x1 += slopeHypot;
-
-			x2 += slopeA;
-		}
-	}
 }
 
 void FillTriangleTop(SDL_Renderer* renderer, vec2d_t* vTop, vec2d_t* vMid, float slopeHyp, float* xHyp) {
-
 	if ((int)vTop->y == (int)vMid->y) return;
+
 	float slopeA = (vTop->x - vMid->x) / (vTop->y - vMid->y);
 	float x1 = vTop->x;
 	float *a, *b;
+
 	if(slopeA < slopeHyp) {
 		a = &x1;
 		b = xHyp;
@@ -217,10 +170,11 @@ void FillTriangleTop(SDL_Renderer* renderer, vec2d_t* vTop, vec2d_t* vMid, float
 		a = xHyp;
 		b = &x1;
 	}
-	if (vTop->y > vMid->y) printf("\n%s\n", "HI");
+
 	for (int y = vTop->y; y<vMid->y; y++) {
 		x1 += slopeA;
 		*xHyp += slopeHyp;
+
 		for (int x = *a; x < *b; x++) {
 			SDL_RenderDrawPoint(renderer, x, y);
 		}
@@ -247,11 +201,9 @@ void FillTriangleBottom(SDL_Renderer* renderer, vec2d_t* vMid, vec2d_t* vBot, fl
 		x1 += slopeB;
 		*xHyp += slopeHyp;
 
-
-		if (*a > *b) printf("\n%s\n", "HI");	
 		for (int x = *a; x < *b; x++ ) {
 			SDL_RenderDrawPoint(renderer, x, y);
-		}
+		}	
 	}
 }
 
