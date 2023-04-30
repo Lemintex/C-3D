@@ -149,8 +149,7 @@ void FillTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 
 	float slopeHypot;
 	slopeHypot = (vMax.x - vMin.x) / (vMax.y - vMin.y);
-	float xHyp;
-	xHyp = vMin.y;
+	float xHyp = vMin.x;
 printf("%s", "filling top");
 	FillTriangleTop(renderer, &vMin, &vMid, slopeHypot, &xHyp);
 	FillTriangleBottom(renderer, &vMid, &vMax, slopeHypot, &xHyp);
@@ -209,11 +208,20 @@ void FillTriangleTop(SDL_Renderer* renderer, vec2d_t* vTop, vec2d_t* vMid, float
 	if ((int)vTop->y == (int)vMid->y) return;
 	float slopeA = (vTop->x - vMid->x) / (vTop->y - vMid->y);
 	float x1 = vTop->x;
-
+	float *a, *b;
+	if(slopeA < slopeHyp) {
+		a = &x1;
+		b = xHyp;
+	}
+	else {
+		a = xHyp;
+		b = &x1;
+	}
+	if (vTop->y > vMid->y) printf("\n%s\n", "HI");
 	for (int y = vTop->y; y<vMid->y; y++) {
-	x1 += slopeA;
-	*xHyp += slopeHyp;
-		for (int x = x1; x < *xHyp; x++ ) {
+		x1 += slopeA;
+		*xHyp += slopeHyp;
+		for (int x = *a; x < *b; x++) {
 			SDL_RenderDrawPoint(renderer, x, y);
 		}
 	}
@@ -221,14 +229,27 @@ void FillTriangleTop(SDL_Renderer* renderer, vec2d_t* vTop, vec2d_t* vMid, float
 
 void FillTriangleBottom(SDL_Renderer* renderer, vec2d_t* vMid, vec2d_t* vBot, float slopeHyp, float* xHyp) {
 	if ((int)vMid->y == (int)vBot->y) return;
-	float slopeB = (vMid->x - vBot->x) / (vMid->y - vBot->y);
 
-float x1 = vMid->x;
+	float slopeB = (vMid->x - vBot->x) / (vMid->y - vBot->y);
+	float x1 = vMid->x;
+	float *a, *b;
+
+	if(slopeB > slopeHyp) {
+	   	a = &x1;
+	   	b = xHyp;
+	}
+	else {
+		a = xHyp;
+   		b = &x1;
+	}
 
 	for (int y = vMid->y; y<vBot->y; y++) {
-	x1 += slopeB;
-	*xHyp += slopeHyp;
-		for (int x = x1; x < *xHyp; x++ ) {
+		x1 += slopeB;
+		*xHyp += slopeHyp;
+
+
+		if (*a > *b) printf("\n%s\n", "HI");	
+		for (int x = *a; x < *b; x++ ) {
 			SDL_RenderDrawPoint(renderer, x, y);
 		}
 	}
