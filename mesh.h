@@ -1,6 +1,10 @@
 #ifndef _MESH_H
 #define _MESH_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <stdlib.h>
 #include "vec.h"
 
@@ -16,4 +20,5 @@ typedef struct mesh {
 
 mesh_t* CreateCube();
 
+mesh_t* ReadMeshFromFile(char* file);
 #endif
