@@ -50,14 +50,14 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 
 //		triangleTranslated = triangle; 
 
-		printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[0].x, triangleTranslated.verts[0].y, triangleTranslated.verts[0].z);
-		printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[1].x, triangleTranslated.verts[1].y, triangleTranslated.verts[1].z);
-		printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[2].x, triangleTranslated.verts[2].y, triangleTranslated.verts[2].z);
+		//printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[0].x, triangleTranslated.verts[0].y, triangleTranslated.verts[0].z);
+		//printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[1].x, triangleTranslated.verts[1].y, triangleTranslated.verts[1].z);
+		//printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[2].x, triangleTranslated.verts[2].y, triangleTranslated.verts[2].z);
 		triangleTranslated = triangleRotatedZX; 
 
-		triangleTranslated.verts[0].z += 3.0;
-		triangleTranslated.verts[1].z += 3.0;
-		triangleTranslated.verts[2].z += 3.0;
+		triangleTranslated.verts[0].z += 9.0;
+		triangleTranslated.verts[1].z += 9.0;
+		triangleTranslated.verts[2].z += 9.0;
 
 		vec3d_t normal, l1, l2;
 		l1.x = triangleTranslated.verts[1].x - triangleTranslated.verts[0].x;
@@ -115,11 +115,11 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 
 		FillTriangle(renderer, &triangleProjected);
 
-printf("%s", "filling top");
 		DrawTriangle(renderer, &triangleProjected);
 	}
+
 	free(transformationMatrix);
-	delta += 0.0001;
+	delta += 0.001;
 }
 
 void DrawTriangle(SDL_Renderer* renderer, triangle_t* triangle) {

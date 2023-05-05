@@ -22,7 +22,7 @@ int main() {
 
 	SDL_Surface* screen = SDL_GetWindowSurface(window);
  
-	mesh_t* cube = CreateCube();
+	mesh_t* ship = ReadMeshFromFile("ship.obj");
 	while(1) {
 		SDL_Event event;
 
@@ -43,7 +43,7 @@ int main() {
 		SDL_RenderClear(renderer);
 
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-		DrawMesh(renderer, cube);
+		DrawMesh(renderer, ship);
 		
 		SDL_RenderPresent(renderer);
 		SDL_UpdateWindowSurface(window);

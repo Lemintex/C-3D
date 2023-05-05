@@ -32,30 +32,15 @@ mesh_t* CreateCube() {
 	return cube;
 }
 
-mesh_t* ReadMeshFromFile(char* file) {
-
-
-typedef struct {
-    float x, y, z;
-} Vertex;
-
-typedef struct {
-    int v1, v2, v3;
-} Face;
-
-void read_obj_file(const char *filename) {
+mesh_t* ReadMeshFromFile(char *filename) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
         printf("Error: Unable to open file %s\n", filename);
-        return;
+        return NULL;
     }
-	mesh_t* mesh = (mesh_t*)malloc(sizeof(mesh_t));
-	//mesh->triangleCount = face_count;
-	mesh->triangles = (triangle_t)malloc(0);//sizeof(triangle_t) * mesh->triangleCount;
-
 
     vec3d_t* vertices = NULL;
-    triangle* faces = NULL;
+    triangle_t* faces = NULL;
     int vertex_count = 0;
     int face_count = 0;
 
@@ -66,11 +51,15 @@ void read_obj_file(const char *filename) {
             sscanf(line, "v %f %f %f", &vertex.x, &vertex.y, &vertex.z);
             vertices = (vec3d_t*)realloc(vertices, (vertex_count + 1) * sizeof(vec3d_t));
             vertices[vertex_count++] = vertex;
-        } else if (line[0] == 'f' && line[1] == ' ') {
-            triangle_t face;
-            sscanf(line, "f %d %d %d", &face.verts[0], &face.verts[1], &face.verts[2]);
+        }
+		else if (line[0] == 'f' && line[1] == ' ') {
+			int verts[3];
+            sscanf(line, "f %d %d %d", &verts[0], &verts[1], &verts[2]);
+			triangle_t face;
+			face = (triangle_t){vertices[verts[0] - 1], vertices[verts[1] - 1], vertices[verts[2] - 1]};
             faces = (triangle_t*)realloc(faces, (face_count + 1) * sizeof(triangle_t));
-            faces[face_count++] = face;
+            faces[face_count] = face;
+			face_count++;
         }
     }
 
@@ -80,10 +69,12 @@ void read_obj_file(const char *filename) {
     // ...
 	mesh_t* mesh = (mesh_t*)malloc(sizeof(mesh_t));
 	mesh->triangleCount = face_count;
-	mesh->triangles = (triangle_t)malloc(sizeof(triangle_t) * mesh->triangleCount;
+	mesh->triangles = faces;//(triangle_t)malloc(sizeof(triangle_t) * mesh->triangleCount;
 
     // Free the allocated memory
     free(vertices);
-    free(faces);
+
+
+	return mesh;
 }
-}
+
