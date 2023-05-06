@@ -135,17 +135,18 @@ void FillTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 	int maxY = 0;
 	int minY = 0;
 	for(int i = 1; i < 3; i++) {
-		if(triangle->verts[i].y > triangle->verts[maxY].y) maxY = i;
-		else if(triangle->verts[i].y < triangle->verts[minY].y) minY = i;
+		if(triangle->verts[i].y >= triangle->verts[maxY].y) maxY = i;
+		else if(triangle->verts[i].y <= triangle->verts[minY].y) minY = i;
 	}
 	int midY = 3 - minY - maxY; // it works!
+
+	printf("%d, %d\n", minY, maxY);
 
 	vec2d_t vMax = {triangle->verts[maxY].x, triangle->verts[maxY].y};
 
 	vec2d_t vMid = {triangle->verts[midY].x, triangle->verts[midY].y};
 
 	vec2d_t vMin = {triangle->verts[minY].x, triangle->verts[minY].y};
-	// TOP
 
 	float slopeHypot = (vMax.x - vMin.x) / (vMax.y - vMin.y);
 	float xHyp = vMin.x;
