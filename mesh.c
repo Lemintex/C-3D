@@ -78,3 +78,14 @@ mesh_t* ReadMeshFromFile(char *filename) {
 	return mesh;
 }
 
+int compareZ(const void* e1, const void* e2) {
+	triangle_t* a = (triangle_t*)e1;
+	float averageA = a->verts[0].z + a->verts[1].z + a->verts[2].z / 3;
+
+	triangle_t* b = (triangle_t*)e2;
+	float averageB = b->verts[0].z + b->verts[1].z + b->verts[2].z / 3;
+
+	if (averageA < averageB) return 1;
+	if (averageA > averageB) return -1;
+	return 0;
+}

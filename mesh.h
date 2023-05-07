@@ -10,6 +10,7 @@
 
 typedef struct triangle {
 	vec3d_t verts[3];
+	char col;
 } triangle_t;
 
 typedef struct mesh {
@@ -21,4 +22,6 @@ typedef struct mesh {
 mesh_t* CreateCube();
 
 mesh_t* ReadMeshFromFile(char* file);
+
+int compareZ(const void* e1, const void* e2);
 #endif

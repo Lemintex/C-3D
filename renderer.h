@@ -12,6 +12,8 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh);
 
 void DrawTriangle(SDL_Renderer* renderer, triangle_t* triangle);
 
+void DrawWireframeTriangle(SDL_Renderer* renderer, triangle_t* triangle);
+
 void FillTriangle(SDL_Renderer* renderer, triangle_t* triangle);
 
 void FillTriangleTop(SDL_Renderer* renderer, vec2d_t* vTop, vec2d_t* vMid, float slopeHyp, float* xHyp);
