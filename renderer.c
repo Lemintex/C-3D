@@ -1,6 +1,7 @@
 #include "renderer.h"
 #include "matrix.h"
 #include "mesh.h"
+#include "vec.h"
 #include <SDL2/SDL_render.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -11,100 +12,76 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 	int trianglesToDraw = 0;
 	triangle_t* sortedTriangles = (triangle_t*)malloc(0);
 
+	matrix_4x4_t matProj = matrix_projection(90, 1 /*w/h*/, 0.1, 1000);
+
 	static float delta = 0;
-	matrix_4x4_t matRotZ = {0};
-	matrix_4x4_t matRotX = {0};
+	matrix_4x4_t matRotZ = matrix_rotationZ(delta);
+	matrix_4x4_t matRotX = matrix_rotationX(delta);
 
-	matRotZ.m[0][0] = cosf(delta);
-	matRotZ.m[0][1] = sinf(delta);
-	matRotZ.m[1][0] = -sinf(delta);
-	matRotZ.m[1][1] = cosf(delta);
-	matRotZ.m[2][2] = 1;
-	matRotZ.m[3][3] = 1;
+	matrix_4x4_t matTrans = matrix_translation(0, 0, 10);
 
-	matRotX.m[0][0] = 1;
-	matRotX.m[1][1] = cosf(delta * 0.5f);
-	matRotX.m[1][2] = sinf(delta * 0.5f);
-	matRotX.m[2][1] = -sinf(delta * 0.5f);
-	matRotX.m[2][2] = cosf(delta * 0.5f);
-	matRotX.m[3][3] = 1;
+	matrix_4x4_t matWorld = matrix_identity();
+	matWorld = matrix_multiplyMatrix(&matRotZ, &matRotX);
+	matWorld = matrix_multiplyMatrix(&matWorld, &matTrans);
 
-	matrix_4x4_t* transformationMatrix = GetTranformationMatrix(500, 500);
 	for (int i = 0; i < mesh->triangleCount; i++) {
-		triangle_t triangle;
-		triangle = mesh->triangles[i];
+		triangle_t triangle = mesh->triangles[i];
 
 	//	printf("%f, %f, %f\n", triangle.verts[0].x,triangle.verts[0].y,triangle.verts[0].z);
 	//	printf("%f, %f, %f\n", triangle.verts[1].x,triangle.verts[1].y,triangle.verts[1].z);
 	//	printf("%f, %f, %f\n\n", triangle.verts[2].x,triangle.verts[2].y,triangle.verts[2].z);
 
 		triangle_t triangleProjected;
-		triangle_t triangleTranslated;
+		triangle_t triangleTransformed;
 
-		triangle_t triangleRotatedZ;
-		MultiplyMatrixByVector(triangle.verts[0], &(triangleRotatedZ.verts[0]), matRotZ);
-		MultiplyMatrixByVector(triangle.verts[1], &(triangleRotatedZ.verts[1]), matRotZ);
-		MultiplyMatrixByVector(triangle.verts[2], &(triangleRotatedZ.verts[2]), matRotZ);
-
-		triangle_t triangleRotatedZX;
-		MultiplyMatrixByVector(triangleRotatedZ.verts[0], &(triangleRotatedZX.verts[0]), matRotX);
-		MultiplyMatrixByVector(triangleRotatedZ.verts[1], &(triangleRotatedZX.verts[1]), matRotX);
-		MultiplyMatrixByVector(triangleRotatedZ.verts[2], &(triangleRotatedZX.verts[2]), matRotX);
-
-//		triangleTranslated = triangle; 
+		triangleTransformed.verts[0] = vec3_mul_mat4(&triangle.verts[0], &matWorld);
+		triangleTransformed.verts[1] = vec3_mul_mat4(&triangle.verts[1], &matWorld);
+		triangleTransformed.verts[2] = vec3_mul_mat4(&triangle.verts[2], &matWorld);
+//		triangleTranslated = triangle;
 
 		//printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[0].x, triangleTranslated.verts[0].y, triangleTranslated.verts[0].z);
 		//printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[1].x, triangleTranslated.verts[1].y, triangleTranslated.verts[1].z);
 		//printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[2].x, triangleTranslated.verts[2].y, triangleTranslated.verts[2].z);
-		triangleTranslated = triangleRotatedZX; 
-
-		triangleTranslated.verts[0].z += 9.0;
-		triangleTranslated.verts[1].z += 9.0;
-		triangleTranslated.verts[2].z += 9.0;
 
 		//	CALCULATE SHADING TO STORE IN TRIANGLE INFO
+
 		vec3d_t normal, l1, l2;
-		l1.x = triangleTranslated.verts[1].x - triangleTranslated.verts[0].x;
-		l1.y = triangleTranslated.verts[1].y - triangleTranslated.verts[0].y;
-		l1.z = triangleTranslated.verts[1].z - triangleTranslated.verts[0].z;
 
-		l2.x = triangleTranslated.verts[2].x - triangleTranslated.verts[0].x;
-		l2.y = triangleTranslated.verts[2].y - triangleTranslated.verts[0].y;
-		l2.z = triangleTranslated.verts[2].z - triangleTranslated.verts[0].z;
+		l1 = vec3_sub(&triangleTransformed.verts[1], &triangleTransformed.verts[0]);
+		l2 = vec3_sub(&triangleTransformed.verts[2], &triangleTransformed.verts[0]);
 
-		normal.x = l1.y * l2.z - l1.z * l2.y;
-		normal.y = l1.z * l2.x - l1.x * l2.z;
-		normal.z = l1.x * l2.y - l1.y * l2.x;
+		normal = vec3_cross(&l1, &l2);
 
-		float length = sqrt(pow(normal.x, 2) + pow(normal.y , 2) + pow(normal.z, 2));
-		normal.x /= length; normal.y /= length; normal.z /= length;
+		normal = vec3_normal(&normal);
+		
+		vec3d_t rayFromCamera = vec3_sub(&triangleTransformed.verts[0], &camera);
 
-		if (normal.x * (triangleTranslated.verts[0].x - camera.x) +
-			normal.y * (triangleTranslated.verts[0].y - camera.y) +
-			normal.z * (triangleTranslated.verts[0].z - camera.z) >= 0) continue;
+//		if (vec3_dot(&normal, &rayFromCamera) >= 0) continue;
 		vec3d_t light_direction = {0, 0, -1};
+		light_direction =vec3_normal(&light_direction);
 
-		float l = sqrt(light_direction.x * light_direction.x + light_direction.y * light_direction.y + light_direction.z * light_direction.z);
-		light_direction.x /= l; light_direction.y /= l; light_direction.z /= l;
-
-		float dp = normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z;
+		float dp = vec3_dot(&light_direction, &normal);
 
 		//SDL_SetRenderDrawColor(renderer, dp * 255, dp * 255, dp * 255, SDL_ALPHA_OPAQUE);
 
-		MultiplyMatrixByVector(triangleTranslated.verts[0], &(triangleProjected.verts[0]), *transformationMatrix);
-		MultiplyMatrixByVector(triangleTranslated.verts[1], &(triangleProjected.verts[1]), *transformationMatrix);
-		MultiplyMatrixByVector(triangleTranslated.verts[2], &(triangleProjected.verts[2]), *transformationMatrix);
+		triangleProjected.verts[0] = vec3_mul_mat4(&triangleTransformed.verts[0], &matProj);
+		triangleProjected.verts[1] = vec3_mul_mat4(&triangleTransformed.verts[1], &matProj);
+		triangleProjected.verts[2] = vec3_mul_mat4(&triangleTransformed.verts[2], &matProj);
+
+		// normalise co-ordinates
+		triangleProjected.verts[0] = vec3_div(&triangleProjected.verts[0], triangleProjected.verts[0].w);
+		triangleProjected.verts[1] = vec3_div(&triangleProjected.verts[1], triangleProjected.verts[1].w);
+		triangleProjected.verts[2] = vec3_div(&triangleProjected.verts[2], triangleProjected.verts[2].w);
 
 		triangleProjected.col = dp * 255;
 		printf("%d\n", triangleProjected.col);
-		triangleProjected.verts[0].x += 1;
-		triangleProjected.verts[0].y += 1;
 
-		triangleProjected.verts[1].x += 1;
-		triangleProjected.verts[1].y += 1;
+		// offset into view
+		vec3d_t vOffsetView = (vec3d_t){1, 1, 0};
 
-		triangleProjected.verts[2].x += 1;
-		triangleProjected.verts[2].y += 1;
+		triangleProjected.verts[0] = vec3_add(&triangleProjected.verts[0], &vOffsetView);
+		triangleProjected.verts[1] = vec3_add(&triangleProjected.verts[1], &vOffsetView);
+		triangleProjected.verts[2] = vec3_add(&triangleProjected.verts[2], &vOffsetView);
 
 		triangleProjected.verts[0].x *= 0.5 * 500;
 		triangleProjected.verts[0].y *= 0.5 * 500;
@@ -119,6 +96,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		trianglesToDraw++;
 		sortedTriangles = (triangle_t*)realloc(sortedTriangles, sizeof(triangle_t) * trianglesToDraw);
 		sortedTriangles[trianglesToDraw - 1] = triangleProjected;
+	printf("%f, %f, %f, %f, %f, %f \n", triangleProjected.verts[0].x, triangleProjected.verts[0].y, triangleProjected.verts[1].x, triangleProjected.verts[1].y, triangleProjected.verts[2].x, triangleProjected.verts[2].y);
 	}
 
 	qsort(sortedTriangles, trianglesToDraw, sizeof(triangle_t), compareZ);
@@ -127,7 +105,6 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		DrawTriangle(renderer, &sortedTriangles[i]);
 	}
 
-	free(transformationMatrix);
 	delta += 0.001;
 }
 
@@ -170,7 +147,6 @@ void DrawWireframeTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 	SDL_RenderDrawLine(renderer, triangle->verts[1].x, triangle->verts[1].y, triangle->verts[2].x, triangle->verts[2].y);
 	SDL_RenderDrawLine(renderer, triangle->verts[2].x, triangle->verts[2].y, triangle->verts[0].x, triangle->verts[0].y);
 
-	//printf("%f, %f, %f, %f, %f, %f \n", triangle->verts[0].x, triangle->verts[0].y, triangle->verts[1].x, triangle->verts[1].y, triangle->verts[2].x, triangle->verts[2].y);
 }
 
 void FillTriangle(SDL_Renderer* renderer, triangle_t* triangle) {

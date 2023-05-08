@@ -1,41 +1,82 @@
 #include "matrix.h"
+
+matrix_4x4_t matrix_identity() {
+	matrix_4x4_t matrix;
+	matrix.m[0][0] = 1;
+	matrix.m[1][1] = 1;
+	matrix.m[2][2] = 1;
+	matrix.m[3][3] = 1;
+	return matrix;
+}
+
+matrix_4x4_t matrix_rotationX(float angleRad) {
+	matrix_4x4_t matrix;
+	matrix.m[0][0] = 1;
+	matrix.m[1][1] = cosf(angleRad);
+	matrix.m[1][2] = sinf(angleRad);
+	matrix.m[2][1] = -sinf(angleRad);
+	matrix.m[2][2] = cosf(angleRad);
+	matrix.m[3][3] = 1;
+}
+
+matrix_4x4_t matrix_rotationY(float angleRad) {
+	matrix_4x4_t matrix;
+	matrix.m[0][0] = cosf(angleRad);
+	matrix.m[0][2] = sinf(angleRad);
+	matrix.m[1][1] = 1;
+	matrix.m[2][0] = -sinf(angleRad);
+	matrix.m[2][2] = cosf(angleRad);
+	matrix.m[3][3] = 1;
+	return matrix;
+}
+
+matrix_4x4_t matrix_rotationZ(float angleRad) {
+	matrix_4x4_t matrix;
+	matrix.m[0][0] = cosf(angleRad);
+	matrix.m[0][1] = sinf(angleRad);
+	matrix.m[1][0] = -sinf(angleRad);
+	matrix.m[1][1] = cosf(angleRad);
+	matrix.m[2][2] = 1;
+	matrix.m[3][3] = 1;
+	return matrix;
+}
+
+matrix_4x4_t matrix_translation(float x, float y, float z) {
+	matrix_4x4_t matrix;
+	matrix.m[0][0] = 1;
+	matrix.m[1][1] = 1;
+	matrix.m[2][2] = 1;
+	matrix.m[3][3] = 1;
+
+	matrix.m[3][0] = x;
+	matrix.m[3][1] = y;
+	matrix.m[3][1] = z;
+	return  matrix;
+}
+
+matrix_4x4_t matrix_projection(float fFovDegrees, float fAspectRatio, float fNear, float fFar) {
+	float fFovRad = 1 / tanf(fFovDegrees * 0.5 / 180 * M_PI);
+	matrix_4x4_t matrix;
+	matrix.m[0][0] = fAspectRatio * fFovRad;
+	matrix.m[1][1] = fFovRad;
+	matrix.m[2][2] = fFar / (fFar - fNear);
+	matrix.m[3][2] = (-fFar * fNear) / (fFar - fNear);
+	matrix.m[2][3] = 1.0f;
+	matrix.m[3][3] = 0.0f;
+	return matrix;
+}
+
+matrix_4x4_t matrix_multiplyMatrix(matrix_4x4_t* m1, matrix_4x4_t* m2) {
+	matrix_4x4_t matrix;
+	for (int c = 0; c < 4; c++) {
+		for (int r = 0; r < 4; r++) {
+			matrix.m[r][c] = m1->m[r][0] * m2->m[0][c] + m1->m[r][1] * m2->m[1][c] + m1->m[r][2] * m2->m[2][c] + m1->m[r][3] * m2->m[3][c];
+		}
+	}
+	return matrix;
+}
+
 matrix_4x4_t* CreateEmptyMatrix() {
 	matrix_4x4_t* matrix = (matrix_4x4_t*)calloc(1, sizeof(matrix_4x4_t));
 	return matrix;
 }
-
-
-matrix_4x4_t* GetTranformationMatrix(float width, float height) {
-	matrix_4x4_t* matrix = CreateEmptyMatrix();
-
-	float fNear = 0.1;
-	float fFar = 1000;
-	float fFov = 90;
-	float fAspectRatio = height / width; 
-	float fFovRad = 1.0 / tanf((fFov / 2) / 180 * M_PI);
-
-	matrix->m[0][0] = fAspectRatio * fFovRad;
-	matrix->m[1][1] = fFovRad;
-	matrix->m[2][2] = fFar / (fFar - fNear);
-	matrix->m[3][2] = (-fFar * fNear) / (fFar - fNear);
-	matrix->m[2][3] = 1.0;
-	matrix->m[3][3] = 0.0; 
-
-	return matrix;
-}
-
-
-void MultiplyMatrixByVector(vec3d_t in, vec3d_t* out, matrix_4x4_t mat) {
-	out->x = in.x * mat.m[0][0] + in.y * mat.m[1][0] + in.z * mat.m[2][0] + mat.m[3][0];
-	out->y = in.x * mat.m[0][1] + in.y * mat.m[1][1] + in.z * mat.m[2][1] + mat.m[3][1];
-	out->z = in.x * mat.m[0][2] + in.y * mat.m[1][2] + in.z * mat.m[2][2] + mat.m[3][2];
-
-	float w = in.x * mat.m[0][3] + in.y * mat.m[1][3] + in.z * mat.m[2][3] + mat.m[3][3];
-
-	if (w != 0) {
-		out->x /= w;
-		out->y /= w;
-		out->z /= w;
-	}
-}
-
