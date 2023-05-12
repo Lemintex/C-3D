@@ -17,16 +17,19 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 	static float delta = 0;
 	matrix_4x4_t matRotZ = matrix_rotationZ(delta);
 	matrix_4x4_t matRotX = matrix_rotationX(delta);
-
+	matrix_4x4_t matRotA;
 	matrix_4x4_t matTrans = matrix_translation(0, 0, 10);
 
 	matrix_4x4_t matWorld = matrix_identity();
-	matWorld = matrix_multiplyMatrix(&matRotZ, &matRotX);
+	matRotA = matrix_multiplyMatrix(&matRotZ, &matRotX);
+
+	matWorld = matrix_multiplyMatrix(&matWorld, &matRotA);
 	matWorld = matrix_multiplyMatrix(&matWorld, &matTrans);
 
 	for (int i = 0; i < mesh->triangleCount; i++) {
 		triangle_t triangle = mesh->triangles[i];
 
+	printf("Triangle; %f, %f, %f, %f, %f, %f \n", triangle.verts[0].x, triangle.verts[0].y, triangle.verts[1].x, triangle.verts[1].y, triangle.verts[2].x, triangle.verts[2].y);
 	//	printf("%f, %f, %f\n", triangle.verts[0].x,triangle.verts[0].y,triangle.verts[0].z);
 	//	printf("%f, %f, %f\n", triangle.verts[1].x,triangle.verts[1].y,triangle.verts[1].z);
 	//	printf("%f, %f, %f\n\n", triangle.verts[2].x,triangle.verts[2].y,triangle.verts[2].z);
@@ -34,10 +37,13 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		triangle_t triangleProjected;
 		triangle_t triangleTransformed;
 
+		printf("World: %f, %f, %f\n", triangle.verts[0].x, triangle.verts[0].y, triangle.verts[0].z);
+
 		triangleTransformed.verts[0] = vec3_mul_mat4(&triangle.verts[0], &matWorld);
 		triangleTransformed.verts[1] = vec3_mul_mat4(&triangle.verts[1], &matWorld);
 		triangleTransformed.verts[2] = vec3_mul_mat4(&triangle.verts[2], &matWorld);
 //		triangleTranslated = triangle;
+		printf("World: %f, %f, %f\n", triangleTransformed.verts[0].x, triangleTransformed.verts[0].y, triangleTransformed.verts[0].z);
 
 		//printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[0].x, triangleTranslated.verts[0].y, triangleTranslated.verts[0].z);
 		//printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[1].x, triangleTranslated.verts[1].y, triangleTranslated.verts[1].z);
@@ -96,7 +102,6 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		trianglesToDraw++;
 		sortedTriangles = (triangle_t*)realloc(sortedTriangles, sizeof(triangle_t) * trianglesToDraw);
 		sortedTriangles[trianglesToDraw - 1] = triangleProjected;
-	printf("%f, %f, %f, %f, %f, %f \n", triangleProjected.verts[0].x, triangleProjected.verts[0].y, triangleProjected.verts[1].x, triangleProjected.verts[1].y, triangleProjected.verts[2].x, triangleProjected.verts[2].y);
 	}
 
 	qsort(sortedTriangles, trianglesToDraw, sizeof(triangle_t), compareZ);
@@ -147,6 +152,7 @@ void DrawWireframeTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 	SDL_RenderDrawLine(renderer, triangle->verts[1].x, triangle->verts[1].y, triangle->verts[2].x, triangle->verts[2].y);
 	SDL_RenderDrawLine(renderer, triangle->verts[2].x, triangle->verts[2].y, triangle->verts[0].x, triangle->verts[0].y);
 
+	printf("%f, %f, %f, %f, %f, %f \n", triangle->verts[0].x, triangle->verts[0].y, triangle->verts[1].x, triangle->verts[1].y, triangle->verts[2].x, triangle->verts[2].y);
 }
 
 void FillTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
