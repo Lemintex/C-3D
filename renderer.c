@@ -39,12 +39,15 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 
 		printf("World: %f, %f, %f\n", triangle.verts[0].x, triangle.verts[0].y, triangle.verts[0].z);
 
+//		triangleTranslated = triangle;
 		triangleTransformed.verts[0] = vec3_mul_mat4(&triangle.verts[0], &matWorld);
 		triangleTransformed.verts[1] = vec3_mul_mat4(&triangle.verts[1], &matWorld);
 		triangleTransformed.verts[2] = vec3_mul_mat4(&triangle.verts[2], &matWorld);
-//		triangleTranslated = triangle;
 		printf("World: %f, %f, %f\n", triangleTransformed.verts[0].x, triangleTransformed.verts[0].y, triangleTransformed.verts[0].z);
 
+		triangleTransformed.verts[0].z += 10; // = vec3_mul_mat4(&triangle.verts[0], &matWorld);
+		triangleTransformed.verts[1].z += 10; // = vec3_mul_mat4(&triangle.verts[1], &matWorld);
+		triangleTransformed.verts[2].z += 10; // = vec3_mul_mat4(&triangle.verts[2], &matWorld);
 		//printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[0].x, triangleTranslated.verts[0].y, triangleTranslated.verts[0].z);
 		//printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[1].x, triangleTranslated.verts[1].y, triangleTranslated.verts[1].z);
 		//printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[2].x, triangleTranslated.verts[2].y, triangleTranslated.verts[2].z);
