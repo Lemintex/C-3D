@@ -49,6 +49,7 @@ mesh_t* ReadMeshFromFile(char *filename) {
         if (line[0] == 'v' && line[1] == ' ') {
             vec3d_t vertex;
             sscanf(line, "v %f %f %f", &vertex.x, &vertex.y, &vertex.z);
+			vertex.w = 1;
             vertices = (vec3d_t*)realloc(vertices, (vertex_count + 1) * sizeof(vec3d_t));
             vertices[vertex_count++] = vertex;
         }
