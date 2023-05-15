@@ -29,28 +29,12 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 	for (int i = 0; i < mesh->triangleCount; i++) {
 		triangle_t triangle = mesh->triangles[i];
 
-	printf("Triangle; %f, %f, %f, %f, %f, %f \n", triangle.verts[0].x, triangle.verts[0].y, triangle.verts[1].x, triangle.verts[1].y, triangle.verts[2].x, triangle.verts[2].y);
-	//	printf("%f, %f, %f\n", triangle.verts[0].x,triangle.verts[0].y,triangle.verts[0].z);
-	//	printf("%f, %f, %f\n", triangle.verts[1].x,triangle.verts[1].y,triangle.verts[1].z);
-	//	printf("%f, %f, %f\n\n", triangle.verts[2].x,triangle.verts[2].y,triangle.verts[2].z);
-
 		triangle_t triangleProjected;
 		triangle_t triangleTransformed;
 
-		printf("World: %f, %f, %f\n", triangle.verts[0].x, triangle.verts[0].y, triangle.verts[0].z);
-
-//		triangleTranslated = triangle;
 		triangleTransformed.verts[0] = vec3_mul_mat4(&triangle.verts[0], &matWorld);
 		triangleTransformed.verts[1] = vec3_mul_mat4(&triangle.verts[1], &matWorld);
 		triangleTransformed.verts[2] = vec3_mul_mat4(&triangle.verts[2], &matWorld);
-		printf("World: %f, %f, %f\n", triangleTransformed.verts[0].x, triangleTransformed.verts[0].y, triangleTransformed.verts[0].z);
-
-//		triangleTransformed.verts[0].z += 10; // = vec3_mul_mat4(&triangle.verts[0], &matWorld);
-//		triangleTransformed.verts[1].z += 10; // = vec3_mul_mat4(&triangle.verts[1], &matWorld);
-//		triangleTransformed.verts[2].z += 10; // = vec3_mul_mat4(&triangle.verts[2], &matWorld);
-		//printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[0].x, triangleTranslated.verts[0].y, triangleTranslated.verts[0].z);
-		//printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[1].x, triangleTranslated.verts[1].y, triangleTranslated.verts[1].z);
-		//printf("TRI %d: x: %f, y: %f, z: %f\n", i, triangleTranslated.verts[2].x, triangleTranslated.verts[2].y, triangleTranslated.verts[2].z);
 
 		//	CALCULATE SHADING TO STORE IN TRIANGLE INFO
 
@@ -142,7 +126,6 @@ void DrawTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 
 
 		SDL_SetRenderDrawColor(renderer, triangle->col, triangle->col,triangle->col, SDL_ALPHA_OPAQUE);
-		//SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
 		FillTriangle(renderer, triangle);
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
@@ -154,8 +137,6 @@ void DrawWireframeTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 	SDL_RenderDrawLine(renderer, triangle->verts[0].x, triangle->verts[0].y, triangle->verts[1].x, triangle->verts[1].y);
 	SDL_RenderDrawLine(renderer, triangle->verts[1].x, triangle->verts[1].y, triangle->verts[2].x, triangle->verts[2].y);
 	SDL_RenderDrawLine(renderer, triangle->verts[2].x, triangle->verts[2].y, triangle->verts[0].x, triangle->verts[0].y);
-
-	printf("%f, %f, %f, %f, %f, %f \n", triangle->verts[0].x, triangle->verts[0].y, triangle->verts[1].x, triangle->verts[1].y, triangle->verts[2].x, triangle->verts[2].y);
 }
 
 void FillTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
