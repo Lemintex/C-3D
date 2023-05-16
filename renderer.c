@@ -18,7 +18,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 	matrix_4x4_t matRotZ = matrix_rotationZ(delta);
 	matrix_4x4_t matRotX = matrix_rotationX(delta);
 	matrix_4x4_t matRotA;
-	matrix_4x4_t matTrans = matrix_translation(0, 0, 10);
+	matrix_4x4_t matTrans = matrix_translation(5, 0, 10);
 
 	matrix_4x4_t matWorld = matrix_identity();
 	matRotA = matrix_multiplyMatrix(&matRotZ, &matRotX);

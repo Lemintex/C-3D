@@ -22,7 +22,7 @@ int main() {
 
 	SDL_Surface* screen = SDL_GetWindowSurface(window);
  
-	mesh_t* ship = ReadMeshFromFile("ship.obj");
+	mesh_t* ship = ReadMeshFromFile("axis.obj");
 	while(1) {
 		SDL_Event event;
 
