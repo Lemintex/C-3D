@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include <stdlib.h>
-#include "vec.h"
+#include "3dmath.h"
 
 typedef struct triangle {
 	vec3d_t verts[3];

@@ -1,13 +1,10 @@
 #include "renderer.h"
-#include "matrix.h"
-#include "mesh.h"
-#include "vec.h"
 #include <SDL2/SDL_render.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 extern vec3d_t camera;
-
+extern vec3d_t lookDir;
 void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 	int trianglesToDraw = 0;
 	triangle_t* sortedTriangles = (triangle_t*)malloc(0);
@@ -23,14 +20,22 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 	matrix_4x4_t matWorld = matrix_identity();
 	matRotA = matrix_multiplyMatrix(&matRotZ, &matRotX);
 
-	matWorld = matrix_multiplyMatrix(&matWorld, &matRotA);
+//	matWorld = matrix_multiplyMatrix(&matWorld, &matRotA);
 	matWorld = matrix_multiplyMatrix(&matWorld, &matTrans);
 
+	lookDir = (vec3d_t){0, 0, 1, 1};
+	vec3d_t vUp = (vec3d_t){0, 1, 0, 1};
+	vec3d_t vTarget = vec3_add(&camera, &lookDir);
+
+	matrix_4x4_t cameraMatrix = matrix_pointAt(&camera, &vTarget, &vUp);
+
+	matrix_4x4_t cameraView = matrix_quickInverse(&cameraMatrix);
 	for (int i = 0; i < mesh->triangleCount; i++) {
 		triangle_t triangle = mesh->triangles[i];
 
 		triangle_t triangleProjected;
 		triangle_t triangleTransformed;
+		triangle_t triangleViewed;
 
 		triangleTransformed.verts[0] = vec3_mul_mat4(&triangle.verts[0], &matWorld);
 		triangleTransformed.verts[1] = vec3_mul_mat4(&triangle.verts[1], &matWorld);
@@ -57,9 +62,13 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 
 		//SDL_SetRenderDrawColor(renderer, dp * 255, dp * 255, dp * 255, SDL_ALPHA_OPAQUE);
 
-		triangleProjected.verts[0] = vec3_mul_mat4(&triangleTransformed.verts[0], &matProj);
-		triangleProjected.verts[1] = vec3_mul_mat4(&triangleTransformed.verts[1], &matProj);
-		triangleProjected.verts[2] = vec3_mul_mat4(&triangleTransformed.verts[2], &matProj);
+		triangleViewed.verts[0] = vec3_mul_mat4(&triangleTransformed.verts[0], &cameraView);
+		triangleViewed.verts[1] = vec3_mul_mat4(&triangleTransformed.verts[1], &cameraView);
+		triangleViewed.verts[2] = vec3_mul_mat4(&triangleTransformed.verts[2], &cameraView);
+
+		triangleProjected.verts[0] = vec3_mul_mat4(&triangleViewed.verts[0], &matProj);
+		triangleProjected.verts[1] = vec3_mul_mat4(&triangleViewed.verts[1], &matProj);
+		triangleProjected.verts[2] = vec3_mul_mat4(&triangleViewed.verts[2], &matProj);
 
 		// normalise co-ordinates
 		triangleProjected.verts[0] = vec3_div(&triangleProjected.verts[0], triangleProjected.verts[0].w);
@@ -69,6 +78,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		triangleProjected.col = dp * 255;
 		printf("%d\n", triangleProjected.col);
 
+		 
 		// offset into view
 		vec3d_t vOffsetView = (vec3d_t){1, 1, 0};
 

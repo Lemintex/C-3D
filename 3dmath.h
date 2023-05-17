@@ -1,6 +1,8 @@
 #ifndef _3DMATH_H_
 #define _3DMATH_H_
 
+#include <math.h>
+
 typedef struct matrix_4x4 {
 	float m[4][4];
 } matrix_4x4_t;
@@ -53,4 +55,5 @@ matrix_4x4_t matrix_multiplyMatrix(matrix_4x4_t* m1, matrix_4x4_t* m2);
 
 matrix_4x4_t matrix_pointAt(vec3d_t* pos, vec3d_t* target, vec3d_t* up);
  
+matrix_4x4_t matrix_quickInverse(matrix_4x4_t* mat);
 #endif
