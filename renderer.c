@@ -159,8 +159,6 @@ void FillTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 	}
 	int midY = 3 - minY - maxY; // it works!
 
-	printf("%d, %d\n", minY, maxY);
-
 	vec2d_t vMax = {triangle->verts[maxY].x, triangle->verts[maxY].y};
 
 	vec2d_t vMid = {triangle->verts[midY].x, triangle->verts[midY].y};
