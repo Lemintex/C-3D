@@ -41,10 +41,7 @@ int main() {
 					if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
 						SDL_DestroyWindow(window);
 						return 0;
-					if (event.key.keysym.scancode == SDL_SCANCODE_W) {
-						camera.y += 1;
 					}
-				}
 			}
 		}
 		updateCamera();

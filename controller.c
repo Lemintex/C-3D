@@ -19,11 +19,11 @@ void handleKeyboardInput(SDL_Event* e) {
 			bit = 2;
 			break;
 		
-		case SDLK_a:
+		case SDLK_d:
 			bit = 3;
 			break;
 		
-		case SDLK_d:
+		case SDLK_a:
 			bit = 4;
 			break;
 		
@@ -34,10 +34,12 @@ void handleKeyboardInput(SDL_Event* e) {
 		case SDLK_f:
 			bit = 6;
 			break;
+
 		default:
 			break;
 	}
-
+	unsigned short state = 0;
+	if (e->key.repeat) return;
 	keyState ^= 1UL << bit;
 }
 
@@ -55,7 +57,7 @@ int getBit(unsigned short* keystate, int n) {
 	return (*keystate >> n) & 1U;
 }
 
-void keyboard_flipBit(short* keyState);
+void keyboard_flipBit(unsigned short* keyState);
 //void handleKeyboardInput(SDL_KeyboardEvent* type) {
 //	static short keyState = 0;
 //	switch (type->state) {

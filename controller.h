@@ -17,5 +17,5 @@ void onKeyReleased(SDL_Keycode* key);
 
 void handleMouseInput();
 
-void keyboard_flipBit(short* keyState);
+void keyboard_flipBit(unsigned short* keyState);
 #endif
