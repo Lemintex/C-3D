@@ -52,7 +52,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 
 		normal = vec3_normal(&normal);
 		
-		vec3d_t rayFromCamera = vec3_sub(&triangleTransformed.verts[0], &camera);
+		vec3d_t rayFromCamera = vec3_sub(&triangleTransformed.verts[1], &camera);
 
 		if (vec3_dot(&normal, &rayFromCamera) >= 0) continue;
 		vec3d_t light_direction = {0, 0, -1};
@@ -75,9 +75,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		triangleProjected.verts[1] = vec3_div(&triangleProjected.verts[1], triangleProjected.verts[1].w);
 		triangleProjected.verts[2] = vec3_div(&triangleProjected.verts[2], triangleProjected.verts[2].w);
 
-		triangleProjected.col = dp * 255;
-		printf("%d\n", triangleProjected.col);
-
+		triangleProjected.col = dp * 128 + 127;
 		 
 		// offset into view
 		vec3d_t vOffsetView = (vec3d_t){1, 1, 0};

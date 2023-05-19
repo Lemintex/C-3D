@@ -4,17 +4,14 @@
  * 2 = backwards
  * 3 = left
  * 4 = right
- * 5  = ascend
- * 6  = descend
+ * 5 = ascend
+ * 6 = descend
  */
 	static unsigned short keyState = 0;
 void handleKeyboardInput(SDL_Event* e) {
 	int bit = 0;
 	switch (e->key.keysym.sym) {
-
 		case SDLK_w:
-printf("%s", "peni");
-
 			bit = 1;
 			break;
 		
@@ -46,13 +43,12 @@ printf("%s", "peni");
 
 void updateCamera() {
 	extern vec3d_t camera;
-	if (getBit(&keyState, 1)) printf("%s", "penis");
+	if (getBit(&keyState, 1)) camera.z += 0.01;
 	if (getBit(&keyState, 2)) camera.z -= 0.01;
 	if (getBit(&keyState, 3)) camera.x += 0.01;
 	if (getBit(&keyState, 4)) camera.x -= 0.01;
 	if (getBit(&keyState, 5)) camera.y += 0.01;
 	if (getBit(&keyState, 6)) camera.y -= 0.01;
-	printf("%f", camera.z);
 }
 
 int getBit(unsigned short* keystate, int n) {
