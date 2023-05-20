@@ -4,7 +4,6 @@
 #include <SDL2/SDL_render.h>
 
 #include "mesh.h"
-#include "camera.h"
 
 void Render();
 
