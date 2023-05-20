@@ -7,8 +7,7 @@
  * 5 = ascend
  * 6 = descend
  */
-	static unsigned short keyState = 0;
-void handleKeyboardInput(SDL_Event* e) {
+void handleKeyboardInput(SDL_Event* e, unsigned short* mov) {
 	int bit = 0;
 	switch (e->key.keysym.sym) {
 		case SDLK_w:
@@ -40,22 +39,10 @@ void handleKeyboardInput(SDL_Event* e) {
 	}
 	unsigned short state = 0;
 	if (e->key.repeat) return;
-	keyState ^= 1UL << bit;
+	*mov ^= 1UL << bit;
 }
 
-void updateCamera() {
-	extern vec3d_t camera;
-	if (getBit(&keyState, 1)) camera.z += 0.01;
-	if (getBit(&keyState, 2)) camera.z -= 0.01;
-	if (getBit(&keyState, 3)) camera.x += 0.01;
-	if (getBit(&keyState, 4)) camera.x -= 0.01;
-	if (getBit(&keyState, 5)) camera.y += 0.01;
-	if (getBit(&keyState, 6)) camera.y -= 0.01;
-}
 
-int getBit(unsigned short* keystate, int n) {
-	return (*keystate >> n) & 1U;
-}
 
 void keyboard_flipBit(unsigned short* keyState);
 //void handleKeyboardInput(SDL_KeyboardEvent* type) {
@@ -73,12 +60,5 @@ void keyboard_flipBit(unsigned short* keyState);
 //	}
 //}
 //
-//void onKeyPressed(SDL_Keycode* key) {
-//
-//}
-//
-//void onKeyReleased(SDL_Keycode* key) {
-//
-//}
 //
 ////void handleMouseInput();
