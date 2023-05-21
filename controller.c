@@ -6,6 +6,8 @@
  * 4 = right
  * 5 = ascend
  * 6 = descend
+ * 7 = yaw left
+ * 8 = yaw right
  */
 void handleKeyboardInput(SDL_Event* e, unsigned short* mov) {
 	int bit = 0;
@@ -34,10 +36,18 @@ void handleKeyboardInput(SDL_Event* e, unsigned short* mov) {
 			bit = 6;
 			break;
 
+		case SDLK_q:
+			bit = 7;
+			break;
+
+		case SDLK_e:
+			bit = 8;
+			break;
+
 		default:
 			break;
 	}
-	unsigned short state = 0;
+
 	if (e->key.repeat) return;
 	*mov ^= 1UL << bit;
 }

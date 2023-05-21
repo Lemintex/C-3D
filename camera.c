@@ -1,4 +1,3 @@
-
 #include "camera.h"
 
 extern camera_t camera;
@@ -10,6 +9,8 @@ void camera_update() {
 	if (camera_getMovementBit(4)) camera.pos.x -= 0.01;
 	if (camera_getMovementBit(5)) camera.pos.y += 0.01;
 	if (camera_getMovementBit(6)) camera.pos.y -= 0.01;
+	if (camera_getMovementBit(7)) camera.yaw += 0.000001;
+	if (camera_getMovementBit(8)) camera.yaw -= 0.000001;
 }
 
 int camera_getMovementBit(int n) {

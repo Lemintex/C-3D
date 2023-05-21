@@ -16,7 +16,7 @@ camera_t camera;
 
 int main() {
 	camera.pos = (vec3d_t){0, 0, 0, 1};
-	camera.lookDir = (vec3d_t){0, 0, 0, 1};
+	camera.lookDir = (vec3d_t){0, 0, 1, 1};
 	char title[] = "Test";
 	int width = 640, height = 480;
 	if(SDL_Init(SDL_INIT_VIDEO)) {
