@@ -1,4 +1,5 @@
 #include "3dmath.h"
+#include "camera.h"
 #include "controller.h"
 #include "mesh.h"
 #include "renderer.h"
@@ -11,13 +12,13 @@
 #include <SDL2/SDL_surface.h>
 
 SDL_Renderer* renderer;
-vec3d_t camera;
-vec3d_t lookDir;
+camera_t camera;
 
 int main() {
-	camera = (vec3d_t){0, 0, 0, 1};
+	camera.pos = (vec3d_t){0, 0, 0, 1};
+	camera.lookDir = (vec3d_t){0, 0, 1, 1};
 	char title[] = "Test";
-	int width = 640, height = 480;
+	int width = 500, height = 500;
 	if(SDL_Init(SDL_INIT_VIDEO)) {
 		printf("Error");
 	}
@@ -37,14 +38,14 @@ int main() {
 					return 0;
 				case SDL_KEYUP:
 				case SDL_KEYDOWN:
-					handleKeyboardInput(&event);
+					handleKeyboardInput(&event, &camera.mov);
 					if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
 						SDL_DestroyWindow(window);
 						return 0;
 					}
 			}
 		}
-		updateCamera();
+		camera_update();
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 		SDL_RenderClear(renderer);
 

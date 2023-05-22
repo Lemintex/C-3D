@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-extern vec3d_t camera;
-extern vec3d_t lookDir;
+extern camera_t camera;
+
 void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 	int trianglesToDraw = 0;
 	triangle_t* sortedTriangles = (triangle_t*)malloc(0);
@@ -19,17 +19,21 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 
 	matrix_4x4_t matWorld = matrix_identity();
 	matRotA = matrix_multiplyMatrix(&matRotZ, &matRotX);
-
+	
 //	matWorld = matrix_multiplyMatrix(&matWorld, &matRotA);
 	matWorld = matrix_multiplyMatrix(&matWorld, &matTrans);
 
-	lookDir = (vec3d_t){0, 0, 1, 1};
-	vec3d_t vUp = (vec3d_t){0, 1, 0, 1};
-	vec3d_t vTarget = vec3_add(&camera, &lookDir);
+	vec3d_t up = (vec3d_t){0, 1, 0, 1};
+	vec3d_t target = (vec3d_t){0, 0, 1, 1};
+	matrix_4x4_t yaw = matrix_rotationY(camera.yaw);
 
-	matrix_4x4_t cameraMatrix = matrix_pointAt(&camera, &vTarget, &vUp);
+	camera.lookDir = vec3_mul_mat4(&target, &yaw);
+	target = vec3_add(&camera.pos, &camera.lookDir);
+
+	matrix_4x4_t cameraMatrix = matrix_pointAt(&camera.pos, &target, &up);
 
 	matrix_4x4_t cameraView = matrix_quickInverse(&cameraMatrix);
+
 	for (int i = 0; i < mesh->triangleCount; i++) {
 		triangle_t triangle = mesh->triangles[i];
 
@@ -52,7 +56,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 
 		normal = vec3_normal(&normal);
 		
-		vec3d_t rayFromCamera = vec3_sub(&triangleTransformed.verts[1], &camera);
+		vec3d_t rayFromCamera = vec3_sub(&triangleTransformed.verts[1], &camera.pos);
 
 		if (vec3_dot(&normal, &rayFromCamera) >= 0) continue;
 		vec3d_t light_direction = {0, 0, -1};
