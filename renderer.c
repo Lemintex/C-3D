@@ -19,17 +19,18 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 
 	matrix_4x4_t matWorld = matrix_identity();
 	matRotA = matrix_multiplyMatrix(&matRotZ, &matRotX);
-
-	matrix_4x4_t yaw = matrix_rotationY(camera.yaw);
-
+	
 //	matWorld = matrix_multiplyMatrix(&matWorld, &matRotA);
 	matWorld = matrix_multiplyMatrix(&matWorld, &matTrans);
 
-	camera.lookDir = vec3_mul_mat4(&camera.lookDir, &yaw);
-	vec3d_t vUp = (vec3d_t){0, 1, 0, 1};
-	vec3d_t vTarget = vec3_add(&camera.pos, &camera.lookDir);
+	vec3d_t up = (vec3d_t){0, 1, 0, 1};
+	vec3d_t target = (vec3d_t){0, 0, 1, 1};
+	matrix_4x4_t yaw = matrix_rotationY(camera.yaw);
 
-	matrix_4x4_t cameraMatrix = matrix_pointAt(&camera.pos, &vTarget, &vUp);
+	camera.lookDir = vec3_mul_mat4(&target, &yaw);
+	target = vec3_add(&camera.pos, &camera.lookDir);
+
+	matrix_4x4_t cameraMatrix = matrix_pointAt(&camera.pos, &target, &up);
 
 	matrix_4x4_t cameraView = matrix_quickInverse(&cameraMatrix);
 
