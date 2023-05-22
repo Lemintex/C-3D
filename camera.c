@@ -3,8 +3,11 @@
 extern camera_t camera;
 
 void camera_update() {
-	if (camera_getMovementBit(1)) camera.pos.z += 0.01;
-	if (camera_getMovementBit(2)) camera.pos.z -= 0.01;
+	camera.lookDir = vec3_normal(&camera.lookDir);
+	vec3d_t forward = vec3_mul(&camera.lookDir, 0.01);
+
+	if (camera_getMovementBit(1)) camera.pos = vec3_add(&camera.pos, &forward);
+	if (camera_getMovementBit(2)) camera.pos = vec3_sub(&camera.pos, &forward);
 	if (camera_getMovementBit(3)) camera.pos.x += 0.01;
 	if (camera_getMovementBit(4)) camera.pos.x -= 0.01;
 	if (camera_getMovementBit(5)) camera.pos.y += 0.01;
