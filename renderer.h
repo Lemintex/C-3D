@@ -1,6 +1,8 @@
 #ifndef _RENDERER_H
 #define _RENDERER_H
 
+#include <sys/queue.h> 
+
 #include <SDL2/SDL_render.h>
 
 #include "mesh.h"

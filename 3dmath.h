@@ -38,6 +38,8 @@ vec3d_t vec3_cross(vec3d_t* v1, vec3d_t* v2);
 
 vec3d_t vec3_mul_mat4(vec3d_t* v, matrix_4x4_t* m);
 
+vec3d_t vec3_intersectPlsne(vec3d_t* planePoint, vec3d_t* planeNormal, vec3d_t* lineStart, vec3d_t* lineEnd); 
+
 // MAT4
 matrix_4x4_t matrix_identity();
 
