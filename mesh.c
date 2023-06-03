@@ -66,9 +66,10 @@ int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangl
 	float distance[3];
 	for (int i = 0; i < 3; i++) {
 		vec3d_t v = triangleIn->verts[i];
+		v = vec3_add(&v, planePoint);
 //		v = vec3_normal(&v);
 //		vec3d_t v = vec3_normal(&triangleIn->verts[i]);
-		distance[i] = planeNormal->x * v.x +planeNormal->y * v.y + planeNormal->z * v.z - vec3_dot(planeNormal, planePoint);
+		distance[i] = vec3_dot(planeNormal, &v);//planePoint) - (planeNormal->x * v.x +planeNormal->y * v.y + planeNormal->z * v.z);
 		//distance[i] = planeNormal->x * v.x + planeNormal->y * v.y + planeNormal->z * v.z - vec3_dot(planeNormal, planePoint);
 	}
 
@@ -79,7 +80,7 @@ int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangl
 
 	for (int i = 0; i < 3; i++) {
 		printf("%f, ", distance[i]);
-		if (distance[i] >= 0) inside_points[nInsidePointCount++] = &triangleIn->verts[i];
+		if (distance[i] < 0) inside_points[nInsidePointCount++] = &triangleIn->verts[i];
 		else outside_points[nOutsidePointCount++] = &triangleIn->verts[i];
 	}
 		printf("\n");
