@@ -47,6 +47,17 @@ vec3d_t vec3_mul_mat4(vec3d_t* v, matrix_4x4_t* m) {
 	return vec;
 }
 
+vec3d_t vec3_intersectPlane(vec3d_t* planePoint, vec3d_t* planeNormal, vec3d_t* lineStart, vec3d_t* lineEnd) {
+	*planeNormal = vec3_normal(planeNormal);
+	float planeDot = -vec3_dot(planeNormal, planePoint);
+	float distanceStart = vec3_dot(planeNormal, lineStart);
+	float distanceEnd = vec3_dot(planeNormal, lineEnd);
+	float t = (-planeDot - distanceStart) / (distanceEnd - distanceStart);
+	vec3d_t startToEnd = vec3_sub(lineEnd, lineStart);
+	vec3d_t lineToIntersect = vec3_mul(&startToEnd, t);
+	return vec3_add(lineStart, &lineToIntersect);
+}
+
 matrix_4x4_t matrix_identity() {
 	matrix_4x4_t matrix = {0};
 	matrix.m[0][0] = 1;

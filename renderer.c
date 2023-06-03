@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "3dmath.h"
 #include <SDL2/SDL_render.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -69,10 +70,20 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		triangleViewed.verts[0] = vec3_mul_mat4(&triangleTransformed.verts[0], &cameraView);
 		triangleViewed.verts[1] = vec3_mul_mat4(&triangleTransformed.verts[1], &cameraView);
 		triangleViewed.verts[2] = vec3_mul_mat4(&triangleTransformed.verts[2], &cameraView);
+		// clip against near plane of camera
+		int clippedTriangles = 0;
+		triangle_t clipped[2];
+vec3d_t nearPlane = (vec3d_t){0,0, -3, 1};
+vec3d_t nearPlaneNormal = (vec3d_t){0, 0, -1, 1};
+		clippedTriangles = triangle_clipAgainstPlane(&nearPlane, &nearPlaneNormal, &triangleViewed, &clipped[0], &clipped[1]);
+	//	printf("%d", clippedTriangles);
+		for (int j = 0; j < clippedTriangles; j++) {
+			
 
-		triangleProjected.verts[0] = vec3_mul_mat4(&triangleViewed.verts[0], &matProj);
-		triangleProjected.verts[1] = vec3_mul_mat4(&triangleViewed.verts[1], &matProj);
-		triangleProjected.verts[2] = vec3_mul_mat4(&triangleViewed.verts[2], &matProj);
+		
+		triangleProjected.verts[0] = vec3_mul_mat4(&clipped[j].verts[0], &matProj);
+		triangleProjected.verts[1] = vec3_mul_mat4(&clipped[j].verts[1], &matProj);
+		triangleProjected.verts[2] = vec3_mul_mat4(&clipped[j].verts[2], &matProj);
 
 		// normalise co-ordinates
 		triangleProjected.verts[0] = vec3_div(&triangleProjected.verts[0], triangleProjected.verts[0].w);
@@ -101,6 +112,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		trianglesToDraw++;
 		sortedTriangles = (triangle_t*)realloc(sortedTriangles, sizeof(triangle_t) * trianglesToDraw);
 		sortedTriangles[trianglesToDraw - 1] = triangleProjected;
+		}
 	}
 
 	qsort(sortedTriangles, trianglesToDraw, sizeof(triangle_t), compareZ);

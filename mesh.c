@@ -64,9 +64,12 @@ int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangl
 
 	// returned signed distance from planePoint to closest triangle point
 	float distance[3];
-	for (int i = 0; i > 3; i++) {
-		vec3d_t v = vec3_normal(&triangleIn->verts[i]);
-		distance[i] = planeNormal->x * v.x + planeNormal->y * v.y + planeNormal->z * v.z - vec3_dot(planeNormal, planePoint);
+	for (int i = 0; i < 3; i++) {
+		vec3d_t v = triangleIn->verts[i];
+//		v = vec3_normal(&v);
+//		vec3d_t v = vec3_normal(&triangleIn->verts[i]);
+		distance[i] = planeNormal->x * v.x +planeNormal->y * v.y + planeNormal->z * v.z - vec3_dot(planeNormal, planePoint);
+		//distance[i] = planeNormal->x * v.x + planeNormal->y * v.y + planeNormal->z * v.z - vec3_dot(planeNormal, planePoint);
 	}
 
 	// create temporary inside and outside arrays used to classify points
@@ -75,22 +78,39 @@ int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangl
 	vec3d_t* outside_points[3]; int nOutsidePointCount = 0;
 
 	for (int i = 0; i < 3; i++) {
+		printf("%f, ", distance[i]);
 		if (distance[i] >= 0) inside_points[nInsidePointCount++] = &triangleIn->verts[i];
 		else outside_points[nOutsidePointCount++] = &triangleIn->verts[i];
 	}
+		printf("\n");
 
+	if (nInsidePointCount < 3) return 0; //TEST DELETE ONCE DONE
 	if (nInsidePointCount == 0) return 0;
 
 	if (nInsidePointCount == 3) {
-		triangleOut1 = triangleIn;
+		*triangleOut1 = *triangleIn;
 		return 1;
 	}
 
 	if (nInsidePointCount == 1 && nOutsidePointCount == 2) {
+		triangleOut1->verts[0] = *inside_points[0];
+
+		triangleOut1->verts[1] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[0]);
+		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[1]);
+
 		return 1;
 	}
 
 	if (nInsidePointCount == 2 && nOutsidePointCount == 1) {
+		triangleOut1->verts[0] = *inside_points[0];
+		triangleOut1->verts[1] = *inside_points[1];
+		triangleOut2->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[0]);
+
+		triangleOut2->verts[0] = *inside_points[1];
+		triangleOut1->verts[1] = triangleOut1->verts[2];
+		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[1], outside_points[0]);
+
+
 		return 2;
 	}
 }
