@@ -73,7 +73,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		// clip against near plane of camera
 		int clippedTriangles = 0;
 		triangle_t clipped[2];
-vec3d_t nearPlane = (vec3d_t){0,0, /*BUG*/3, 1};
+vec3d_t nearPlane = (vec3d_t){0, 0, 1, 1};
 vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 1, 1};
 		clippedTriangles = triangle_clipAgainstPlane(&nearPlane, &nearPlaneNormal, &triangleViewed, &clipped[0], &clipped[1]);
 	//	printf("%d", clippedTriangles);

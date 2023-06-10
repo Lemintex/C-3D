@@ -49,15 +49,35 @@ vec3d_t vec3_mul_mat4(vec3d_t* v, matrix_4x4_t* m) {
 
 vec3d_t vec3_intersectPlane(vec3d_t* planePoint, vec3d_t* planeNormal, vec3d_t* lineStart, vec3d_t* lineEnd) {
 	*planeNormal = vec3_normal(planeNormal);
-	vec3d_t dir = vec3_sub(lineEnd, lineStart);
-	float dot = vec3_dot(&dir, planeNormal);
+    vec3d_t intersectionPoint;
+    
+    // Calculate the direction of the line
+    vec3d_t lineDirection;
+    lineDirection.x = lineEnd->x - lineStart->x;
+    lineDirection.y = lineEnd->y - lineStart->y;
+    lineDirection.z = lineEnd->z - lineStart->z;
+    
+    // Calculate the dot product of planeNormal and lineDirection
+    float dotProduct = planeNormal->x * lineDirection.x + planeNormal->y * lineDirection.y + planeNormal->z * lineDirection.z;
+    
+    // Check if the line is parallel to the plane
+    
+    // Calculate the vector from the plane point to the line start
+    vec3d_t planeToPoint;
+    planeToPoint.x = lineStart->x + planePoint->x;
+    planeToPoint.y = lineStart->y + planePoint->y;
+    planeToPoint.z = lineStart->z + planePoint->z;
+    
+    // Calculate the distance factor along the line where the intersection occurs
+    float distanceFactor = -(planeNormal->x * planeToPoint.x + planeNormal->y * planeToPoint.y + planeNormal->z * planeToPoint.z) / dotProduct;
+    
+    // Calculate the coordinates of the intersection point
+    intersectionPoint.x = lineStart->x + distanceFactor * lineDirection.x;
+    intersectionPoint.y = lineStart->y + distanceFactor * lineDirection.y;
+    intersectionPoint.z = lineStart->z + distanceFactor * lineDirection.z;
+    
+    return intersectionPoint;
 
-    float t = ((planePoint->x - lineStart->x) * planeNormal->x +
-                   (planePoint->y - lineStart->y) * planeNormal->y +
-                   (planePoint->z - lineStart->z) * planeNormal->z) / dot;
-        
-	vec3d_t distance = vec3_mul(&dir, t);
-	return vec3_add(&distance, lineStart);
 //	float planeDot = -vec3_dot(planeNormal, planePoint);
 //	float distanceStart = vec3_dot(lineStart, planeNormal);
 //	float distanceEnd = vec3_dot(lineEnd, planeNormal);

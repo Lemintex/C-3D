@@ -79,37 +79,40 @@ int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangl
 	vec3d_t* outside_points[3]; int nOutsidePointCount = 0;
 
 	for (int i = 0; i < 3; i++) {
-		printf("%f, ", distance[i]);
+	//	printf("%f, ", distance[i]);
 		if (distance[i] < 0) inside_points[nInsidePointCount++] = &triangleIn->verts[i];
 		else outside_points[nOutsidePointCount++] = &triangleIn->verts[i];
 	}
-		printf("\n");
+	//	printf("\n");
 
-	if (nInsidePointCount < 3) return 0; //TEST DELETE ONCE DONE
+//	if (nInsidePointCount < 3) return 0; //TEST DELETE ONCE DONE
 	if (nInsidePointCount == 0) return 0;
 
 	if (nInsidePointCount == 3) {
 		*triangleOut1 = *triangleIn;
 		return 1;
 	}
-
 	if (nInsidePointCount == 1 && nOutsidePointCount == 2) {
 		triangleOut1->verts[0] = *inside_points[0];
 
 		triangleOut1->verts[1] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[0]);
 		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[1]);
 
+	printf("Indide: x: %f, y: %f, z: %f", inside_points[0]->x, inside_points[0]->y, inside_points[0]->z);
+	printf("Outside: x: %f, y: %f, z: %f", outside_points[0]->x, outside_points[0]->y, outside_points[0]->z);
+	printf("Mid: x: %f, y: %f, z: %f", triangleOut1->verts[2].x, triangleOut1->verts[2].y, triangleOut1->verts[2].z);
+	printf("\n");
 		return 1;
 	}
-
+//return 0;
 	if (nInsidePointCount == 2 && nOutsidePointCount == 1) {
 		triangleOut1->verts[0] = *inside_points[0];
 		triangleOut1->verts[1] = *inside_points[1];
-		triangleOut2->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[0]);
+		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[0]);
 
 		triangleOut2->verts[0] = *inside_points[1];
-		triangleOut1->verts[1] = triangleOut1->verts[2];
-		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[1], outside_points[0]);
+		triangleOut2->verts[1] = triangleOut1->verts[2];
+		triangleOut2->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[1], outside_points[0]);
 
 
 		return 2;
