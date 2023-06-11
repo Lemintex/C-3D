@@ -62,49 +62,42 @@ int compareZ(const void* e1, const void* e2) {
 int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangle_t* triangleIn, triangle_t* triangleOut1, triangle_t* triangleOut2) {
 	*planeNormal = vec3_normal(planeNormal);
 
-	// returned signed distance from planePoint to closest triangle point
 	float distance[3];
+	// gets signed distance from planePoint to triangle point
 	for (int i = 0; i < 3; i++) {
 		vec3d_t v = triangleIn->verts[i];
 		v = vec3_add(&v, planePoint);
-//		v = vec3_normal(&v);
-//		vec3d_t v = vec3_normal(&triangleIn->verts[i]);
 		distance[i] = vec3_dot(planeNormal, &v);//planePoint) - (planeNormal->x * v.x +planeNormal->y * v.y + planeNormal->z * v.z);
-		//distance[i] = planeNormal->x * v.x + planeNormal->y * v.y + planeNormal->z * v.z - vec3_dot(planeNormal, planePoint);
 	}
 
 	// create temporary inside and outside arrays used to classify points
-	// if distance is more than 0, point is 'inside' plane
 	vec3d_t* inside_points[3];  int nInsidePointCount = 0;
 	vec3d_t* outside_points[3]; int nOutsidePointCount = 0;
 
 	for (int i = 0; i < 3; i++) {
-	//	printf("%f, ", distance[i]);
+		// if distance is more than 0, point is 'inside' plane
 		if (distance[i] < 0) inside_points[nInsidePointCount++] = &triangleIn->verts[i];
+		// oherwise, it is 'outside' plane
 		else outside_points[nOutsidePointCount++] = &triangleIn->verts[i];
 	}
-	//	printf("\n");
 
-//	if (nInsidePointCount < 3) return 0; //TEST DELETE ONCE DONE
 	if (nInsidePointCount == 0) return 0;
 
 	if (nInsidePointCount == 3) {
 		*triangleOut1 = *triangleIn;
+
 		return 1;
 	}
+
 	if (nInsidePointCount == 1 && nOutsidePointCount == 2) {
 		triangleOut1->verts[0] = *inside_points[0];
 
 		triangleOut1->verts[1] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[0]);
 		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[1]);
 
-	printf("Indide: x: %f, y: %f, z: %f", inside_points[0]->x, inside_points[0]->y, inside_points[0]->z);
-	printf("Outside: x: %f, y: %f, z: %f", outside_points[0]->x, outside_points[0]->y, outside_points[0]->z);
-	printf("Mid: x: %f, y: %f, z: %f", triangleOut1->verts[2].x, triangleOut1->verts[2].y, triangleOut1->verts[2].z);
-	printf("\n");
 		return 1;
 	}
-//return 0;
+
 	if (nInsidePointCount == 2 && nOutsidePointCount == 1) {
 		triangleOut1->verts[0] = *inside_points[0];
 		triangleOut1->verts[1] = *inside_points[1];
