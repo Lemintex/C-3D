@@ -5,17 +5,17 @@ typedef struct node {
     struct node *next;
 } node_t;
 
-void enqueue(node_t **head, int val) {
+void enqueue(node_t **head, triangle_t triangle) {
     node_t *new_node = malloc(sizeof(node_t));
     if (!new_node) return;
 
-    new_node->val = val;
+    new_node->triangle = triangle;
     new_node->next = *head;
 
     *head = new_node;
 }
 
-int dequeue(node_t **head) {
+triangle_t dequeue(node_t **head) {
     node_t *current, *prev = NULL;
     int retval = -1;
 
@@ -27,7 +27,7 @@ int dequeue(node_t **head) {
         current = current->next;
     }
 
-    retval = current->val;
+	triangle_t triangle =current->triangle;
     free(current);
     
     if (prev)
@@ -35,5 +35,5 @@ int dequeue(node_t **head) {
     else
         *head = NULL;
 
-    return retval;
+    return triangle;
 }

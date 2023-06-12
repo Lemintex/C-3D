@@ -2,14 +2,15 @@
 #define _QUEUE_H
 
 #include <stdlib.h>
+#include "mesh.h"
 
 typedef struct node {
-	int val;
+	triangle_t triangle;
 	struct node* next;
 } node_t;
 
 
-void enqueue(node_t **head, int val);
+void enqueue(node_t **head, triangle_t triangle);
 
-int dequeue(node_t **head);
+triangle_t dequeue(node_t **head);
 #endif
