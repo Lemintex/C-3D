@@ -9,8 +9,16 @@ typedef struct node {
 	struct node* next;
 } node_t;
 
+typedef struct queue {
+	node_t* front;
+	node_t* rear;
+} queue_t;
 
-void enqueue(node_t **head, triangle_t triangle);
+queue_t* createQueue();
 
-triangle_t dequeue(node_t **head);
+int isEmpty(queue_t* queue);
+
+void enqueue(queue_t* queue, triangle_t triangle);
+
+triangle_t dequeue(queue_t* queue);
 #endif

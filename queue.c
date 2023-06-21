@@ -1,39 +1,34 @@
 #include "queue.h"
 
-typedef struct node {
-    int val;
-    struct node *next;
-} node_t;
+queue_t* createQueue() {
+	queue_t* queue = (queue_t*)malloc(sizeof(queue_t));
+	queue->front = queue->rear = NULL;
+	return queue;
+}
 
-void enqueue(node_t **head, triangle_t triangle) {
-    node_t *new_node = malloc(sizeof(node_t));
+int isEmpty(queue_t *queue) {
+	return (queue->front == NULL);
+}
+
+void enqueue(queue_t* queue, triangle_t triangle) {
+    node_t* new_node = malloc(sizeof(node_t));
     if (!new_node) return;
 
     new_node->triangle = triangle;
-    new_node->next = *head;
+    new_node->next = NULL;
 
-    *head = new_node;
+    if (isEmpty(queue)) {
+        queue->front = queue->rear = new_node;
+    } else {
+        queue->rear->next = new_node;
+        queue->rear = new_node;
+    }
 }
 
-triangle_t dequeue(node_t **head) {
-    node_t *current, *prev = NULL;
-    int retval = -1;
-
-    if (*head == NULL) return -1;
-
-    current = *head;
-    while (current->next != NULL) {
-        prev = current;
-        current = current->next;
-    }
-
-	triangle_t triangle =current->triangle;
-    free(current);
-    
-    if (prev)
-        prev->next = NULL;
-    else
-        *head = NULL;
-
-    return triangle;
+triangle_t dequeue(queue_t* queue) {
+	node_t* front = queue->front;
+	triangle_t triangle = front->triangle;
+	queue->front = front->next;
+	free(front);
+	return triangle;
 }
