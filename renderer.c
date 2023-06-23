@@ -1,5 +1,6 @@
 #include "renderer.h"
 #include "3dmath.h"
+#include "queue.h"
 #include <SDL2/SDL_render.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -73,49 +74,89 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		// clip against near plane of camera
 		int clippedTriangles = 0;
 		triangle_t clipped[2];
-vec3d_t nearPlane = (vec3d_t){0, 0, 1, 1};
-vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 1, 1};
+
+		vec3d_t nearPlane = (vec3d_t){0, 0, 3, 1};
+		vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 1, 1};
+
 		clippedTriangles = triangle_clipAgainstPlane(&nearPlane, &nearPlaneNormal, &triangleViewed, &clipped[0], &clipped[1]);
 	//	printf("%d", clippedTriangles);
 		for (int j = 0; j < clippedTriangles; j++) {
-			
-
-		
-		triangleProjected.verts[0] = vec3_mul_mat4(&clipped[j].verts[0], &matProj);
-		triangleProjected.verts[1] = vec3_mul_mat4(&clipped[j].verts[1], &matProj);
-		triangleProjected.verts[2] = vec3_mul_mat4(&clipped[j].verts[2], &matProj);
-
-		// normalise co-ordinates
-		triangleProjected.verts[0] = vec3_div(&triangleProjected.verts[0], triangleProjected.verts[0].w);
-		triangleProjected.verts[1] = vec3_div(&triangleProjected.verts[1], triangleProjected.verts[1].w);
-		triangleProjected.verts[2] = vec3_div(&triangleProjected.verts[2], triangleProjected.verts[2].w);
-
-		triangleProjected.col = dp * 128 + 127;
-		 
-		// offset into view
-		vec3d_t vOffsetView = (vec3d_t){1, 1, 0};
-
-		triangleProjected.verts[0] = vec3_add(&triangleProjected.verts[0], &vOffsetView);
-		triangleProjected.verts[1] = vec3_add(&triangleProjected.verts[1], &vOffsetView);
-		triangleProjected.verts[2] = vec3_add(&triangleProjected.verts[2], &vOffsetView);
-
-		triangleProjected.verts[0].x *= 0.5 * 500;
-		triangleProjected.verts[0].y *= 0.5 * 500;
-
-		triangleProjected.verts[1].x *= 0.5 * 500;
-		triangleProjected.verts[1].y *= 0.5 * 500;
-
-		triangleProjected.verts[2].x *= 0.5 * 500;
-		triangleProjected.verts[2].y *= 0.5 * 500;
-
-
-		trianglesToDraw++;
-		sortedTriangles = (triangle_t*)realloc(sortedTriangles, sizeof(triangle_t) * trianglesToDraw);
-		sortedTriangles[trianglesToDraw - 1] = triangleProjected;
+			triangleProjected.verts[0] = vec3_mul_mat4(&clipped[j].verts[0], &matProj);
+			triangleProjected.verts[1] = vec3_mul_mat4(&clipped[j].verts[1], &matProj);
+			triangleProjected.verts[2] = vec3_mul_mat4(&clipped[j].verts[2], &matProj);
+	
+			// normalise co-ordinates
+			triangleProjected.verts[0] = vec3_div(&triangleProjected.verts[0], triangleProjected.verts[0].w);
+			triangleProjected.verts[1] = vec3_div(&triangleProjected.verts[1], triangleProjected.verts[1].w);
+			triangleProjected.verts[2] = vec3_div(&triangleProjected.verts[2], triangleProjected.verts[2].w);
+	
+			triangleProjected.col = dp * 128 + 127;
+			 
+			// offset into view
+			vec3d_t vOffsetView = (vec3d_t){1, 1, 0};
+	
+			triangleProjected.verts[0] = vec3_add(&triangleProjected.verts[0], &vOffsetView);
+			triangleProjected.verts[1] = vec3_add(&triangleProjected.verts[1], &vOffsetView);
+			triangleProjected.verts[2] = vec3_add(&triangleProjected.verts[2], &vOffsetView);
+	
+			triangleProjected.verts[0].x *= 0.5 * 500;
+			triangleProjected.verts[0].y *= 0.5 * 500;
+	
+			triangleProjected.verts[1].x *= 0.5 * 500;
+			triangleProjected.verts[1].y *= 0.5 * 500;
+	
+			triangleProjected.verts[2].x *= 0.5 * 500;
+			triangleProjected.verts[2].y *= 0.5 * 500;
+	
+			trianglesToDraw++;
+			sortedTriangles = (triangle_t*)realloc(sortedTriangles, sizeof(triangle_t) * trianglesToDraw);
+			sortedTriangles[trianglesToDraw - 1] = triangleProjected;
 		}
 	}
 
 	qsort(sortedTriangles, trianglesToDraw, sizeof(triangle_t), compareZ);
+				printf("%s", "BOOBIES");
+
+	int numberOfClippedTriangles = 0;
+	triangle_t* clippedTriangles = (triangle_t*)malloc(0);
+	for(int i = 0; i < trianglesToDraw; i++) {
+		triangle_t* clipped[2];
+
+		queue_t* queue = createQueue();
+		enqueue(queue, sortedTriangles[i]);
+				printf("%s", "BOOBIES");
+
+		for(int p = 0; p < 4; p++) {
+			int trianglesToAdd = 0;
+			while (!isEmpty(queue)) {
+				triangle_t test = dequeue(queue);
+				printf("%s", "BOOBS");
+				int clippedTriangles = 0;
+				switch(p) {
+					case 0:
+						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test, clipped[0], clipped[1]);
+							break;
+
+					case 1:
+						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){0, 500 /*W*/, 0, 1}), &((vec3d_t){0, -1, 0, 1}), &test, clipped[0], clipped[1]);
+							break;
+
+					case 2:
+						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, clipped[0], clipped[1]);
+							break;
+
+					case 3:
+						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){500/*H*/, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test, clipped[0], clipped[1]);
+							break;
+
+					default: break;
+				}
+			}
+			for(int t = 0; t < trianglesToAdd; t++) {
+				enqueue(queue, *clipped[t]);
+			}
+		}
+	}
 
 	for(int i = 0; i < trianglesToDraw; i++) {
 		DrawTriangle(renderer, &sortedTriangles[i]);
