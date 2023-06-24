@@ -75,7 +75,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		int clippedTriangles = 0;
 		triangle_t clipped[2];
 
-		vec3d_t nearPlane = (vec3d_t){0, 0, 3, 1};
+		vec3d_t nearPlane = (vec3d_t){0, 0, 1, 1};
 		vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 1, 1};
 
 		clippedTriangles = triangle_clipAgainstPlane(&nearPlane, &nearPlaneNormal, &triangleViewed, &clipped[0], &clipped[1]);
@@ -115,45 +115,42 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 	}
 
 	qsort(sortedTriangles, trianglesToDraw, sizeof(triangle_t), compareZ);
-				printf("%s", "BOOBIES");
 
 	int numberOfClippedTriangles = 0;
 	triangle_t* clippedTriangles = (triangle_t*)malloc(0);
 	for(int i = 0; i < trianglesToDraw; i++) {
-		triangle_t* clipped[2];
+		triangle_t clipped[2];
 
 		queue_t* queue = createQueue();
 		enqueue(queue, sortedTriangles[i]);
-				printf("%s", "BOOBIES");
 
 		for(int p = 0; p < 4; p++) {
 			int trianglesToAdd = 0;
 			while (!isEmpty(queue)) {
 				triangle_t test = dequeue(queue);
-				printf("%s", "BOOBS");
 				int clippedTriangles = 0;
 				switch(p) {
 					case 0:
-						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test, clipped[0], clipped[1]);
+						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test, &clipped[0], &clipped[1]);
 							break;
 
 					case 1:
-						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){0, 500 /*W*/, 0, 1}), &((vec3d_t){0, -1, 0, 1}), &test, clipped[0], clipped[1]);
+						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){0, 500 /*W*/, 0, 1}), &((vec3d_t){0, -1, 0, 1}), &test, &clipped[0], &clipped[1]);
 							break;
 
 					case 2:
-						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, clipped[0], clipped[1]);
+						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, &clipped[0], &clipped[1]);
 							break;
 
 					case 3:
-						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){500/*H*/, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test, clipped[0], clipped[1]);
+						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){500/*H*/, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test, &clipped[0], &clipped[1]);
 							break;
 
 					default: break;
 				}
 			}
 			for(int t = 0; t < trianglesToAdd; t++) {
-				enqueue(queue, *clipped[t]);
+				enqueue(queue, clipped[t]);
 			}
 		}
 	}
