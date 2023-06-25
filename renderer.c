@@ -76,7 +76,19 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		triangle_t clipped[2];
 
 		vec3d_t nearPlane = (vec3d_t){0, 0, 1, 1};
-		vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 1, 1};
+		vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 1, 1}; //FRONT PLANE
+
+//		vec3d_t nearPlane = (vec3d_t){0, -8, 0, 1};
+//		vec3d_t nearPlaneNormal = (vec3d_t){0, 1, 0, 1}; //TOP PLANE
+//
+//		vec3d_t nearPlane = (vec3d_t){0, 8, 1, 1};
+//		vec3d_t nearPlaneNormal = (vec3d_t){0, -1, 0, 1}; //BOTTOM PLANE
+//
+//		vec3d_t nearPlane = (vec3d_t){-8, 0, 0, 1};
+//		vec3d_t nearPlaneNormal = (vec3d_t){1, 0, 0, 1}; //LEFT PLANE
+//
+//		vec3d_t nearPlane = (vec3d_t){8, 0, 1, 1};
+//		vec3d_t nearPlaneNormal = (vec3d_t){-1, 0, 0, 1}; //RIGHT PLANE
 
 		clippedTriangles = triangle_clipAgainstPlane(&nearPlane, &nearPlaneNormal, &triangleViewed, &clipped[0], &clipped[1]);
 	//	printf("%d", clippedTriangles);
@@ -90,8 +102,8 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 			triangleProjected.verts[1] = vec3_div(&triangleProjected.verts[1], triangleProjected.verts[1].w);
 			triangleProjected.verts[2] = vec3_div(&triangleProjected.verts[2], triangleProjected.verts[2].w);
 	
-			triangleProjected.col = dp * 128 + 127;
-			 
+			uint8_t shade = dp * 128 + 127;
+triangleProjected.color = createColor(shade, shade, shade);
 			// offset into view
 			vec3d_t vOffsetView = (vec3d_t){1, 1, 0};
 	
@@ -153,6 +165,12 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 				enqueue(queue, clipped[t]);
 			}
 		}
+		while(!isEmpty(queue)) {
+
+			numberOfClippedTriangles++;
+			clippedTriangles = (triangle_t*)realloc(clippedTriangles, sizeof(triangle_t) * numberOfClippedTriangles);
+			clippedTriangles[numberOfClippedTriangles- 1] = dequeue(queue);
+		}
 	}
 
 	for(int i = 0; i < trianglesToDraw; i++) {
@@ -187,7 +205,7 @@ void DrawTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 		float dp = normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z;
 
 
-		SDL_SetRenderDrawColor(renderer, triangle->col, triangle->col,triangle->col, SDL_ALPHA_OPAQUE);
+		SDL_SetRenderDrawColor(renderer, triangle->color.r, triangle->color.g, triangle->color.b, SDL_ALPHA_OPAQUE);//255,255,255,SDL_ALPHA_OPAQUE);//triangle->col, triangle->col,triangle->col, SDL_ALPHA_OPAQUE);
 		FillTriangle(renderer, triangle);
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);

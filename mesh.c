@@ -47,6 +47,14 @@ mesh_t* ReadMeshFromFile(char *filename) {
 	return mesh;
 }
 
+color_t createColor(u_int8_t r, u_int8_t g, u_int8_t b) {
+	color_t color;
+	color.r = r;
+	color.g = g;
+	color.b = b;
+	return color;
+}
+
 int compareZ(const void* e1, const void* e2) {
 	triangle_t* a = (triangle_t*)e1;
 	float averageA = a->verts[0].z + a->verts[1].z + a->verts[2].z / 3;
@@ -86,6 +94,7 @@ int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangl
 	if (nInsidePointCount == 3) {
 		*triangleOut1 = *triangleIn;
 
+		triangleOut1->color = createColor(0, 0, 255);
 		return 1;
 	}
 
@@ -95,6 +104,7 @@ int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangl
 		triangleOut1->verts[1] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[0]);
 		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[1]);
 
+		triangleOut1->color = createColor(0, 255, 0);
 		return 1;
 	}
 
@@ -102,10 +112,12 @@ int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangl
 		triangleOut1->verts[0] = *inside_points[0];
 		triangleOut1->verts[1] = *inside_points[1];
 		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[0]);
+		triangleOut1->color = createColor(255, 0, 0);
 
 		triangleOut2->verts[0] = *inside_points[1];
 		triangleOut2->verts[1] = triangleOut1->verts[2];
 		triangleOut2->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[1], outside_points[0]);
+		triangleOut2->color = createColor(255, 0, 0);
 
 
 		return 2;
