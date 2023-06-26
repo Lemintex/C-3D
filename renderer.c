@@ -128,53 +128,63 @@ triangleProjected.color = createColor(shade, shade, shade);
 
 	qsort(sortedTriangles, trianglesToDraw, sizeof(triangle_t), compareZ);
 
-	int numberOfClippedTriangles = 0;
+	int nClippedTriangles = 1;
 	triangle_t* clippedTriangles = (triangle_t*)malloc(0);
+
 	for(int i = 0; i < trianglesToDraw; i++) {
 		triangle_t clipped[2];
 
 		queue_t* queue = createQueue();
 		enqueue(queue, sortedTriangles[i]);
 
+		int trianglesToClip = 1;
+
 		for(int p = 0; p < 4; p++) {
 			int trianglesToAdd = 0;
-			while (!isEmpty(queue)) {
+			while (trianglesToClip > 9) {
+				trianglesToClip--;
+
 				triangle_t test = dequeue(queue);
-				int clippedTriangles = 0;
 				switch(p) {
 					case 0:
-						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test, &clipped[0], &clipped[1]);
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test, &clipped[0], &clipped[1]);
 							break;
 
 					case 1:
-						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){0, 500 /*W*/, 0, 1}), &((vec3d_t){0, -1, 0, 1}), &test, &clipped[0], &clipped[1]);
+					trianglesToAdd 	= triangle_clipAgainstPlane(&((vec3d_t){0, 500 /*W*/, 0, 1}), &((vec3d_t){0, -1, 0, 1}), &test, &clipped[0], &clipped[1]);
 							break;
 
 					case 2:
-						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, &clipped[0], &clipped[1]);
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, &clipped[0], &clipped[1]);
 							break;
 
 					case 3:
-						clippedTriangles = triangle_clipAgainstPlane(&((vec3d_t){500/*H*/, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test, &clipped[0], &clipped[1]);
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){500/*H*/, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test, &clipped[0], &clipped[1]);
 							break;
 
 					default: break;
 				}
+				for(int t = 0; t < trianglesToAdd; t++) {
+					enqueue(queue, clipped[t]);
+				}
+
+				
 			}
-			for(int t = 0; t < trianglesToAdd; t++) {
-				enqueue(queue, clipped[t]);
-			}
+			trianglesToClip = queue->len;
+
 		}
 		while(!isEmpty(queue)) {
 
-			numberOfClippedTriangles++;
-			clippedTriangles = (triangle_t*)realloc(clippedTriangles, sizeof(triangle_t) * numberOfClippedTriangles);
-			clippedTriangles[numberOfClippedTriangles- 1] = dequeue(queue);
+			nClippedTriangles++;
+			clippedTriangles = (triangle_t*)realloc(clippedTriangles, sizeof(triangle_t) * nClippedTriangles);
+			clippedTriangles[nClippedTriangles- 1] = dequeue(queue);
+			printf("%s", "HI");
 		}
 	}
+		printf("%s\n", "HI");
 
-	for(int i = 0; i < trianglesToDraw; i++) {
-		DrawTriangle(renderer, &sortedTriangles[i]);
+	for(int i = 0; i < nClippedTriangles; i++) {
+		DrawTriangle(renderer, &clippedTriangles[i]);
 	}
 
 	delta += 0.001;

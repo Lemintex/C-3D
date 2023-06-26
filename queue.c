@@ -3,11 +3,12 @@
 queue_t* createQueue() {
 	queue_t* queue = (queue_t*)malloc(sizeof(queue_t));
 	queue->front = queue->rear = NULL;
+	queue->len = 0;
 	return queue;
 }
 
 int isEmpty(queue_t *queue) {
-	return (queue->front == NULL);
+	return (queue->len == 0);//front == NULL);
 }
 
 void enqueue(queue_t* queue, triangle_t triangle) {
