@@ -145,30 +145,29 @@ triangleProjected.color = createColor(shade, shade, shade);
 				trianglesToClip--;
 
 				triangle_t test = dequeue(queue);
-//				switch(p) {
-//					case 0:
-//						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test, &clipped[0], &clipped[1]);
-//							break;
-//
-//					case 1:
-//					trianglesToAdd 	= triangle_clipAgainstPlane(&((vec3d_t){0, 500 /*W*/, 0, 1}), &((vec3d_t){0, -1, 0, 1}), &test, &clipped[0], &clipped[1]);
-//							break;
-//
-//					case 2:
-//						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, &clipped[0], &clipped[1]);
-//							break;
-//
-//					case 3:
-//						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){500/*H*/, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test, &clipped[0], &clipped[1]);
-//							break;
-//
-//					default: break;
-//				}
+				switch(p) {
+					case 0:
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){0, -1, 0, 1}), &test, &clipped[0], &clipped[1]); //TOP
+							break;
+
+					case 1:
+				
+					trianglesToAdd 	= triangle_clipAgainstPlane(&((vec3d_t){0, -500 /*W*/, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test, &clipped[0], &clipped[1]); //BOTTOM
+							break;
+
+					case 2:
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test, &clipped[0], &clipped[1]); //LEFT
+							break;
+
+					case 3:
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){-500/*H*/, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, &clipped[0], &clipped[1]);
+							break;
+
+					default: break;
+				}
 				for(int t = 0; t < trianglesToAdd; t++) {
 					enqueue(queue, clipped[t]);
 				}
-
-				
 			}
 			trianglesToClip = queue->len;
 			nClippedTriangles+=queue->len;
@@ -178,15 +177,18 @@ triangleProjected.color = createColor(shade, shade, shade);
 			clippedTriangles[nClippedTriangles- 1] = dequeue(queue);
 			printf("%s", "deque");
 		}
+		free(queue);
 	}
 //		printf("%s\n", "HI");
 
-	for(int i = 0; i < trianglesToDraw; i++) {
-		DrawTriangle(renderer, &sortedTriangles[i]);
-	}
-//	for(int i = 0; i < nClippedTriangles; i++) {
-//		DrawTriangle(renderer, &clippedTriangles[i]);
+//	for(int i = 0; i < trianglesToDraw; i++) {
+//		DrawTriangle(renderer, &sortedTriangles[i]);
 //	}
+	for(int i = 0; i < nClippedTriangles; i++) {
+		DrawTriangle(renderer, &clippedTriangles[i]);
+			printf("%s", "deque");
+	}
+	free(clippedTriangles);
 
 	delta += 0.001;
 }

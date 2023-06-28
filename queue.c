@@ -12,6 +12,7 @@ int isEmpty(queue_t *queue) {
 }
 
 void enqueue(queue_t* queue, triangle_t triangle) {
+
     node_t* new_node = malloc(sizeof(node_t));
     if (!new_node) return;
 
@@ -24,9 +25,12 @@ void enqueue(queue_t* queue, triangle_t triangle) {
         queue->rear->next = new_node;
         queue->rear = new_node;
     }
+	queue->len = queue->len + 1;
 }
 
 triangle_t dequeue(queue_t* queue) {
+	queue->len = queue->len - 1;
+
 	node_t* front = queue->front;
 	triangle_t triangle = front->triangle;
 	queue->front = front->next;
