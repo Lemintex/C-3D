@@ -139,11 +139,12 @@ triangleProjected.color = createColor(shade, shade, shade);
 
 		int trianglesToClip = 1;
 
-		for(int p = 0; p < 4; p++) {
+		for(int p = 0; p < 1; p++) {
+			printf("%d\n", p);
 			int trianglesToAdd = 1;
 			while (trianglesToClip > 0) {
 				trianglesToClip--;
-
+				if (isEmpty(queue)) continue;
 				triangle_t test = dequeue(queue);
 				switch(p) {
 					case 0:
@@ -156,11 +157,11 @@ triangleProjected.color = createColor(shade, shade, shade);
 							break;
 
 					case 2:
-						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test, &clipped[0], &clipped[1]); //LEFT
+//						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test, &clipped[0], &clipped[1]); //LEFT
 							break;
 
 					case 3:
-						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){-500/*H*/, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, &clipped[0], &clipped[1]);
+//						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){-500/*H*/, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, &clipped[0], &clipped[1]);
 							break;
 
 					default: break;
@@ -168,6 +169,7 @@ triangleProjected.color = createColor(shade, shade, shade);
 				for(int t = 0; t < trianglesToAdd; t++) {
 					enqueue(queue, clipped[t]);
 				}
+					printQueue(queue);
 			}
 			trianglesToClip = queue->len;
 			nClippedTriangles+=queue->len;
@@ -175,8 +177,9 @@ triangleProjected.color = createColor(shade, shade, shade);
 		while(!isEmpty(queue)) {
 			clippedTriangles = (triangle_t*)realloc(clippedTriangles, sizeof(triangle_t) * nClippedTriangles);
 			clippedTriangles[nClippedTriangles- 1] = dequeue(queue);
-			printf("%s", "deque");
+			printf("%s", "deque ");
 		}
+			printf("%s", "\n");
 		free(queue);
 	}
 //		printf("%s\n", "HI");
@@ -186,7 +189,7 @@ triangleProjected.color = createColor(shade, shade, shade);
 //	}
 	for(int i = 0; i < nClippedTriangles; i++) {
 		DrawTriangle(renderer, &clippedTriangles[i]);
-			printf("%s", "deque");
+//			printf("%s", "deque");
 	}
 	free(clippedTriangles);
 
