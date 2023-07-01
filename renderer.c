@@ -152,22 +152,22 @@ triangleProjected.color = createColor(shade, shade, shade);
 							break;
 
 					case 1:
-				
-					trianglesToAdd 	= triangle_clipAgainstPlane(&((vec3d_t){0, -500 /*W*/, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test, &clipped[0], &clipped[1]); //BOTTOM
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, -500 /*W*/, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test, &clipped[0], &clipped[1]); //BOTTOM
 							break;
 
 					case 2:
-//						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test, &clipped[0], &clipped[1]); //LEFT
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test, &clipped[0], &clipped[1]); //LEFT
 							break;
 
 					case 3:
-//						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){-500/*H*/, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, &clipped[0], &clipped[1]);
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){-500/*H*/, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, &clipped[0], &clipped[1]);
 							break;
 
 					default: break;
 				}
 				for(int t = 0; t < trianglesToAdd; t++) {
 					enqueue(queue, clipped[t]);
+//		DrawTriangle(renderer, &clipped[t]);
 				}
 					printQueue(queue);
 			}
@@ -176,7 +176,7 @@ triangleProjected.color = createColor(shade, shade, shade);
 		}
 		while(!isEmpty(queue)) {
 			clippedTriangles = (triangle_t*)realloc(clippedTriangles, sizeof(triangle_t) * nClippedTriangles);
-			clippedTriangles[nClippedTriangles- 1] = dequeue(queue);
+			clippedTriangles[nClippedTriangles- queue->len] = dequeue(queue);
 			printf("%s", "deque ");
 		}
 			printf("%s", "\n");
@@ -189,7 +189,7 @@ triangleProjected.color = createColor(shade, shade, shade);
 //	}
 	for(int i = 0; i < nClippedTriangles; i++) {
 		DrawTriangle(renderer, &clippedTriangles[i]);
-//			printf("%s", "deque");
+//			printf("%s", "deque"k0i);
 	}
 	free(clippedTriangles);
 
