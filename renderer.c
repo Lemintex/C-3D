@@ -128,8 +128,7 @@ triangleProjected.color = createColor(shade, shade, shade);
 
 	qsort(sortedTriangles, trianglesToDraw, sizeof(triangle_t), compareZ);
 
-	int nClippedTriangles = 0;
-	triangle_t* clippedTriangles = (triangle_t*)malloc(0);
+	queue_t* clippedTrianglesToDraw = createQueue();
 
 	for(int i = 0; i < trianglesToDraw; i++) {
 		triangle_t clipped[2];
@@ -137,15 +136,16 @@ triangleProjected.color = createColor(shade, shade, shade);
 		queue_t* queue = createQueue();
 		enqueue(queue, sortedTriangles[i]);
 
-		int trianglesToClip = 1;
+		int nNewTriangles = 1;
 
-		for(int p = 0; p < 1; p++) {
+		for(int p = 0; p < 4; p++) {
 			printf("%d\n", p);
 			int trianglesToAdd = 1;
-			while (trianglesToClip > 0) {
-				trianglesToClip--;
+			while (nNewTriangles> 0) {
+				nNewTriangles--;
 				if (isEmpty(queue)) continue;
 				triangle_t test = dequeue(queue);
+
 				switch(p) {
 					case 0:
 						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){0, -1, 0, 1}), &test, &clipped[0], &clipped[1]); //TOP
@@ -160,23 +160,22 @@ triangleProjected.color = createColor(shade, shade, shade);
 							break;
 
 					case 3:
-						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){-500/*H*/, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, &clipped[0], &clipped[1]);
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){-500/*H*/, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, &clipped[0], &clipped[1]); //RIGHT
 							break;
 
 					default: break;
 				}
+
 				for(int t = 0; t < trianglesToAdd; t++) {
 					enqueue(queue, clipped[t]);
 //		DrawTriangle(renderer, &clipped[t]);
 				}
 					printQueue(queue);
 			}
-			trianglesToClip = queue->len;
-			nClippedTriangles+=queue->len;
+			nNewTriangles = queue->len;
 		}
 		while(!isEmpty(queue)) {
-			clippedTriangles = (triangle_t*)realloc(clippedTriangles, sizeof(triangle_t) * nClippedTriangles);
-			clippedTriangles[nClippedTriangles- queue->len] = dequeue(queue);
+			enqueue(clippedTrianglesToDraw, dequeue(queue));
 			printf("%s", "deque ");
 		}
 			printf("%s", "\n");
@@ -187,11 +186,11 @@ triangleProjected.color = createColor(shade, shade, shade);
 //	for(int i = 0; i < trianglesToDraw; i++) {
 //		DrawTriangle(renderer, &sortedTriangles[i]);
 //	}
-	for(int i = 0; i < nClippedTriangles; i++) {
-		DrawTriangle(renderer, &clippedTriangles[i]);
-//			printf("%s", "deque"k0i);
+	while (!isEmpty(clippedTrianglesToDraw)) {
+	triangle_t t = dequeue(clippedTrianglesToDraw);
+		DrawTriangle(renderer, &t);
+			printf("%s", "draw");
 	}
-	free(clippedTriangles);
 
 	delta += 0.001;
 }
