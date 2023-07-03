@@ -141,7 +141,7 @@ triangleProjected.color = createColor(shade, shade, shade);
 		for(int p = 0; p < 4; p++) {
 			printf("%d\n", p);
 			int trianglesToAdd = 1;
-			while (nNewTriangles> 0) {
+			while (nNewTriangles > 0) {
 				nNewTriangles--;
 				if (isEmpty(queue)) continue;
 				triangle_t test = dequeue(queue);
@@ -168,17 +168,14 @@ triangleProjected.color = createColor(shade, shade, shade);
 
 				for(int t = 0; t < trianglesToAdd; t++) {
 					enqueue(queue, clipped[t]);
-//		DrawTriangle(renderer, &clipped[t]);
 				}
-					printQueue(queue);
 			}
 			nNewTriangles = queue->len;
 		}
 		while(!isEmpty(queue)) {
 			enqueue(clippedTrianglesToDraw, dequeue(queue));
-			printf("%s", "deque ");
 		}
-			printf("%s", "\n");
+
 		free(queue);
 	}
 //		printf("%s\n", "HI");

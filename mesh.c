@@ -94,7 +94,7 @@ int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangl
 	if (nInsidePointCount == 3) {
 		*triangleOut1 = *triangleIn;
 
-		triangleOut1->color = createColor(0, 0, 255);
+//		triangleOut1->color = createColor(0, 0, 255);
 		return 1;
 	}
 
