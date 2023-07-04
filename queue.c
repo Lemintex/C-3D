@@ -8,7 +8,7 @@ queue_t* createQueue() {
 }
 
 int isEmpty(queue_t *queue) {
-	return (queue->len == 0);//front == NULL);
+	return (queue->len == 0);
 }
 
 void enqueue(queue_t* queue, triangle_t triangle) {

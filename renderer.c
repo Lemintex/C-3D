@@ -22,7 +22,6 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 	matrix_4x4_t matWorld = matrix_identity();
 	matRotA = matrix_multiplyMatrix(&matRotZ, &matRotX);
 	
-//	matWorld = matrix_multiplyMatrix(&matWorld, &matRotA);
 	matWorld = matrix_multiplyMatrix(&matWorld, &matTrans);
 
 	vec3d_t up = (vec3d_t){0, 1, 0, 1};
@@ -66,29 +65,16 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 
 		float dp = vec3_dot(&light_direction, &normal);
 
-		//SDL_SetRenderDrawColor(renderer, dp * 255, dp * 255, dp * 255, SDL_ALPHA_OPAQUE);
-
 		triangleViewed.verts[0] = vec3_mul_mat4(&triangleTransformed.verts[0], &cameraView);
 		triangleViewed.verts[1] = vec3_mul_mat4(&triangleTransformed.verts[1], &cameraView);
 		triangleViewed.verts[2] = vec3_mul_mat4(&triangleTransformed.verts[2], &cameraView);
+
 		// clip against near plane of camera
 		int clippedTriangles = 0;
 		triangle_t clipped[2];
 
 		vec3d_t nearPlane = (vec3d_t){0, 0, 1, 1};
 		vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 1, 1}; //FRONT PLANE
-
-//		vec3d_t nearPlane = (vec3d_t){0, -8, 0, 1};
-//		vec3d_t nearPlaneNormal = (vec3d_t){0, 1, 0, 1}; //TOP PLANE
-//
-//		vec3d_t nearPlane = (vec3d_t){0, 8, 1, 1};
-//		vec3d_t nearPlaneNormal = (vec3d_t){0, -1, 0, 1}; //BOTTOM PLANE
-//
-//		vec3d_t nearPlane = (vec3d_t){-8, 0, 0, 1};
-//		vec3d_t nearPlaneNormal = (vec3d_t){1, 0, 0, 1}; //LEFT PLANE
-//
-//		vec3d_t nearPlane = (vec3d_t){8, 0, 1, 1};
-//		vec3d_t nearPlaneNormal = (vec3d_t){-1, 0, 0, 1}; //RIGHT PLANE
 
 		clippedTriangles = triangle_clipAgainstPlane(&nearPlane, &nearPlaneNormal, &triangleViewed, &clipped[0], &clipped[1]);
 	//	printf("%d", clippedTriangles);
@@ -104,6 +90,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 	
 			uint8_t shade = dp * 128 + 127;
 triangleProjected.color = createColor(shade, shade, shade);
+
 			// offset into view
 			vec3d_t vOffsetView = (vec3d_t){1, 1, 0};
 	
@@ -178,15 +165,10 @@ triangleProjected.color = createColor(shade, shade, shade);
 
 		free(queue);
 	}
-//		printf("%s\n", "HI");
 
-//	for(int i = 0; i < trianglesToDraw; i++) {
-//		DrawTriangle(renderer, &sortedTriangles[i]);
-//	}
 	while (!isEmpty(clippedTrianglesToDraw)) {
-	triangle_t t = dequeue(clippedTrianglesToDraw);
+		triangle_t t = dequeue(clippedTrianglesToDraw);
 		DrawTriangle(renderer, &t);
-			printf("%s", "draw");
 	}
 
 	delta += 0.001;
@@ -216,8 +198,7 @@ void DrawTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 
 		float dp = normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z;
 
-
-		SDL_SetRenderDrawColor(renderer, triangle->color.r, triangle->color.g, triangle->color.b, SDL_ALPHA_OPAQUE);//255,255,255,SDL_ALPHA_OPAQUE);//triangle->col, triangle->col,triangle->col, SDL_ALPHA_OPAQUE);
+		SDL_SetRenderDrawColor(renderer, triangle->color.r, triangle->color.g, triangle->color.b, SDL_ALPHA_OPAQUE);
 		FillTriangle(renderer, triangle);
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
