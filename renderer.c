@@ -77,7 +77,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 		vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 1, 1}; //FRONT PLANE
 
 		clippedTriangles = triangle_clipAgainstPlane(&nearPlane, &nearPlaneNormal, &triangleViewed, &clipped[0], &clipped[1]);
-	//	printf("%d", clippedTriangles);
+
 		for (int j = 0; j < clippedTriangles; j++) {
 			triangleProjected.verts[0] = vec3_mul_mat4(&clipped[j].verts[0], &matProj);
 			triangleProjected.verts[1] = vec3_mul_mat4(&clipped[j].verts[1], &matProj);
@@ -89,7 +89,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 			triangleProjected.verts[2] = vec3_div(&triangleProjected.verts[2], triangleProjected.verts[2].w);
 	
 			uint8_t shade = dp * 128 + 127;
-triangleProjected.color = createColor(shade, shade, shade);
+			triangleProjected.color = createColor(shade, shade, shade);
 
 			// offset into view
 			vec3d_t vOffsetView = (vec3d_t){1, 1, 0};
@@ -126,7 +126,6 @@ triangleProjected.color = createColor(shade, shade, shade);
 		int nNewTriangles = 1;
 
 		for(int p = 0; p < 4; p++) {
-			printf("%d\n", p);
 			int trianglesToAdd = 1;
 			while (nNewTriangles > 0) {
 				nNewTriangles--;
@@ -171,6 +170,7 @@ triangleProjected.color = createColor(shade, shade, shade);
 		DrawTriangle(renderer, &t);
 	}
 
+	free(clippedTrianglesToDraw);
 	delta += 0.001;
 }
 
