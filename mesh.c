@@ -155,3 +155,4 @@ int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangl
 		return 2;
 	}
 }
+
