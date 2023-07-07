@@ -1,4 +1,6 @@
 #include "renderer.h"
+#include "3dmath.h"
+#include "queue.h"
 #include <SDL2/SDL_render.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,7 +22,6 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 	matrix_4x4_t matWorld = matrix_identity();
 	matRotA = matrix_multiplyMatrix(&matRotZ, &matRotX);
 	
-//	matWorld = matrix_multiplyMatrix(&matWorld, &matRotA);
 	matWorld = matrix_multiplyMatrix(&matWorld, &matTrans);
 
 	vec3d_t up = (vec3d_t){0, 1, 0, 1};
@@ -64,51 +65,112 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 
 		float dp = vec3_dot(&light_direction, &normal);
 
-		//SDL_SetRenderDrawColor(renderer, dp * 255, dp * 255, dp * 255, SDL_ALPHA_OPAQUE);
-
 		triangleViewed.verts[0] = vec3_mul_mat4(&triangleTransformed.verts[0], &cameraView);
 		triangleViewed.verts[1] = vec3_mul_mat4(&triangleTransformed.verts[1], &cameraView);
 		triangleViewed.verts[2] = vec3_mul_mat4(&triangleTransformed.verts[2], &cameraView);
 
-		triangleProjected.verts[0] = vec3_mul_mat4(&triangleViewed.verts[0], &matProj);
-		triangleProjected.verts[1] = vec3_mul_mat4(&triangleViewed.verts[1], &matProj);
-		triangleProjected.verts[2] = vec3_mul_mat4(&triangleViewed.verts[2], &matProj);
+		// clip against near plane of camera
+		int clippedTriangles = 0;
+		triangle_t clipped[2];
 
-		// normalise co-ordinates
-		triangleProjected.verts[0] = vec3_div(&triangleProjected.verts[0], triangleProjected.verts[0].w);
-		triangleProjected.verts[1] = vec3_div(&triangleProjected.verts[1], triangleProjected.verts[1].w);
-		triangleProjected.verts[2] = vec3_div(&triangleProjected.verts[2], triangleProjected.verts[2].w);
+		vec3d_t nearPlane = (vec3d_t){0, 0, 1, 1};
+		vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 1, 1}; //FRONT PLANE
 
-		triangleProjected.col = dp * 128 + 127;
-		 
-		// offset into view
-		vec3d_t vOffsetView = (vec3d_t){1, 1, 0};
+		clippedTriangles = triangle_clipAgainstPlane(&nearPlane, &nearPlaneNormal, &triangleViewed, &clipped[0], &clipped[1]);
 
-		triangleProjected.verts[0] = vec3_add(&triangleProjected.verts[0], &vOffsetView);
-		triangleProjected.verts[1] = vec3_add(&triangleProjected.verts[1], &vOffsetView);
-		triangleProjected.verts[2] = vec3_add(&triangleProjected.verts[2], &vOffsetView);
+		for (int j = 0; j < clippedTriangles; j++) {
+			triangleProjected.verts[0] = vec3_mul_mat4(&clipped[j].verts[0], &matProj);
+			triangleProjected.verts[1] = vec3_mul_mat4(&clipped[j].verts[1], &matProj);
+			triangleProjected.verts[2] = vec3_mul_mat4(&clipped[j].verts[2], &matProj);
+	
+			// normalise co-ordinates
+			triangleProjected.verts[0] = vec3_div(&triangleProjected.verts[0], triangleProjected.verts[0].w);
+			triangleProjected.verts[1] = vec3_div(&triangleProjected.verts[1], triangleProjected.verts[1].w);
+			triangleProjected.verts[2] = vec3_div(&triangleProjected.verts[2], triangleProjected.verts[2].w);
+	
+			uint8_t shade = dp * 128 + 127;
+			triangleProjected.color = createColor(shade, shade, shade);
 
-		triangleProjected.verts[0].x *= 0.5 * 500;
-		triangleProjected.verts[0].y *= 0.5 * 500;
-
-		triangleProjected.verts[1].x *= 0.5 * 500;
-		triangleProjected.verts[1].y *= 0.5 * 500;
-
-		triangleProjected.verts[2].x *= 0.5 * 500;
-		triangleProjected.verts[2].y *= 0.5 * 500;
-
-
-		trianglesToDraw++;
-		sortedTriangles = (triangle_t*)realloc(sortedTriangles, sizeof(triangle_t) * trianglesToDraw);
-		sortedTriangles[trianglesToDraw - 1] = triangleProjected;
+			// offset into view
+			vec3d_t vOffsetView = (vec3d_t){1, 1, 0};
+	
+			triangleProjected.verts[0] = vec3_add(&triangleProjected.verts[0], &vOffsetView);
+			triangleProjected.verts[1] = vec3_add(&triangleProjected.verts[1], &vOffsetView);
+			triangleProjected.verts[2] = vec3_add(&triangleProjected.verts[2], &vOffsetView);
+	
+			triangleProjected.verts[0].x *= 0.5 * 500;
+			triangleProjected.verts[0].y *= 0.5 * 500;
+	
+			triangleProjected.verts[1].x *= 0.5 * 500;
+			triangleProjected.verts[1].y *= 0.5 * 500;
+	
+			triangleProjected.verts[2].x *= 0.5 * 500;
+			triangleProjected.verts[2].y *= 0.5 * 500;
+	
+			trianglesToDraw++;
+			sortedTriangles = (triangle_t*)realloc(sortedTriangles, sizeof(triangle_t) * trianglesToDraw);
+			sortedTriangles[trianglesToDraw - 1] = triangleProjected;
+		}
 	}
 
 	qsort(sortedTriangles, trianglesToDraw, sizeof(triangle_t), compareZ);
 
+	queue_t* clippedTrianglesToDraw = createQueue();
+
 	for(int i = 0; i < trianglesToDraw; i++) {
-		DrawTriangle(renderer, &sortedTriangles[i]);
+		triangle_t clipped[2];
+
+		queue_t* queue = createQueue();
+		enqueue(queue, sortedTriangles[i]);
+
+		int nNewTriangles = 1;
+
+		for(int p = 0; p < 4; p++) {
+			int trianglesToAdd = 1;
+			while (nNewTriangles > 0) {
+				nNewTriangles--;
+				if (isEmpty(queue)) continue;
+				triangle_t test = dequeue(queue);
+
+				switch(p) {
+					case 0:
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){0, -1, 0, 1}), &test, &clipped[0], &clipped[1]); //TOP
+							break;
+
+					case 1:
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, -500 /*W*/, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test, &clipped[0], &clipped[1]); //BOTTOM
+							break;
+
+					case 2:
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test, &clipped[0], &clipped[1]); //LEFT
+							break;
+
+					case 3:
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){-500/*H*/, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, &clipped[0], &clipped[1]); //RIGHT
+							break;
+
+					default: break;
+				}
+
+				for(int t = 0; t < trianglesToAdd; t++) {
+					enqueue(queue, clipped[t]);
+				}
+			}
+			nNewTriangles = queue->len;
+		}
+		while(!isEmpty(queue)) {
+			enqueue(clippedTrianglesToDraw, dequeue(queue));
+		}
+
+		free(queue);
 	}
 
+	while (!isEmpty(clippedTrianglesToDraw)) {
+		triangle_t t = dequeue(clippedTrianglesToDraw);
+		DrawTriangle(renderer, &t);
+	}
+
+	free(clippedTrianglesToDraw);
 	delta += 0.001;
 }
 
@@ -136,8 +198,7 @@ void DrawTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 
 		float dp = normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z;
 
-
-		SDL_SetRenderDrawColor(renderer, triangle->col, triangle->col,triangle->col, SDL_ALPHA_OPAQUE);
+		SDL_SetRenderDrawColor(renderer, triangle->color.r, triangle->color.g, triangle->color.b, SDL_ALPHA_OPAQUE);
 		FillTriangle(renderer, triangle);
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);

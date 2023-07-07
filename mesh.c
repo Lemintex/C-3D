@@ -79,6 +79,14 @@ mesh_t* ReadMeshFromFile(char *filename) {
 	return mesh;
 }
 
+color_t createColor(u_int8_t r, u_int8_t g, u_int8_t b) {
+	color_t color;
+	color.r = r;
+	color.g = g;
+	color.b = b;
+	return color;
+}
+
 int compareZ(const void* e1, const void* e2) {
 	triangle_t* a = (triangle_t*)e1;
 	float averageA = a->verts[0].z + a->verts[1].z + a->verts[2].z / 3;
@@ -90,3 +98,61 @@ int compareZ(const void* e1, const void* e2) {
 	if (averageA > averageB) return 1;
 	return 0;
 }
+
+int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangle_t* triangleIn, triangle_t* triangleOut1, triangle_t* triangleOut2) {
+	*planeNormal = vec3_normal(planeNormal);
+
+	float distance[3];
+	// gets signed distance from planePoint to triangle point
+	for (int i = 0; i < 3; i++) {
+		vec3d_t v = triangleIn->verts[i];
+		v = vec3_add(&v, planePoint);
+		distance[i] = vec3_dot(planeNormal, &v);//planePoint) - (planeNormal->x * v.x +planeNormal->y * v.y + planeNormal->z * v.z);
+	}
+
+	// create temporary inside and outside arrays used to classify points
+	vec3d_t* inside_points[3];  int nInsidePointCount = 0;
+	vec3d_t* outside_points[3]; int nOutsidePointCount = 0;
+
+	for (int i = 0; i < 3; i++) {
+		// if distance is more than 0, point is 'inside' plane
+		if (distance[i] < 0) inside_points[nInsidePointCount++] = &triangleIn->verts[i];
+		// oherwise, it is 'outside' plane
+		else outside_points[nOutsidePointCount++] = &triangleIn->verts[i];
+	}
+
+	if (nInsidePointCount == 0) return 0;
+
+	if (nInsidePointCount == 3) {
+		*triangleOut1 = *triangleIn;
+
+//		triangleOut1->color = createColor(0, 0, 255);
+		return 1;
+	}
+
+	if (nInsidePointCount == 1 && nOutsidePointCount == 2) {
+		triangleOut1->verts[0] = *inside_points[0];
+
+		triangleOut1->verts[1] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[0]);
+		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[1]);
+
+		triangleOut1->color = createColor(0, 255, 0);
+		return 1;
+	}
+
+	if (nInsidePointCount == 2 && nOutsidePointCount == 1) {
+		triangleOut1->verts[0] = *inside_points[0];
+		triangleOut1->verts[1] = *inside_points[1];
+		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[0]);
+		triangleOut1->color = createColor(255, 0, 0);
+
+		triangleOut2->verts[0] = *inside_points[1];
+		triangleOut2->verts[1] = triangleOut1->verts[2];
+		triangleOut2->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[1], outside_points[0]);
+		triangleOut2->color = createColor(255, 0, 0);
+
+
+		return 2;
+	}
+}
+

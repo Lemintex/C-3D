@@ -47,6 +47,31 @@ vec3d_t vec3_mul_mat4(vec3d_t* v, matrix_4x4_t* m) {
 	return vec;
 }
 
+vec3d_t vec3_intersectPlane(vec3d_t* planePoint, vec3d_t* planeNormal, vec3d_t* lineStart, vec3d_t* lineEnd) {
+	// ensure the normal is normalised
+	*planeNormal = vec3_normal(planeNormal);
+    
+    // calculate the direction of the line
+	vec3d_t lineDirection = vec3_sub(lineEnd, lineStart);
+    
+    // calculate the dot product of planeNormal and lineDirection
+    float dotProduct = vec3_dot(planeNormal, &lineDirection);
+    
+    // check if the line is parallel to the plane
+	// DO I NEED THIS?
+    
+    // calculate the vector from the plane point to the line start
+    vec3d_t planeToPoint = vec3_add(lineStart, planePoint);
+    
+    // calculate the distance factor along the line where the intersection occurs
+    float distanceFactor = -vec3_dot(planeNormal, &planeToPoint) / dotProduct;
+    
+    // calculate the coordinates of the intersection point
+	vec3d_t distanceToPoint = vec3_mul(&lineDirection, distanceFactor);
+
+    return vec3_add(lineStart, &distanceToPoint);
+}
+
 matrix_4x4_t matrix_identity() {
 	matrix_4x4_t matrix = {0};
 	matrix.m[0][0] = 1;

@@ -5,6 +5,7 @@
 
 #include "mesh.h"
 #include "camera.h"
+#include "queue.h"
 
 void Render();
 
