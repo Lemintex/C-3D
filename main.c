@@ -13,12 +13,13 @@
 
 SDL_Renderer* renderer;
 camera_t camera;
+int width = 1000, height = 1000;
 
 int main() {
 	camera.pos = (vec3d_t){0, 0, 0, 1};
 	camera.lookDir = (vec3d_t){0, 0, 1, 1};
 	char title[] = "Test";
-	int width = 500, height = 500;
+
 	if(SDL_Init(SDL_INIT_VIDEO)) {
 		printf("Error");
 	}
@@ -27,7 +28,7 @@ int main() {
 
 	SDL_Surface* screen = SDL_GetWindowSurface(window);
  
-	mesh_t* ship = ReadMeshFromFile("axis.obj");
+	mesh_t* ship = CreateCube();//ReadMeshFromFile("axis.obj");
 	while(1) {
 		SDL_Event event;
 

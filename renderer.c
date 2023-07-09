@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 extern camera_t camera;
+extern int width, height;
 
 void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 	int trianglesToDraw = 0;
@@ -98,14 +99,14 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 			triangleProjected.verts[1] = vec3_add(&triangleProjected.verts[1], &vOffsetView);
 			triangleProjected.verts[2] = vec3_add(&triangleProjected.verts[2], &vOffsetView);
 	
-			triangleProjected.verts[0].x *= 0.5 * 500;
-			triangleProjected.verts[0].y *= 0.5 * 500;
+			triangleProjected.verts[0].x *= 0.5 * width;
+			triangleProjected.verts[0].y *= 0.5 * height;
 	
-			triangleProjected.verts[1].x *= 0.5 * 500;
-			triangleProjected.verts[1].y *= 0.5 * 500;
+			triangleProjected.verts[1].x *= 0.5 * width;
+			triangleProjected.verts[1].y *= 0.5 * height;
 	
-			triangleProjected.verts[2].x *= 0.5 * 500;
-			triangleProjected.verts[2].y *= 0.5 * 500;
+			triangleProjected.verts[2].x *= 0.5 * width;
+			triangleProjected.verts[2].y *= 0.5 * height;
 	
 			trianglesToDraw++;
 			sortedTriangles = (triangle_t*)realloc(sortedTriangles, sizeof(triangle_t) * trianglesToDraw);
@@ -138,7 +139,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 							break;
 
 					case 1:
-						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, -500 /*W*/, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test, &clipped[0], &clipped[1]); //BOTTOM
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){0, -width, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test, &clipped[0], &clipped[1]); //BOTTOM
 							break;
 
 					case 2:
@@ -146,7 +147,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 							break;
 
 					case 3:
-						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){-500/*H*/, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, &clipped[0], &clipped[1]); //RIGHT
+						trianglesToAdd = triangle_clipAgainstPlane(&((vec3d_t){-height, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test, &clipped[0], &clipped[1]); //RIGHT
 							break;
 
 					default: break;
