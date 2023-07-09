@@ -7,16 +7,16 @@ typedef struct matrix_4x4 {
 	float m[4][4];
 } matrix_4x4_t;
 
-typedef struct {
+typedef struct vec3d {
 	float x;
 	float y;
 	float z;
 	float w;
 } vec3d_t;
 
-typedef struct {
-	float x;
-	float y;
+typedef struct vec2d {
+	float u;
+	float v;
 } vec2d_t;
 
 // VEC3D
