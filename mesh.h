@@ -33,4 +33,6 @@ mesh_t* ReadMeshFromFile(char* file);
 color_t createColor(u_int8_t r, u_int8_t g, u_int8_t b);
 
 int compareZ(const void* e1, const void* e2);
+
+int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangle_t* triangleIn, triangle_t* triangleOut1, triangle_t* triangleOut2);
 #endif
