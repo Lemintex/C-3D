@@ -223,11 +223,11 @@ void FillTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 	}
 	int midY = 3 - minY - maxY; // it works!
 
-	vec2d_t vMax = {triangle->verts[maxY].x, triangle->verts[maxY].y};
+	vec3d_t vMax = {triangle->verts[maxY].x, triangle->verts[maxY].y, 0};
 
-	vec2d_t vMid = {triangle->verts[midY].x, triangle->verts[midY].y};
-
-	vec2d_t vMin = {triangle->verts[minY].x, triangle->verts[minY].y};
+	vec3d_t vMid = {triangle->verts[midY].x, triangle->verts[midY].y, 0};
+	
+	vec3d_t vMin = {triangle->verts[minY].x, triangle->verts[minY].y, 0};
 
 	float slopeHypot = (vMax.x - vMin.x) / (vMax.y - vMin.y);
 	float xHyp = vMin.x;
@@ -237,7 +237,7 @@ void FillTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 	FillTriangleBottom(renderer, &vMid, &vMax, slopeHypot, &xHyp);
 }
 
-void FillTriangleTop(SDL_Renderer* renderer, vec2d_t* vTop, vec2d_t* vMid, float slopeHyp, float* xHyp) {
+void FillTriangleTop(SDL_Renderer* renderer, vec3d_t* vTop, vec3d_t* vMid, float slopeHyp, float* xHyp) {
 	if(vMid->y - vTop->y < 1) return;
 
 	float slopeA = (vTop->x - vMid->x) / (vTop->y - vMid->y);
@@ -263,7 +263,7 @@ void FillTriangleTop(SDL_Renderer* renderer, vec2d_t* vTop, vec2d_t* vMid, float
 	}
 }
 
-void FillTriangleBottom(SDL_Renderer* renderer, vec2d_t* vMid, vec2d_t* vBot, float slopeHyp, float* xHyp) {
+void FillTriangleBottom(SDL_Renderer* renderer, vec3d_t* vMid, vec3d_t* vBot, float slopeHyp, float* xHyp) {
 	if(vBot->y - vMid->y < 1) return;
 
 	float slopeB = (vMid->x - vBot->x) / (vMid->y - vBot->y);

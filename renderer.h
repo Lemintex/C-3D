@@ -17,7 +17,7 @@ void DrawWireframeTriangle(SDL_Renderer* renderer, triangle_t* triangle);
 
 void FillTriangle(SDL_Renderer* renderer, triangle_t* triangle);
 
-void FillTriangleTop(SDL_Renderer* renderer, vec2d_t* vTop, vec2d_t* vMid, float slopeHyp, float* xHyp);
+void FillTriangleTop(SDL_Renderer* renderer, vec3d_t* vTop, vec3d_t* vMid, float slopeHyp, float* xHyp);
 
-void FillTriangleBottom(SDL_Renderer* renderer, vec2d_t* vTop, vec2d_t* vMid, float slopeHyp, float* xHyp);
+void FillTriangleBottom(SDL_Renderer* renderer, vec3d_t* vTop, vec3d_t* vMid, float slopeHyp, float* xHyp);
 #endif
