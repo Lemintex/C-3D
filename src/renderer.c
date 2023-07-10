@@ -300,6 +300,136 @@ void FillTriangleBottom(SDL_Renderer* renderer, vec3d_t* vMid, vec3d_t* vBot, fl
 }
 
 void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_Surface* texture) {
+	unsigned char* pixels = (unsigned char*)texture->pixels;
+	
+	int maxY = 0;
+	int minY = 0;
+	for(int i = 1; i < 3; i++) {
+		if(triangle->verts[i].y >= triangle->verts[maxY].y) maxY = i;
+		else if(triangle->verts[i].y <= triangle->verts[minY].y) minY = i;
+	}
+	int midY = 3 - minY - maxY; // it works!
 
+	vec3d_t vMax = {triangle->verts[maxY].x, triangle->verts[maxY].y, 0};
+	vec2d_t tMax = {triangle->texture[maxY].u, triangle->texture[maxY].v};
+
+	vec3d_t vMid = {triangle->verts[midY].x, triangle->verts[midY].y, 0};
+	vec2d_t tMid = {triangle->texture[midY].u, triangle->texture[midY].v};
+	
+	vec3d_t vMin = {triangle->verts[minY].x, triangle->verts[minY].y, 0};
+	vec2d_t tMin = {triangle->texture[minY].u, triangle->texture[minY].v};
+
+	int dx1 = vMid.x - vMin.x;
+	int dy1 = vMid.y - vMin.y;
+	float du1 = tMid.u - tMin.u;
+	float dv1 = tMid.v- tMin.v;
+	
+	int dx2 = vMax.x - vMin.x;
+	int dy2 = vMax.y - vMin.y;
+	float du2 = tMax.u - tMin.u;
+	float dv2 = tMax.v - tMin.v;
+
+	float texu, texv;
+
+	float dx1_step = 0, dx2_step = 0,
+	du1_step = 0, du2_step = 0,
+	dv1_step = 0, dv2_step = 0;
+
+	if (dy1) dx1_step = dx1 / (float)abs(dy1);
+	if (dy2) dx2_step = dx2 / (float)abs(dy2);
+
+	if (dy1) du1_step = du1 / (float)abs(dy1);
+	if (dy2) du2_step = du2 / (float)abs(dy2);
+
+	if (dy1) dv1_step = dv1 / (float)abs(dy1);
+	if (dy2) dv2_step = dv2 / (float)abs(dy2);
+
+	if (dy1) {
+		for (int i = vMin.y; i <= vMid.y; i++) {
+			int x1 = vMin.x + (float)(i - vMin.y) * dx1_step;
+			int x2 = vMin.x + (float)(i - vMin.y) * dx2_step;
+
+			float su = tMin.u + (float)(i  - vMin.y) * du1_step;
+			float eu = tMin.u + (float)(i  - vMin.y) * du2_step;
+
+			float sv = tMin.v + (float)(i - vMin.y) * dv1_step;
+			float ev = tMin.v + (float)(i - vMin.y) * dv2_step;
+
+			if (x1 > x2) {
+				int temp = x1; x1 = x2; x2 = temp;
+
+				float tempu = su; su = eu; eu = tempu;
+
+				float tempv = sv; sv = ev; ev = tempv;
+			}
+			texu = su; texv = sv;
+
+			float tStep = 1 / ((float)(x2 - x1));
+			float t = 0;
+			for (int j = x1; j < x2; j++)
+			{
+				texu = (1 - t) * su + t * eu;
+				texv = (1 - t) * su + t * ev;
+
+				unsigned char b = pixels[4 * (i * texture->w + j) + 0];
+				unsigned char g = pixels[4 * (i * texture->w + j) + 1];
+				unsigned char r = pixels[4 * (i * texture->w + j) + 2];
+				unsigned char a = pixels[4 * (i * texture->w + j) + 3];
+				SDL_SetRenderDrawColor(renderer, r, g, b, a);
+				SDL_RenderDrawPoint(renderer, j, i);
+				t += tStep;
+			}
+			 
+		}
+
+		dy1 = vMax.y - vMid.y;
+		dx1 = vMax.x - vMid.x;
+		dv1 = tMax.v - tMid.v;
+		du1 = tMax.u - tMid.u;
+
+			if (dy1) dx1_step = dx1 / (float)abs(dy1);
+
+	if (dy1) du1_step = du1 / (float)abs(dy1);
+
+	if (dy1) dv1_step = dv1 / (float)abs(dy1);
+
+		if (dy1) {
+		for (int i = vMid.y; i <= vMax.y; i++) {
+			int x1 = vMid.x + (float)(i - vMid.y) * dx1_step;
+			int x2 = vMin.x + (float)(i - vMin.y) * dx2_step;
+
+			float su = tMid.u + (float)(i  - vMid.y) * du1_step;
+			float eu = tMin.u + (float)(i  - vMin.y) * du2_step;
+
+			float sv = tMid.v + (float)(i - vMid.y) * dv1_step;
+			float ev = tMin.v + (float)(i - vMin.y) * dv2_step;
+
+			if (x1 > x2) {
+				int temp = x1; x1 = x2; x2 = temp;
+
+				float tempu = su; su = eu; eu = tempu;
+
+				float tempv = sv; sv = ev; ev = tempv;
+			}
+			texu = su; texv = sv;
+
+			float tStep = 1 / ((float)(x2 - x1));
+			float t = 0;
+			for (int j = x1; j < x2; j++)
+			{
+				texu = (1 - t) * su + t * eu;
+				texv = (1 - t) * su + t * ev;
+
+				unsigned char b = pixels[4 * (i * texture->w + j) + 0];
+				unsigned char g = pixels[4 * (i * texture->w + j) + 1];
+				unsigned char r = pixels[4 * (i * texture->w + j) + 2];
+				unsigned char a = pixels[4 * (i * texture->w + j) + 3];
+				SDL_SetRenderDrawColor(renderer, r, g, b, a);
+				SDL_RenderDrawPoint(renderer, j, i);
+				t += tStep;
+			}
+			 
+		}
+	}
+	}
 }
-
