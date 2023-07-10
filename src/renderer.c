@@ -8,7 +8,7 @@
 extern camera_t camera;
 extern int width, height;
 
-void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
+void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh, SDL_Surface* texture) {
 	int trianglesToDraw = 0;
 	triangle_t* sortedTriangles = (triangle_t*)malloc(0);
 
@@ -178,14 +178,14 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh) {
 
 	while (!isEmpty(clippedTrianglesToDraw)) {
 		triangle_t t = dequeue(clippedTrianglesToDraw);
-		DrawTriangle(renderer, &t);
+		DrawTriangle(renderer, &t, texture);
 	}
 
 	free(clippedTrianglesToDraw);
 	delta += 0.001;
 }
 
-void DrawTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
+void DrawTriangle(SDL_Renderer* renderer, triangle_t* triangle, SDL_Surface* texture) {
 	
 		vec3d_t normal, l1, l2;
 		l1.x = triangle->verts[1].x - triangle->verts[0].x;
@@ -210,9 +210,9 @@ void DrawTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 		float dp = normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z;
 
 		SDL_SetRenderDrawColor(renderer, triangle->color.r, triangle->color.g, triangle->color.b, SDL_ALPHA_OPAQUE);
-		FillTriangle(renderer, triangle);
-
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+		// FillTriangle(renderer, triangle);
+		FillTriangleWithTexture(renderer, triangle, texture);
+		SDL_SetRenderDrawColor(renderer, 250, 250, 250, SDL_ALPHA_OPAQUE);
 		DrawWireframeTriangle(renderer, triangle);
 
 }
@@ -299,7 +299,7 @@ void FillTriangleBottom(SDL_Renderer* renderer, vec3d_t* vMid, vec3d_t* vBot, fl
 	}
 }
 
-void FillTriangleWithTexture(triangle_t* triangle, SDL_Texture* texture) {
+void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_Surface* texture) {
 
 }
 
