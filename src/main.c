@@ -29,6 +29,7 @@ int main() {
 	SDL_Surface* screen = SDL_GetWindowSurface(window);
  
 	mesh_t* ship = CreateCube();//ReadMeshFromFile("axis.obj");
+	SDL_Surface* texture = SDL_LoadBMP("mario.bmp");
 	while(1) {
 		SDL_Event event;
 
@@ -51,7 +52,7 @@ int main() {
 		SDL_RenderClear(renderer);
 
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-		DrawMesh(renderer, ship);
+		DrawMesh(renderer, ship, texture);
 		
 		SDL_RenderPresent(renderer);
 		SDL_UpdateWindowSurface(window);
