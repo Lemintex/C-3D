@@ -366,8 +366,7 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 
 			float tStep = 1 / ((float)(x2 - x1));
 			float t = 0;
-			for (int j = x1; j < x2; j++)
-			{
+			for (int j = x1; j < x2; j++) {
 				texu = (1 - t) * su + t * eu;
 				texv = (1 - t) * su + t * ev;
 
@@ -379,21 +378,21 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 				SDL_RenderDrawPoint(renderer, j, i);
 				t += tStep;
 			}
-			 
 		}
+	}
 
-		dy1 = vMax.y - vMid.y;
-		dx1 = vMax.x - vMid.x;
-		dv1 = tMax.v - tMid.v;
-		du1 = tMax.u - tMid.u;
+	dy1 = vMax.y - vMid.y;
+	dx1 = vMax.x - vMid.x;
+	dv1 = tMax.v - tMid.v;
+	du1 = tMax.u - tMid.u;
 
-			if (dy1) dx1_step = dx1 / (float)abs(dy1);
+	if (dy1) dx1_step = dx1 / (float)abs(dy1);
 
 	if (dy1) du1_step = du1 / (float)abs(dy1);
 
 	if (dy1) dv1_step = dv1 / (float)abs(dy1);
 
-		if (dy1) {
+	if (dy1) {
 		for (int i = vMid.y; i <= vMax.y; i++) {
 			int x1 = vMid.x + (float)(i - vMid.y) * dx1_step;
 			int x2 = vMin.x + (float)(i - vMin.y) * dx2_step;
@@ -415,8 +414,7 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 
 			float tStep = 1 / ((float)(x2 - x1));
 			float t = 0;
-			for (int j = x1; j < x2; j++)
-			{
+			for (int j = x1; j < x2; j++) {
 				texu = (1 - t) * su + t * eu;
 				texv = (1 - t) * su + t * ev;
 
@@ -428,8 +426,8 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 				SDL_RenderDrawPoint(renderer, j, i);
 				t += tStep;
 			}
-			 
 		}
 	}
-	}
 }
+	// }
+//}
