@@ -10,7 +10,7 @@
                 "${workspaceFolder}/src/*.c",
                 "${workspaceFolder}/src/*.h",
                 "-o",
-                "${workspaceFolder}/build/${fileBasenameNoExtension}",
+                "${workspaceFolder}/build/main",
                 "-lSDL2",
                 "-lm"
             ],
