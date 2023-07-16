@@ -210,7 +210,7 @@ void DrawTriangle(SDL_Renderer* renderer, triangle_t* triangle, SDL_Surface* tex
 		float dp = normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z;
 
 		SDL_SetRenderDrawColor(renderer, triangle->color.r, triangle->color.g, triangle->color.b, SDL_ALPHA_OPAQUE);
-		// FillTriangle(renderer, triangle);
+		FillTriangle(renderer, triangle);
 		FillTriangleWithTexture(renderer, triangle, texture);
 		SDL_SetRenderDrawColor(renderer, 250, 250, 250, SDL_ALPHA_OPAQUE);
 		DrawWireframeTriangle(renderer, triangle);
@@ -300,6 +300,8 @@ void FillTriangleBottom(SDL_Renderer* renderer, vec3d_t* vMid, vec3d_t* vBot, fl
 }
 
 void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_Surface* texture) {
+	int x = 1;
+
 	unsigned char* pixels = (unsigned char*)texture->pixels;
 	
 	int maxY = 0;
@@ -380,54 +382,52 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 			}
 		}
 	}
-
-	dy1 = vMax.y - vMid.y;
-	dx1 = vMax.x - vMid.x;
-	dv1 = tMax.v - tMid.v;
-	du1 = tMax.u - tMid.u;
-
-	if (dy1) dx1_step = dx1 / (float)abs(dy1);
-
-	if (dy1) du1_step = du1 / (float)abs(dy1);
-
-	if (dy1) dv1_step = dv1 / (float)abs(dy1);
-
-	if (dy1) {
-		for (int i = vMid.y; i <= vMax.y; i++) {
-			int x1 = vMid.x + (float)(i - vMid.y) * dx1_step;
-			int x2 = vMin.x + (float)(i - vMin.y) * dx2_step;
-
-			float su = tMid.u + (float)(i  - vMid.y) * du1_step;
-			float eu = tMin.u + (float)(i  - vMin.y) * du2_step;
-
-			float sv = tMid.v + (float)(i - vMid.y) * dv1_step;
-			float ev = tMin.v + (float)(i - vMin.y) * dv2_step;
-
-			if (x1 > x2) {
-				int temp = x1; x1 = x2; x2 = temp;
-
-				float tempu = su; su = eu; eu = tempu;
-
-				float tempv = sv; sv = ev; ev = tempv;
-			}
-			texu = su; texv = sv;
-
-			float tStep = 1 / ((float)(x2 - x1));
-			float t = 0;
-			for (int j = x1; j < x2; j++) {
-				texu = (1 - t) * su + t * eu;
-				texv = (1 - t) * su + t * ev;
-
-				unsigned char b = pixels[4 * (i * texture->w + j) + 0];
-				unsigned char g = pixels[4 * (i * texture->w + j) + 1];
-				unsigned char r = pixels[4 * (i * texture->w + j) + 2];
-				unsigned char a = pixels[4 * (i * texture->w + j) + 3];
-				SDL_SetRenderDrawColor(renderer, r, g, b, a);
-				SDL_RenderDrawPoint(renderer, j, i);
-				t += tStep;
-			}
-		}
-	}
 }
+	// dy1 = vMax.y - vMid.y;
+	// dx1 = vMax.x - vMid.x;
+	// dv1 = tMax.v - tMid.v;
+	// du1 = tMax.u - tMid.u;
+
+	// if (dy1) dx1_step = dx1 / (float)abs(dy1);
+
+	// if (dy1) du1_step = du1 / (float)abs(dy1);
+
+	// if (dy1) dv1_step = dv1 / (float)abs(dy1);
+
+	// if (dy1) {
+	// 	for (int i = vMid.y; i <= vMax.y; i++) {
+	// 		int x1 = vMid.x + (float)(i - vMid.y) * dx1_step;
+	// 		int x2 = vMin.x + (float)(i - vMin.y) * dx2_step;
+
+	// 		float su = tMid.u + (float)(i  - vMid.y) * du1_step;
+	// 		float eu = tMin.u + (float)(i  - vMin.y) * du2_step;
+
+	// 		float sv = tMid.v + (float)(i - vMid.y) * dv1_step;
+	// 		float ev = tMin.v + (float)(i - vMin.y) * dv2_step;
+
+	// 		if (x1 > x2) {
+	// 			int temp = x1; x1 = x2; x2 = temp;
+
+	// 			float tempu = su; su = eu; eu = tempu;
+
+	// 			float tempv = sv; sv = ev; ev = tempv;
+	// 		}
+	// 		texu = su; texv = sv;
+
+	// 		float tStep = 1 / ((float)(x2 - x1));
+	// 		float t = 0;
+	// 		for (int j = x1; j < x2; j++) {
+	// 			texu = (1 - t) * su + t * eu;
+	// 			texv = (1 - t) * su + t * ev;
+
+	// 			unsigned char b = pixels[4 * (i * texture->w + j) + 0];
+	// 			unsigned char g = pixels[4 * (i * texture->w + j) + 1];
+	// 			unsigned char r = pixels[4 * (i * texture->w + j) + 2];
+	// 			unsigned char a = pixels[4 * (i * texture->w + j) + 3];
+	// 			SDL_SetRenderDrawColor(renderer, r, g, b, a);
+	// 			SDL_RenderDrawPoint(renderer, j, i);
+	// 			t += tStep;
+	// 		}
+	// 	}
 	// }
-//}
+// }
