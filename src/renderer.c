@@ -322,7 +322,7 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 	int dx1 = vMid.x - vMin.x;
 	int dy1 = vMid.y - vMin.y;
 	float du1 = tMid.u - tMin.u;
-	float dv1 = tMid.v- tMin.v;
+	float dv1 = tMid.v - tMin.v;
 	
 	int dx2 = vMax.x - vMin.x;
 	int dy2 = vMax.y - vMin.y;
