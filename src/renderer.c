@@ -368,12 +368,14 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 			float t = 0;
 			for (int j = x1; j < x2; j++) {
 				texu = (1 - t) * su + t * eu;
-				texv = (1 - t) * su + t * ev;
+				texv = (1 - t) * sv + t * ev;
 
-				unsigned char b = pixels[4 * (i * texture->w + j) + 0];
-				unsigned char g = pixels[4 * (i * texture->w + j) + 1];
-				unsigned char r = pixels[4 * (i * texture->w + j) + 2];
-				unsigned char a = pixels[4 * (i * texture->w + j) + 3];
+				int u = texu * texture->w;
+				int v = texv * texture->w * texture->h;
+				unsigned char g = pixels[4 * (u + v) + 1];
+				unsigned char r = pixels[4 * (u + v) + 2];
+				unsigned char b = pixels[4 * (u + v) + 0];
+				unsigned char a = pixels[4 * (u + v) + 3];
 				SDL_SetRenderDrawColor(renderer, r, g, b, a);
 				SDL_RenderDrawPoint(renderer, j, i);
 				t += tStep;
