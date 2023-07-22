@@ -346,14 +346,14 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 
 	if (dy1) {
 		for (int i = vMin.y; i <= vMid.y; i++) {
-			int x1 = vMin.x + (float)(i - vMin.y) * dx1_step;
-			int x2 = vMin.x + (float)(i - vMin.y) * dx2_step;
+			int x1 = vMin.x + (float)(i - (int)vMin.y) * dx1_step;
+			int x2 = vMin.x + (float)(i - (int)vMin.y) * dx2_step;
 
-			float su = tMin.u + (float)(i  - vMin.y) * du1_step;
-			float eu = tMin.u + (float)(i  - vMin.y) * du2_step;
+			float su = tMin.u + (float)(i  - (int)vMin.y) * du1_step;
+			float eu = tMin.u + (float)(i  - (int)vMin.y) * du2_step;
 
-			float sv = tMin.v + (float)(i - vMin.y) * dv1_step;
-			float ev = tMin.v + (float)(i - vMin.y) * dv2_step;
+			float sv = tMin.v + (float)(i - (int)vMin.y) * dv1_step;
+			float ev = tMin.v + (float)(i - (int)vMin.y) * dv2_step;
 
 			if (x1 > x2) {
 				int temp = x1; x1 = x2; x2 = temp;
@@ -362,20 +362,30 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 
 				float tempv = sv; sv = ev; ev = tempv;
 			}
-			texu = su; texv = sv;
+			// texu = su; texv = sv;
 
 			float tStep = 1 / ((float)(x2 - x1));
 			float t = 0;
 			for (int j = x1; j < x2; j++) {
+				if (su < 0) su = 0; if (su > 1) su = 1;
+				if (eu < 0) eu = 0; if (eu > 1) eu = 1;
+				if (sv < 0) sv = 0; if (sv > 1) sv = 1;
+				if (ev < 0) ev = 0; if (ev > 1) ev = 1;
 				texu = (1 - t) * su + t * eu;
 				texv = (1 - t) * sv + t * ev;
-
+				
+				texu *= 255;
+				texv *= 255;
 				int u = texu * texture->w;
-				int v = texv * texture->w * texture->h;
-				unsigned char g = pixels[4 * (u + v) + 1];
-				unsigned char r = pixels[4 * (u + v) + 2];
-				unsigned char b = pixels[4 * (u + v) + 0];
-				unsigned char a = pixels[4 * (u + v) + 3];
+				int v = (texv * texture->h) * texture->w;
+				int row = i - vMin.y;
+				// int u = texu;
+				// int v = texv * texture->w + (texture->h * texv);
+				int pixel = 4 * (u + v);
+				unsigned char g = texv;//pixels[pixel + 1];
+				unsigned char r = texu;//pixels[pixel + 2];
+				unsigned char b = 0;//pixels[pixel + 0];
+				unsigned char a = 255;//pixels[pixel + 3];
 				SDL_SetRenderDrawColor(renderer, r, g, b, a);
 				SDL_RenderDrawPoint(renderer, j, i);
 				t += tStep;
