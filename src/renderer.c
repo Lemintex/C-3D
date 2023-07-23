@@ -366,6 +366,7 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 
 			float tStep = 1 / ((float)(x2 - x1));
 			float t = 0;
+			
 			for (int j = x1; j < x2; j++) {
 				if (su < 0) su = 0; if (su > 1) su = 1;
 				if (eu < 0) eu = 0; if (eu > 1) eu = 1;
