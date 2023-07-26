@@ -81,7 +81,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh, SDL_Surface* texture) {
 		triangle_t clipped[2];
 
 		vec3d_t nearPlane = (vec3d_t){0, 0, 1, 1};
-		vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 1, 1}; //FRONT PLANE
+		vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 0.1, 1}; //FRONT PLANE
 
 		clippedTriangles = triangle_clipAgainstPlane(&nearPlane, &nearPlaneNormal, &triangleViewed, &clipped[0], &clipped[1]);
 
@@ -362,11 +362,11 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 
 				float tempv = sv; sv = ev; ev = tempv;
 			}
-			// texu = su; texv = sv;
+			texu = su; texv = sv;
 
 			float tStep = 1 / ((float)(x2 - x1));
 			float t = 0;
-			
+			printf("%s\n", "new line");
 			for (int j = x1; j < x2; j++) {
 				if (su < 0) su = 0; if (su > 1) su = 1;
 				if (eu < 0) eu = 0; if (eu > 1) eu = 1;
@@ -374,19 +374,21 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 				if (ev < 0) ev = 0; if (ev > 1) ev = 1;
 				texu = (1 - t) * su + t * eu;
 				texv = (1 - t) * sv + t * ev;
-				
-				texu *= 255;
-				texv *= 255;
-				int u = texu * texture->w;
-				int v = (texv * texture->h) * texture->w;
+				// int debug = texu * 255;
+				int debug = texv * 255;
+				// texu *= 255;
+				// texv *= 255;
+				int u =i;;//texu * texture->w;
+				int v = j;;//texv * texture->h;//(texv * texture->h) * texture->w;
+				printf("u: %s, v:%s", u, v);
 				int row = i - vMin.y;
-				// int u = texu;
-				// int v = texv * texture->w + (texture->h * texv);
+				// int u = texu * texture->w;
+				// int v = (texture->h * texv);
 				int pixel = 4 * (u + v);
-				unsigned char g = texv;//pixels[pixel + 1];
-				unsigned char r = texu;//pixels[pixel + 2];
 				unsigned char b = 0;//pixels[pixel + 0];
-				unsigned char a = 255;//pixels[pixel + 3];
+				unsigned char g = texv * 255;//pixels[pixel + 1];
+				unsigned char r = texu * 255;//pixels[pixel + 2];
+				unsigned char a = pixels[pixel + 3];
 				SDL_SetRenderDrawColor(renderer, r, g, b, a);
 				SDL_RenderDrawPoint(renderer, j, i);
 				t += tStep;
@@ -431,11 +433,11 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 				texu = (1 - t) * su + t * eu;
 				texv = (1 - t) * su + t * ev;
 
-				unsigned char b = pixels[4 * (i * texture->w + j) + 0];
-				unsigned char g = pixels[4 * (i * texture->w + j) + 1];
-				unsigned char r = pixels[4 * (i * texture->w + j) + 2];
-				unsigned char a = pixels[4 * (i * texture->w + j) + 3];
-				SDL_SetRenderDrawColor(renderer, r, g, b, a);
+				// unsigned char b = pixels[4 * (i * texture->w + j) + 0];
+				// unsigned char g = pixels[4 * (i * texture->w + j) + 1];
+				// unsigned char r = pixels[4 * (i * texture->w + j) + 2];
+				// unsigned char a = pixels[4 * (i * texture->w + j) + 3];
+				// SDL_SetRenderDrawColor(renderer, r, g, b, a);
 				SDL_RenderDrawPoint(renderer, j, i);
 				t += tStep;
 			}
