@@ -366,7 +366,7 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 
 			float tStep = 1 / ((float)(x2 - x1));
 			float t = 0;
-			printf("%s\n", "new line");
+			printf("\n%s\n", "new line");
 			for (int j = x1; j < x2; j++) {
 				if (su < 0) su = 0; if (su > 1) su = 1;
 				if (eu < 0) eu = 0; if (eu > 1) eu = 1;
@@ -378,9 +378,9 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 				int debug = texv * 255;
 				// texu *= 255;
 				// texv *= 255;
-				int u =i;;//texu * texture->w;
-				int v = j;;//texv * texture->h;//(texv * texture->h) * texture->w;
-				printf("u: %s, v:%s", u, v);
+				int u = texture->w * texu;//texu * texture->w;
+				int v = texture->w * (texture->h * texv);//texv * texture->h;//(texv * texture->h) * texture->w;
+				printf("u: %d, v:%d | ", u, v);//u, v);
 				int row = i - vMin.y;
 				// int u = texu * texture->w;
 				// int v = (texture->h * texv);
