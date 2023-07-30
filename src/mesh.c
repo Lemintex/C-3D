@@ -147,8 +147,8 @@ int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangl
 		triangleOut1->texture[1].v  = t * (outside_texture[0]->v - inside_texture[0]->v) + inside_texture[0]->v;
 
 		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[1], &t);
-		triangleOut1->texture[2].u = t * (outside_texture[0]->u - inside_texture[0]->u) + inside_texture[0]->u;
-		triangleOut1->texture[2].v  = t * (outside_texture[0]->v - inside_texture[0]->v) + inside_texture[0]->v;
+		triangleOut1->texture[2].u = t * (outside_texture[1]->u - inside_texture[0]->u) + inside_texture[0]->u;
+		triangleOut1->texture[2].v  = t * (outside_texture[1]->v - inside_texture[0]->v) + inside_texture[0]->v;
 
 		triangleOut1->color = createColor(0, 255, 0);
 		return 1;
@@ -177,8 +177,8 @@ int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangl
 
 		triangleOut2->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[1], outside_points[0], &t);
 
-		triangleOut2->texture[2].u = t * (outside_texture[0]->u - inside_texture[1]->u) - inside_texture[1]->u;
-		triangleOut2->texture[2].u = t * (outside_texture[0]->v - inside_texture[1]->v) - inside_texture[1]->v;
+		triangleOut2->texture[2].u = t * (outside_texture[0]->u - inside_texture[1]->u) + inside_texture[1]->u;
+		triangleOut2->texture[2].v = t * (outside_texture[0]->v - inside_texture[1]->v) + inside_texture[1]->v;
 		triangleOut2->color = createColor(255, 0, 0);
 
 
