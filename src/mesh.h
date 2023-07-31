@@ -18,6 +18,7 @@ typedef struct color {
 typedef struct vec2d {
 	float u;
 	float v;
+	float w;
 } vec2d_t;
 
 typedef struct triangle {
