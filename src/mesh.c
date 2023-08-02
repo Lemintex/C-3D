@@ -6,28 +6,28 @@ mesh_t* CreateCube() {
 	cube->triangles = (triangle_t*)malloc(sizeof(triangle_t) * 12);
 	cube->triangleCount = 12;
 		// SOUTH
-	cube->triangles[0] = (triangle_t){ 0.0, 0.0, 0.0, 1.0,    0.0, 1.0, 0.0, 1.0,    1.0, 1.0, 0.0 , 1.0,		0.0, 1.0, 0.0, 0.0, 1.0, 0.0};
-	cube->triangles[1] = (triangle_t){ 0.0, 0.0, 0.0, 1.0,    1.0, 1.0, 0.0, 1.0,    1.0, 0.0, 0.0 , 1.0,		0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
+	cube->triangles[0] = (triangle_t){ 0.0, 0.0, 0.0, 1.0,    0.0, 1.0, 0.0, 1.0,    1.0, 1.0, 0.0 , 1.0,		0.0, 1.0, 1.0,	0.0, 0.0, 1.0,	1.0, 0.0, 1.0};
+	cube->triangles[1] = (triangle_t){ 0.0, 0.0, 0.0, 1.0,    1.0, 1.0, 0.0, 1.0,    1.0, 0.0, 0.0 , 1.0,		0.0, 1.0, 1.0,	1.0, 0.0, 1.0,	1.0, 1.0, 1.0};
 
 		// EAST                                     , 1.0                 ,		0.0, 1.0, 0.0, 0.0, 1.0, 0.0
-	cube->triangles[2] = (triangle_t){ 1.0, 0.0, 0.0, 1.0,    1.0, 1.0, 0.0, 1.0,    1.0, 1.0, 1.0 , 1.0,		0.0, 1.0, 0.0, 0.0, 1.0, 0.0};
-	cube->triangles[3] = (triangle_t){ 1.0, 0.0, 0.0, 1.0,    1.0, 1.0, 1.0, 1.0,    1.0, 0.0, 1.0 , 1.0,		0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
+	cube->triangles[2] = (triangle_t){ 1.0, 0.0, 0.0, 1.0,    1.0, 1.0, 0.0, 1.0,    1.0, 1.0, 1.0 , 1.0,		0.0, 1.0, 1.0,	0.0, 0.0, 1.0,	1.0, 0.0, 1.0};
+	cube->triangles[3] = (triangle_t){ 1.0, 0.0, 0.0, 1.0,    1.0, 1.0, 1.0, 1.0,    1.0, 0.0, 1.0 , 1.0,		0.0, 1.0, 1.0,	1.0, 0.0, 1.0,	1.0, 1.0, 1.0};
 
 		// NORTH                                    , 1.0                ,		0.0, 1.0, 0.0, 0.0, 1.0, 0.0
-	cube->triangles[4] = (triangle_t){ 1.0, 0.0, 1.0, 1.0,    1.0, 1.0, 1.0, 1.0,    0.0, 1.0, 1.0 , 1.0,		0.0, 1.0, 0.0, 0.0, 1.0, 0.0};
-	cube->triangles[5] = (triangle_t){ 1.0, 0.0, 1.0, 1.0,    0.0, 1.0, 1.0, 1.0,    0.0, 0.0, 1.0 , 1.0,		0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
+	cube->triangles[4] = (triangle_t){ 1.0, 0.0, 1.0, 1.0,    1.0, 1.0, 1.0, 1.0,    0.0, 1.0, 1.0 , 1.0,		0.0, 1.0, 1.0,	0.0, 0.0, 1.0,	1.0, 0.0, 1.0};
+	cube->triangles[5] = (triangle_t){ 1.0, 0.0, 1.0, 1.0,    0.0, 1.0, 1.0, 1.0,    0.0, 0.0, 1.0 , 1.0,		0.0, 1.0, 1.0,	1.0, 0.0, 1.0,	1.0, 1.0, 1.0};
 
 		// WEST                                     , 1.0                ,		0.0, 1.0, 0.0, 0.0, 1.0, 0.0
-	cube->triangles[6] = (triangle_t){ 0.0, 0.0, 1.0, 1.0,    0.0, 1.0, 1.0, 1.0,    0.0, 1.0, 0.0 , 1.0,		0.0, 1.0, 0.0, 0.0, 1.0, 0.0};
-	cube->triangles[7] = (triangle_t){ 0.0, 0.0, 1.0, 1.0,    0.0, 1.0, 0.0, 1.0,    0.0, 0.0, 0.0 , 1.0,		0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
+	cube->triangles[6] = (triangle_t){ 0.0, 0.0, 1.0, 1.0,    0.0, 1.0, 1.0, 1.0,    0.0, 1.0, 0.0 , 1.0,		0.0, 1.0, 1.0,	0.0, 0.0, 1.0,	1.0, 0.0, 1.0};
+	cube->triangles[7] = (triangle_t){ 0.0, 0.0, 1.0, 1.0,    0.0, 1.0, 0.0, 1.0,    0.0, 0.0, 0.0 , 1.0,		0.0, 1.0, 1.0,	1.0, 0.0, 1.0,	1.0, 1.0, 1.0};
 
 		// TOP                                      , 1.0                 ,		0.0, 1.0, 0.0, 0.0, 1.0, 0.0
-	cube->triangles[8] = (triangle_t){ 0.0, 1.0, 0.0, 1.0,    0.0, 1.0, 1.0, 1.0,    1.0, 1.0, 1.0 , 1.0,		0.0, 1.0, 0.0, 0.0, 1.0, 0.0};
-	cube->triangles[9] = (triangle_t){ 0.0, 1.0, 0.0, 1.0,    1.0, 1.0, 1.0, 1.0,    1.0, 1.0, 0.0 , 1.0,		0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
+	cube->triangles[8] = (triangle_t){ 0.0, 1.0, 0.0, 1.0,    0.0, 1.0, 1.0, 1.0,    1.0, 1.0, 1.0 , 1.0,		0.0, 1.0, 1.0,	0.0, 0.0, 1.0,	1.0, 0.0, 1.0};
+	cube->triangles[9] = (triangle_t){ 0.0, 1.0, 0.0, 1.0,    1.0, 1.0, 1.0, 1.0,    1.0, 1.0, 0.0 , 1.0,		0.0, 1.0, 1.0,	1.0, 0.0, 1.0,	1.0, 1.0, 1.0};
 
 		// BOTTOM                                   , 1.0                 ,		0.0, 1.0, 0.0, 0.0, 1.0, 0.0
-	cube->triangles[10] = (triangle_t){ 1.0, 0.0, 1.0, 1.0,    0.0, 0.0, 1.0, 1.0,    0.0, 0.0, 0.0, 1.0,		0.0, 1.0, 0.0, 0.0, 1.0, 0.0 };
-	cube->triangles[11] = (triangle_t){ 1.0, 0.0, 1.0, 1.0,    0.0, 0.0, 0.0, 1.0,    1.0, 0.0, 0.0, 1.0,		0.0, 1.0, 1.0, 0.0, 1.0, 1.0 };
+	cube->triangles[10] = (triangle_t){ 1.0, 0.0, 1.0, 1.0,    0.0, 0.0, 1.0, 1.0,    0.0, 0.0, 0.0, 1.0,		0.0, 1.0, 1.0,	0.0, 0.0, 1.0,	1.0, 0.0, 1.0};
+	cube->triangles[11] = (triangle_t){ 1.0, 0.0, 1.0, 1.0,    0.0, 0.0, 0.0, 1.0,    1.0, 0.0, 0.0, 1.0,		0.0, 1.0, 1.0,	1.0, 0.0, 1.0,	1.0, 1.0, 1.0};
 	return cube;
 }
 
@@ -144,11 +144,13 @@ int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangl
 		float t;
 		triangleOut1->verts[1] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[0], &t);
 		triangleOut1->texture[1].u = t * (outside_texture[0]->u - inside_texture[0]->u) + inside_texture[0]->u;
-		triangleOut1->texture[1].v  = t * (outside_texture[0]->v - inside_texture[0]->v) + inside_texture[0]->v;
+		triangleOut1->texture[1].v = t * (outside_texture[0]->v - inside_texture[0]->v) + inside_texture[0]->v;
+		triangleOut1->texture[1].w = t * (outside_texture[0]->w - inside_texture[0]->w) + inside_texture[0]->w;
 
 		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[1], &t);
 		triangleOut1->texture[2].u = t * (outside_texture[1]->u - inside_texture[0]->u) + inside_texture[0]->u;
-		triangleOut1->texture[2].v  = t * (outside_texture[1]->v - inside_texture[0]->v) + inside_texture[0]->v;
+		triangleOut1->texture[2].v = t * (outside_texture[1]->v - inside_texture[0]->v) + inside_texture[0]->v;
+		triangleOut1->texture[2].w = t * (outside_texture[1]->w - inside_texture[0]->w) + inside_texture[0]->w;
 
 		triangleOut1->color = createColor(0, 255, 0);
 		return 1;
@@ -165,7 +167,8 @@ int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangl
 		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[0], &t);
 
 		triangleOut1->texture[2].u = t * (outside_texture[0]->u - inside_texture[0]->u) + inside_texture[0]->u;
-		triangleOut1->texture[2].v  = t * (outside_texture[0]->v - inside_texture[0]->v) + inside_texture[0]->v;
+		triangleOut1->texture[2].v = t * (outside_texture[0]->v - inside_texture[0]->v) + inside_texture[0]->v;
+		triangleOut1->texture[2].w = t * (outside_texture[0]->w - inside_texture[0]->w) + inside_texture[0]->w;
 
 		triangleOut1->color = createColor(255, 0, 0);
 
@@ -179,6 +182,7 @@ int triangle_clipAgainstPlane(vec3d_t* planePoint, vec3d_t* planeNormal, triangl
 
 		triangleOut2->texture[2].u = t * (outside_texture[0]->u - inside_texture[1]->u) + inside_texture[1]->u;
 		triangleOut2->texture[2].v = t * (outside_texture[0]->v - inside_texture[1]->v) + inside_texture[1]->v;
+		triangleOut2->texture[2].w = t * (outside_texture[0]->w - inside_texture[1]->w) + inside_texture[1]->w;
 		triangleOut2->color = createColor(255, 0, 0);
 
 
