@@ -80,7 +80,7 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh, SDL_Surface* texture) {
 		int clippedTriangles = 0;
 		triangle_t clipped[2];
 
-		vec3d_t nearPlane = (vec3d_t){0, 0, 1, 1};
+		vec3d_t nearPlane = (vec3d_t){0, 0, 0.1, 1};
 		vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 0.1, 1}; //FRONT PLANE
 
 		clippedTriangles = triangle_clipAgainstPlane(&nearPlane, &nearPlaneNormal, &triangleViewed, &clipped[0], &clipped[1]);
@@ -93,6 +93,29 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh, SDL_Surface* texture) {
 			triangleProjected.texture[0] = clipped[j].texture[0];
 			triangleProjected.texture[1] = clipped[j].texture[1];
 			triangleProjected.texture[2] = clipped[j].texture[2];
+
+triangleProjected.texture[0].u /= triangleProjected.verts[0].w;
+triangleProjected.texture[1].u /= triangleProjected.verts[1].w;
+triangleProjected.texture[2].u /= triangleProjected.verts[2].w;
+
+triangleProjected.texture[0].v /= triangleProjected.verts[0].w;
+triangleProjected.texture[1].v /= triangleProjected.verts[1].w;
+triangleProjected.texture[2].v /= triangleProjected.verts[2].w;
+
+triangleProjected.texture[0].w = 1.0 / triangleProjected.verts[0].w;
+triangleProjected.texture[1].w = 1.0 / triangleProjected.verts[1].w;
+triangleProjected.texture[2].w = 1.0 / triangleProjected.verts[2].w;
+// triangleProjected.texture[0].u /= abs(triangleProjected.verts[0].w);
+// triangleProjected.texture[1].u /= abs(triangleProjected.verts[1].w);
+// triangleProjected.texture[2].u /= abs(triangleProjected.verts[2].w);
+
+// triangleProjected.texture[0].v /= abs(triangleProjected.verts[0].w);
+// triangleProjected.texture[1].v /= abs(triangleProjected.verts[1].w);
+// triangleProjected.texture[2].v /= abs(triangleProjected.verts[2].w);
+
+// triangleProjected.texture[0].w = 1.0 / abs(triangleProjected.verts[0].w);
+// triangleProjected.texture[1].w = 1.0 / abs(triangleProjected.verts[1].w);
+// triangleProjected.texture[2].w = 1.0 / abs(triangleProjected.verts[2].w);
 
 			// normalise co-ordinates
 			triangleProjected.verts[0] = vec3_div(&triangleProjected.verts[0], triangleProjected.verts[0].w);
@@ -393,7 +416,7 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 				// texu *= 255;
 				// texv *= 255;
 				int u = (texture->w * texu) / texw;//texu * texture->w;
-				int v = (texture->w * (int)(texture->h * texv)) / texw;//texv * texture->h;//(texv * texture->h) * texture->w;
+				int v = (texture->w * (int)(texture->h * texv / texw));//texv * texture->h;//(texv * texture->h) * texture->w;
 				// printf("u: %d, v:%d | ", u, v);//u, v);
 				int row = i - vMin.y;
 				// int u = texu * texture->w;
@@ -420,7 +443,9 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 	if (dy1) du1_step = du1 / (float)abs(dy1);
 
 	if (dy1) dv1_step = dv1 / (float)abs(dy1);
-
+	
+	if (dy1) dw1_step = dw1 / (float)abs(dy1);
+	
 	if (dy1) {
 		for (int i = vMid.y; i <= vMax.y; i++) {
 			int x1 = vMid.x + (float)(i - vMid.y) * dx1_step;
@@ -432,30 +457,38 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 			float sv = tMid.v + (float)(i - vMid.y) * dv1_step;
 			float ev = tMin.v + (float)(i - vMin.y) * dv2_step;
 
+			float sw = tMid.w + (float)(i - (int)vMid.y) * dw1_step;
+			float ew = tMin.w + (float)(i - (int)vMin.y) * dw2_step;
+
 			if (x1 > x2) {
 				int temp = x1; x1 = x2; x2 = temp;
 
 				float tempu = su; su = eu; eu = tempu;
 
 				float tempv = sv; sv = ev; ev = tempv;
+
+				float tempw = sw; sw = ew; ew = tempw;
 			}
-			texu = su; texv = sv;
+			texu = su; texv = sv; texw = sw;
 
 			float tStep = 1 / ((float)(x2 - x1));
 			float t = 0;
 			for (int j = x1; j < x2; j++) {
-				if (su < 0) su = 0; if (su > 1) su = 1;
+				if (su < 0) su = 0; if (su > 1) su = 1; 
 				if (eu < 0) eu = 0; if (eu > 1) eu = 1;
 				if (sv < 0) sv = 0; if (sv > 1) sv = 1;
 				if (ev < 0) ev = 0; if (ev > 1) ev = 1;
+				if (sw < 0) sw = 0; if (sw > 1) sw = 1;
+				if (ew < 0) ew = 0; if (ew > 1) ew = 1;
 				texu = (1 - t) * su + t * eu;
 				texv = (1 - t) * sv + t * ev;
+				texw = (1 - t) * sw + t * ew;
 				// int debug = texu * 255;
 				int debug = texv * 255;
 				// texu *= 255;
 				// texv *= 255;
-				int u = texture->w * texu;//texu * texture->w;
-				int v = texture->w * (int)(texture->h * texv);//texv * texture->h;//(texv * texture->h) * texture->w;
+				int u = (texture->w * texu) / texw;//texu * texture->w;
+				int v = (texture->w * (int)(texture->h * texv / texw));//texv * texture->h;//(texv * texture->h) * texture->w;
 				// printf("u: %d, v:%d | ", u, v);//u, v);
 				int row = i - vMin.y;
 				// int u = texu * texture->w;
@@ -467,7 +500,7 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 				unsigned char a = pixels[pixel + 3];
 				SDL_SetRenderDrawColor(renderer, r, g, b, a);
 				SDL_RenderDrawPoint(renderer, j, i);
-				t += tStep; 
+				t += tStep;
 			}
 		}
 	}
