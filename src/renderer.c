@@ -311,29 +311,31 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 	int midY = 3 - minY - maxY; // it works!
 
 	vec3d_t vMax = {triangle->verts[maxY].x, triangle->verts[maxY].y, 0};
-	vec2d_t tMax = {triangle->texture[maxY].u, triangle->texture[maxY].v};
+	vec2d_t tMax = {triangle->texture[maxY].u, triangle->texture[maxY].v, triangle->texture[maxY].w};
 
 	vec3d_t vMid = {triangle->verts[midY].x, triangle->verts[midY].y, 0};
-	vec2d_t tMid = {triangle->texture[midY].u, triangle->texture[midY].v};
+	vec2d_t tMid = {triangle->texture[midY].u, triangle->texture[midY].v, triangle->texture[midY].w};
 	
 	vec3d_t vMin = {triangle->verts[minY].x, triangle->verts[minY].y, 0};
-	vec2d_t tMin = {triangle->texture[minY].u, triangle->texture[minY].v};
+	vec2d_t tMin = {triangle->texture[minY].u, triangle->texture[minY].v, triangle->texture[minY].w};
 
 	int dx1 = vMid.x - vMin.x;
 	int dy1 = vMid.y - vMin.y;
 	float du1 = tMid.u - tMin.u;
 	float dv1 = tMid.v - tMin.v;
+	float dw1 = tMid.w - tMin.w;
 	
 	int dx2 = vMax.x - vMin.x;
 	int dy2 = vMax.y - vMin.y;
 	float du2 = tMax.u - tMin.u;
 	float dv2 = tMax.v - tMin.v;
-
-	float texu, texv;
+	float dw2 = tMax.w - tMin.w;
+	float texu, texv, texw;
 
 	float dx1_step = 0, dx2_step = 0,
 	du1_step = 0, du2_step = 0,
-	dv1_step = 0, dv2_step = 0;
+	dv1_step = 0, dv2_step = 0,
+	dw1_step = 0, dw2_step = 0;
 
 	if (dy1) dx1_step = dx1 / (float)abs(dy1);
 	if (dy2) dx2_step = dx2 / (float)abs(dy2);
@@ -343,6 +345,10 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 
 	if (dy1) dv1_step = dv1 / (float)abs(dy1);
 	if (dy2) dv2_step = dv2 / (float)abs(dy2);
+	
+	if (dy1) dw1_step = dw1 / (float)abs(dy1);
+	if (dy2) dw2_step = dw2 / (float)abs(dy2);
+
 
 	if (dy1) {
 		for (int i = vMin.y; i <= vMid.y; i++) {
@@ -355,31 +361,39 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 			float sv = tMin.v + (float)(i - (int)vMin.y) * dv1_step;
 			float ev = tMin.v + (float)(i - (int)vMin.y) * dv2_step;
 
+			float sw = tMin.w + (float)(i - (int)vMin.y) * dw1_step;
+			float ew = tMin.w + (float)(i - (int)vMin.y) * dw2_step;
+
 			if (x1 > x2) {
 				int temp = x1; x1 = x2; x2 = temp;
 
 				float tempu = su; su = eu; eu = tempu;
 
 				float tempv = sv; sv = ev; ev = tempv;
+
+				float tempw = sw; sw = ew; ew = tempw;
 			}
-			texu = su; texv = sv;
+			texu = su; texv = sv; texw = sw;
 
 			float tStep = 1 / ((float)(x2 - x1));
 			float t = 0;
 			// printf("\n%s\n", "new line");
 			for (int j = x1; j < x2; j++) {
-				if (su < 0) su = 0; if (su > 1) su = 1;
-				if (eu < 0) eu = 0; if (eu > 1) eu = 1;
-				if (sv < 0) sv = 0; if (sv > 1) sv = 1;
-				if (ev < 0) ev = 0; if (ev > 1) ev = 1;
+				// if (su < 0) su = 0; if (su > 1) su = 1; 
+				// if (eu < 0) eu = 0; if (eu > 1) eu = 1;
+				// if (sv < 0) sv = 0; if (sv > 1) sv = 1;
+				// if (ev < 0) ev = 0; if (ev > 1) ev = 1;
+				// if (sw < 0) sw = 0; if (sw > 1) sw = 1;
+				// if (ew < 0) ew = 0; if (ew > 1) ew = 1;
 				texu = (1 - t) * su + t * eu;
 				texv = (1 - t) * sv + t * ev;
+				texw = (1 - t) * sw + t * ew;
 				// int debug = texu * 255;
 				int debug = texv * 255;
 				// texu *= 255;
 				// texv *= 255;
-				int u = texture->w * texu;//texu * texture->w;
-				int v = texture->w * (int)(texture->h * texv);//texv * texture->h;//(texv * texture->h) * texture->w;
+				int u = (texture->w * texu) / texw;//texu * texture->w;
+				int v = (texture->w * (int)(texture->h * texv)) / texw;//texv * texture->h;//(texv * texture->h) * texture->w;
 				// printf("u: %d, v:%d | ", u, v);//u, v);
 				int row = i - vMin.y;
 				// int u = texu * texture->w;
