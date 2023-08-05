@@ -402,12 +402,12 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 			float t = 0;
 			// printf("\n%s\n", "new line");
 			for (int j = x1; j < x2; j++) {
-				// if (su < 0) su = 0; if (su > 1) su = 1; 
-				// if (eu < 0) eu = 0; if (eu > 1) eu = 1;
-				// if (sv < 0) sv = 0; if (sv > 1) sv = 1;
-				// if (ev < 0) ev = 0; if (ev > 1) ev = 1;
-				// if (sw < 0) sw = 0; if (sw > 1) sw = 1;
-				// if (ew < 0) ew = 0; if (ew > 1) ew = 1;
+				// if (su > 0) su = 0; if (su < -1) su = -1; 
+				// if (eu > 0) eu = 0; if (eu < -1) eu = -1;
+				// if (sv > 0) sv = 0; if (sv < -1) sv = -1;
+				// if (ev > 0) ev = 0; if (ev < -1) ev = -1;
+				// if (sw > 0) sw = 0; if (sw < -1) sw = -1;
+				// if (ew > 0) ew = 0; if (ew < -1) ew = -1;
 				texu = (1 - t) * su + t * eu;
 				texv = (1 - t) * sv + t * ev;
 				texw = (1 - t) * sw + t * ew;
@@ -416,8 +416,10 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 				// texu *= 255;
 				// texv *= 255;
 				int u = (texture->w * texu) / texw;
-				int v = (texture->w * (int)(texture->h * texv / texw));//texv * texture->h;//(texv * texture->h) * texture->w;
-				// printf("u: %d, v:%d | ", u, v);//u, v);
+				int v = 0;//(texture->w * (int)(texture->h * texv / texw));//texv * texture->h;//(texv * texture->h) * texture->w;
+				int size = texture->pitch * texture->h / 4;
+				if (size < u+v) break;
+								// printf("u: %d, v:%d | ", u, v);//u, v);
 				// int u = texu * texture->w;
 				// int v = (texture->h * texv);
 				int pixel = 4 * (u+v);
@@ -474,12 +476,12 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 			float tStep = 1 / ((float)(x2 - x1));
 			float t = 0;
 			for (int j = x1; j < x2; j++) {
-				// if (su < 0) su = 0; if (su > 1) su = 1; 
-				// if (eu < 0) eu = 0; if (eu > 1) eu = 1;
-				// if (sv < 0) sv = 0; if (sv > 1) sv = 1;
-				// if (ev < 0) ev = 0; if (ev > 1) ev = 1;
-				// if (sw < 0) sw = 0; if (sw > 1) sw = 1;
-				// if (ew < 0) ew = 0; if (ew > 1) ew = 1;
+				// if (su > 0) su = 0; if (su < -1) su = -1; 
+				// if (eu > 0) eu = 0; if (eu < -1) eu = -1;
+				// if (sv > 0) sv = 0; if (sv < -1) sv = -1;
+				// if (ev > 0) ev = 0; if (ev < -1) ev = -1;
+				// if (sw > 0) sw = 0; if (sw < -1) sw = -1;
+				// if (ew > 0) ew = 0; if (ew < -1) ew = -1;
 				texu = (1 - t) * su + t * eu;
 				texv = (1 - t) * sv + t * ev;
 				texw = (1 - t) * sw + t * ew;
@@ -488,7 +490,10 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 				// texu *= 255;
 				// texv *= 255;
 				int u = (texture->w * texu) / texw;//texu * texture->w;
-				int v = (texture->w * (int)(texture->h * texv / texw));//texv * texture->h;//(texv * texture->h) * texture->w;
+				int v = (texture->w * (int)((texture->h * texv) / texw));//texv * texture->h;//(texv * texture->h) * texture->w;
+				int size = texture->pitch * texture->h / 4;
+				if (size < u+v) break;
+				printf("size = %d, index = %d\n", size, u+v);
 				// printf("u: %d, v:%d | ", u, v);//u, v);
 				int row = i - vMin.y;
 				// int u = texu * texture->w;
