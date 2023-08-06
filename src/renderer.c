@@ -418,8 +418,7 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 				int u = (texture->w * (texu / texw));// * texture->format->BytesPerPixel;
 				int h = (texture->h * (int)(texv / texw));
 				int v = (texture->w * h);//texv * texture->h;//(texv * texture->h) * texture->w;
-				int size = texture->pitch * texture->h / 4;
-				if (size < u+v) break;
+
 								// printf("u: %d, v:%d | ", u, v);//u, v);
 				// int u = texu * texture->w;
 				// int v = (texture->h * texv);
@@ -428,8 +427,12 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 				unsigned char g = pixels[pixel + 1];
 				unsigned char r = pixels[pixel + 2];
 				unsigned char a = pixels[pixel + 3];
+				float test = depthBuffer[i * width + j]; 
+				if (texw <= depthBuffer[i * width + j]) {
 				SDL_SetRenderDrawColor(renderer, r, g, b, a);
 				SDL_RenderDrawPoint(renderer, j, i);
+					depthBuffer[i * width + j] = texw;
+				}
 				t += tStep;
 			}
 		}
@@ -493,8 +496,7 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 				int u = (texture->w * (texu / texw));// * texture->format->BytesPerPixel;
 				int h = (texture->h * (int)(texv / texw));
 				int v = (texture->w * h);//texv * texture->h;//(texv * texture->h) * texture->w;
-				int size = texture->pitch * texture->h / 4;
-				if (size < u+v) break;
+
 								// printf("u: %d, v:%d | ", u, v);//u, v);
 				// int u = texu * texture->w;
 				// int v = (texture->h * texv);
@@ -504,8 +506,12 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 				unsigned char g = pixels[pixel + 1];
 				unsigned char r = pixels[pixel + 2];
 				unsigned char a = pixels[pixel + 3];
+				float test = depthBuffer[i * width + j]; 
+				if (texw <= depthBuffer[i * width + j]) {
 				SDL_SetRenderDrawColor(renderer, r, g, b, a);
 				SDL_RenderDrawPoint(renderer, j, i);
+					depthBuffer[i * width + j] = texw;
+				}
 				t += tStep;
 			}
 		}

@@ -13,11 +13,16 @@
 
 SDL_Renderer* renderer;
 camera_t camera;
-int width = 1000, height = 1000;
+const int width = 1000, height = 1000;
+float* depthBuffer;
 
 int main() {
+	depthBuffer = (float*)malloc((width * height) * sizeof(float));
+	memset(depthBuffer, 0, width * height);
+
 	camera.pos = (vec3d_t){0, 0, 0, 1};
 	camera.lookDir = (vec3d_t){0, 0, 1, 1};
+
 	char title[] = "Test";
 
 	if(SDL_Init(SDL_INIT_VIDEO)) {
@@ -48,6 +53,10 @@ int main() {
 			}
 		}
 		camera_update();
+		memset(depthBuffer, 0, width * height);
+		for (int i = 0; i < width*height; i++) {
+			depthBuffer[i] = 1;
+		}
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 		SDL_RenderClear(renderer);
 
