@@ -401,37 +401,25 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 
 			float tStep = 1 / ((float)(x2 - x1));
 			float t = 0;
-			// printf("\n%s\n", "new line");
 			for (int j = x1; j < x2; j++) {
-				// if (su > 0) su = 0; if (su < -1) su = -1; 
-				// if (eu > 0) eu = 0; if (eu < -1) eu = -1;
-				// if (sv > 0) sv = 0; if (sv < -1) sv = -1;
-				// if (ev > 0) ev = 0; if (ev < -1) ev = -1;
-				// if (sw > 0) sw = 0; if (sw < -1) sw = -1;
-				// if (ew > 0) ew = 0; if (ew < -1) ew = -1;
 				texu = (1 - t) * su + t * eu;
 				texv = (1 - t) * sv + t * ev;
 				texw = (1 - t) * sw + t * ew;
-				// int debug = texu * 255;
-				int debug = texv * 255;
-				// texu *= 255;
-				// texv *= 255;
-				int u = (texture->w * (texu / texw));// * texture->format->BytesPerPixel;
-				int h = (texture->h * (int)(texv / texw));
-				int v = (texture->w * h);//texv * texture->h;//(texv * texture->h) * texture->w;
 
-								// printf("u: %d, v:%d | ", u, v);//u, v);
-				// int u = texu * texture->w;
-				// int v = (texture->h * texv);
-				int pixel = texture->format->BytesPerPixel * (u+v);
+				int u = (texture->w * (texu / texw));
+				int h = (texture->h * (int)(texv / texw));
+				int v = (texture->w * h);
+
+				int pixel = texture->format->BytesPerPixel * (u + v);
+
 				unsigned char b = pixels[pixel + 0];
 				unsigned char g = pixels[pixel + 1];
 				unsigned char r = pixels[pixel + 2];
 				unsigned char a = pixels[pixel + 3];
-				float test = depthBuffer[i * width + j]; 
+
 				if (texw <= depthBuffer[i * width + j]) {
-				SDL_SetRenderDrawColor(renderer, r, g, b, a);
-				SDL_RenderDrawPoint(renderer, j, i);
+					SDL_SetRenderDrawColor(renderer, r, g, b, a);
+					SDL_RenderDrawPoint(renderer, j, i);
 					depthBuffer[i * width + j] = texw;
 				}
 				t += tStep;
@@ -481,36 +469,24 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 			float tStep = 1 / ((float)(x2 - x1));
 			float t = 0;
 			for (int j = x1; j < x2; j++) {
-				// if (su < 0) su = 0; if (su > 1) su = 1; 
-				// if (eu < 0) eu = 0; if (eu > 1) eu = 1;
-				// if (sv < 0) sv = 0; if (sv > 1) sv = 1;
-				// if (ev < 0) ev = 0; if (ev > 1) ev = 1;
-				// if (sw < 0) sw = 0; if (sw > 1) sw = 1;
-				// if (ew < 0) ew = 0; if (ew > 1) ew = 1;
 				texu = (1 - t) * su + t * eu;
 				texv = (1 - t) * sv + t * ev;
 				texw = (1 - t) * sw + t * ew;
-				// int debug = texu * 255;
-				int debug = texv * 255;
-				// texu *= 255;
-				// texv *= 255;
-				int u = (texture->w * (texu / texw));// * texture->format->BytesPerPixel;
-				int h = (texture->h * (int)(texv / texw));
-				int v = (texture->w * h);//texv * texture->h;//(texv * texture->h) * texture->w;
 
-								// printf("u: %d, v:%d | ", u, v);//u, v);
-				// int u = texu * texture->w;
-				// int v = (texture->h * texv);
-				int pixel = texture->format->BytesPerPixel * (u+v);
+				int u = (texture->w * (texu / texw));
+				int h = (texture->h * (int)(texv / texw));
+				int v = (texture->w * h);
+				
+				int pixel = texture->format->BytesPerPixel * (u + v);
 
 				unsigned char b = pixels[pixel + 0];
 				unsigned char g = pixels[pixel + 1];
 				unsigned char r = pixels[pixel + 2];
 				unsigned char a = pixels[pixel + 3];
-				float test = depthBuffer[i * width + j]; 
+				
 				if (texw <= depthBuffer[i * width + j]) {
-				SDL_SetRenderDrawColor(renderer, r, g, b, a);
-				SDL_RenderDrawPoint(renderer, j, i);
+					SDL_SetRenderDrawColor(renderer, r, g, b, a);
+					SDL_RenderDrawPoint(renderer, j, i);
 					depthBuffer[i * width + j] = texw;
 				}
 				t += tStep;
