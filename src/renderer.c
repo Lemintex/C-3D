@@ -7,6 +7,7 @@
 
 extern camera_t camera;
 extern int width, height;
+extern float* depthBuffer;
 
 void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh, SDL_Surface* texture) {
 	int trianglesToDraw = 0;
@@ -80,8 +81,8 @@ void DrawMesh(SDL_Renderer* renderer, mesh_t* mesh, SDL_Surface* texture) {
 		int clippedTriangles = 0;
 		triangle_t clipped[2];
 
-		vec3d_t nearPlane = (vec3d_t){0, 0, 0.1, 1};
-		vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 0.1, 1}; //FRONT PLANE
+		vec3d_t nearPlane = (vec3d_t){0, 0, 0.3, 1};
+		vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 1, 1}; //FRONT PLANE
 
 		clippedTriangles = triangle_clipAgainstPlane(&nearPlane, &nearPlaneNormal, &triangleViewed, &clipped[0], &clipped[1]);
 
@@ -203,7 +204,7 @@ triangleProjected.texture[2].w = 1.0 / triangleProjected.verts[2].w;
 		triangle_t t = dequeue(clippedTrianglesToDraw);
 		DrawTriangle(renderer, &t, texture);
 	}
-
+free(sortedTriangles);
 	free(clippedTrianglesToDraw);
 	delta += 0.001;
 }
