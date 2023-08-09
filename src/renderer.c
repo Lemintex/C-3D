@@ -261,12 +261,12 @@ void FillTriangle(SDL_Renderer* renderer, triangle_t* triangle) {
 
 	vec3d_t vMid = {triangle->verts[midY].x, triangle->verts[midY].y, 0};
 	
-	vec3d_t vMin = {triangle->verts[minY].x, triangle->verts[minY].y, 0};
+	vec3d_t vec1 = {triangle->verts[minY].x, triangle->verts[minY].y, 0};
 
-	float slopeHypot = (vMax.x - vMin.x) / (vMax.y - vMin.y);
-	float xHyp = vMin.x;
+	float slopeHypot = (vMax.x - vec1.x) / (vMax.y - vec1.y);
+	float xHyp = vec1.x;
 
-	FillTriangleTop(renderer, &vMin, &vMid, slopeHypot, &xHyp);
+	FillTriangleTop(renderer, &vec1, &vMid, slopeHypot, &xHyp);
 
 	FillTriangleBottom(renderer, &vMid, &vMax, slopeHypot, &xHyp);
 }
@@ -324,7 +324,6 @@ void FillTriangleBottom(SDL_Renderer* renderer, vec3d_t* vMid, vec3d_t* vBot, fl
 }
 
 void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_Surface* texture) {
-	unsigned char* pixels = (unsigned char*)texture->pixels;
 	
 	int maxY = 0;
 	int minY = 0;
@@ -341,53 +340,70 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 	vec2d_t tMid = {triangle->texture[midY].u, triangle->texture[midY].v, triangle->texture[midY].w};
 	
 	vec3d_t vMin = {triangle->verts[minY].x, triangle->verts[minY].y, 0};
-	vec2d_t tMin = {triangle->texture[minY].u, triangle->texture[minY].v, triangle->texture[minY].w};
-
-	int dx1 = vMid.x - vMin.x;
-	int dy1 = vMid.y - vMin.y;
-	float du1 = tMid.u - tMin.u;
-	float dv1 = tMid.v - tMin.v;
-	float dw1 = tMid.w - tMin.w;
+	vec2d_t tMin = {triangle->texture[minY].u, triangle->texture[minY].v, triangle->texture[minY].w};	
 	
-	int dx2 = vMax.x - vMin.x;
-	int dy2 = vMax.y - vMin.y;
-	float du2 = tMax.u - tMin.u;
-	float dv2 = tMax.v - tMin.v;
-	float dw2 = tMax.w - tMin.w;
+	int dx = vMax.x - vMin.x;
+	int dy = vMax.y - vMin.y;
+	float du = tMax.u - tMin.u;
+	float dv = tMax.v - tMin.v;
+	float dw = tMax.w - tMin.w;
+float dx_step = 0; 
+float du_step = 0;
+float dv_step = 0;
+float dw_step = 0;
+	if (dy) dx_step = dx / (float)abs(dy);
+
+	if (dy) du_step = du / (float)abs(dy);
+
+	if (dy) dv_step = dv / (float)abs(dy);
+	
+	if (dy) dw_step = dw / (float)abs(dy);
+	TextureTriangleHalf(renderer, texture, vMin, vMid, tMin, tMid, dx, dy, du, dv, dw, &dx_step, &du_step, &dv_step, &dw_step);
+	TextureTriangleHalf(renderer, texture, vMid, vMax, tMid, tMax, dx, dy, du, dv, dw, &dx_step, &du_step, &dv_step, &dw_step);
+}
+
+void TextureTriangleHalf(SDL_Renderer* renderer, SDL_Surface* texture, vec3d_t vec1, vec3d_t vec2, vec2d_t tex1, vec2d_t tex2, int dx1, int dy1, float du1, float dv1, float dw1, float* dx_step, float* du_step, float* dv_step, float* dw_step) {
+	unsigned char* pixels = (unsigned char*)texture->pixels;
+
+	int dx2 = vec2.x - vec1.x;
+	int dy2 = vec2.y - vec1.y;
+	float du2 = tex2.u - tex1.u;
+	float dv2 = tex2.v - tex1.v;
+	float dw2 = tex2.w - tex1.w;
 	float texu, texv, texw;
 
-	float dx1_step = 0, dx2_step = 0,
-	du1_step = 0, du2_step = 0,
-	dv1_step = 0, dv2_step = 0,
-	dw1_step = 0, dw2_step = 0;
+	float dx1_step = 0,
+	du1_step = 0,
+	dv1_step = 0,
+	dw1_step = 0;
 
-	if (dy1) dx1_step = dx1 / (float)abs(dy1);
-	if (dy2) dx2_step = dx2 / (float)abs(dy2);
+	if (dy1) *dx_step = dx1 / (float)abs(dy1);
+	if (dy2) dx1_step = dx2 / (float)abs(dy2);
 
-	if (dy1) du1_step = du1 / (float)abs(dy1);
-	if (dy2) du2_step = du2 / (float)abs(dy2);
+	if (dy1) *du_step = du1 / (float)abs(dy1);
+	if (dy2) du1_step = du2 / (float)abs(dy2);
 
-	if (dy1) dv1_step = dv1 / (float)abs(dy1);
-	if (dy2) dv2_step = dv2 / (float)abs(dy2);
+	if (dy1) *dv_step = dv1 / (float)abs(dy1);
+	if (dy2) dv1_step = dv2 / (float)abs(dy2);
 	
-	if (dy1) dw1_step = dw1 / (float)abs(dy1);
-	if (dy2) dw2_step = dw2 / (float)abs(dy2);
-
+	if (dy1) *dw_step = dw1 / (float)abs(dy1);
+	if (dy2) dw1_step = dw2 / (float)abs(dy2);
+//WORKING}
 
 	if (dy1) {
-		for (int i = vMin.y; i <= vMid.y; i++) {
-			int x1 = vMin.x + (float)(i - (int)vMin.y) * dx1_step;
-			int x2 = vMin.x + (float)(i - (int)vMin.y) * dx2_step;
+		for (int i = vec1.y; i <= vec2.y; i++) {
+			int x1 = vec1.x + (float)(i - (int)vec1.y) * *dx_step;
+			int x2 = vec1.x + (float)(i - (int)vec1.y) * dx1_step;
 
-			float su = tMin.u + (float)(i  - (int)vMin.y) * du1_step;
-			float eu = tMin.u + (float)(i  - (int)vMin.y) * du2_step;
+			float su = tex1.u + (float)(i  - (int)vec1.y) * *du_step;
+			float eu = tex1.u + (float)(i  - (int)vec1.y) * du1_step;
 
-			float sv = tMin.v + (float)(i - (int)vMin.y) * dv1_step;
-			float ev = tMin.v + (float)(i - (int)vMin.y) * dv2_step;
+			float sv = tex1.v + (float)(i - (int)vec1.y) * *dv_step;
+			float ev = tex1.v + (float)(i - (int)vec1.y) * dv1_step;
 
-			float sw = tMin.w + (float)(i - (int)vMin.y) * dw1_step;
-			float ew = tMin.w + (float)(i - (int)vMin.y) * dw2_step;
-
+			float sw = tex1.w + (float)(i - (int)vec1.y) * *dw_step;
+			float ew = tex1.w + (float)(i - (int)vec1.y) * dw1_step;
+		//working
 			if (x1 > x2) {
 				int temp = x1; x1 = x2; x2 = temp;
 
@@ -397,10 +413,13 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 
 				float tempw = sw; sw = ew; ew = tempw;
 			}
+			//working
+			
 			texu = su; texv = sv; texw = sw;
 
 			float tStep = 1 / ((float)(x2 - x1));
 			float t = 0;
+		// }}}
 			for (int j = x1; j < x2; j++) {
 				texu = (1 - t) * su + t * eu;
 				texv = (1 - t) * sv + t * ev;
@@ -424,74 +443,7 @@ void FillTriangleWithTexture(SDL_Renderer* renderer, triangle_t* triangle, SDL_S
 				}
 				t += tStep;
 			}
-		}
-	}
-
-	dy1 = vMax.y - vMid.y;
-	dx1 = vMax.x - vMid.x;
-	du1 = tMax.u - tMid.u;
-	dv1 = tMax.v - tMid.v;
-	dw1 = tMax.w - tMid.w;
-
-	if (dy1) dx1_step = dx1 / (float)abs(dy1);
-
-	if (dy1) du1_step = du1 / (float)abs(dy1);
-
-	if (dy1) dv1_step = dv1 / (float)abs(dy1);
-	
-	if (dy1) dw1_step = dw1 / (float)abs(dy1);
-	
-	if (dy1) {
-		for (int i = vMid.y; i <= vMax.y; i++) {
-			int x1 = vMid.x + (float)(i - vMid.y) * dx1_step;
-			int x2 = vMin.x + (float)(i - vMin.y) * dx2_step;
-
-			float su = tMid.u + (float)(i  - vMid.y) * du1_step;
-			float eu = tMin.u + (float)(i  - vMin.y) * du2_step;
-
-			float sv = tMid.v + (float)(i - vMid.y) * dv1_step;
-			float ev = tMin.v + (float)(i - vMin.y) * dv2_step;
-
-			float sw = tMid.w + (float)(i - (int)vMid.y) * dw1_step;
-			float ew = tMin.w + (float)(i - (int)vMin.y) * dw2_step;
-
-			if (x1 > x2) {
-				int temp = x1; x1 = x2; x2 = temp;
-
-				float tempu = su; su = eu; eu = tempu;
-
-				float tempv = sv; sv = ev; ev = tempv;
-
-				float tempw = sw; sw = ew; ew = tempw;
-			}
-			texu = su; texv = sv; texw = sw;
-
-			float tStep = 1 / ((float)(x2 - x1));
-			float t = 0;
-			for (int j = x1; j < x2; j++) {
-				texu = (1 - t) * su + t * eu;
-				texv = (1 - t) * sv + t * ev;
-				texw = (1 - t) * sw + t * ew;
-
-				int u = (texture->w * (texu / texw));
-				int h = (texture->h * (int)(texv / texw));
-				int v = (texture->w * h);
-				
-				int pixel = texture->format->BytesPerPixel * (u + v);
-
-				unsigned char b = pixels[pixel + 0];
-				unsigned char g = pixels[pixel + 1];
-				unsigned char r = pixels[pixel + 2];
-				unsigned char a = pixels[pixel + 3];
-				
-				if (texw <= depthBuffer[i * width + j]) {
-					SDL_SetRenderDrawColor(renderer, r, g, b, a);
-					SDL_RenderDrawPoint(renderer, j, i);
-					depthBuffer[i * width + j] = texw;
-				}
-				t += tStep;
-			}
-		}
-	}
-}
+			}}}
+// 		}
+// 	}
 // }
