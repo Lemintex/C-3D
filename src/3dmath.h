@@ -1,6 +1,7 @@
 #ifndef _3DMATH_H_
 #define _3DMATH_H_
 
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 typedef struct matrix_4x4

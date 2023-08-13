@@ -83,7 +83,7 @@ mesh_t *ReadMeshFromFile(char *filename)
 	return mesh;
 }
 
-color_t createColor(u_int8_t r, u_int8_t g, u_int8_t b)
+color_t createColor(unsigned char r, unsigned char g, unsigned char b)
 {
 	color_t color;
 	color.r = r;

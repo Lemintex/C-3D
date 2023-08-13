@@ -1,7 +1,6 @@
 #ifndef _MESH_H
 #define _MESH_H
 
-#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,9 +10,9 @@
 
 typedef struct color
 {
-	u_int8_t r;
-	u_int8_t g;
-	u_int8_t b;
+	unsigned char r;
+	unsigned char g;
+	unsigned char b;
 } color_t;
 
 typedef struct vec2d
@@ -41,7 +40,7 @@ mesh_t *CreateCube();
 
 mesh_t *ReadMeshFromFile(char *file);
 
-color_t createColor(u_int8_t r, u_int8_t g, u_int8_t b);
+color_t createColor(unsigned char r, unsigned char g, unsigned char b);
 
 int compareZ(const void *e1, const void *e2);
 
