@@ -11,13 +11,14 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_surface.h>
 
-SDL_Renderer* renderer;
+SDL_Renderer *renderer;
 camera_t camera;
 const int width = 1000, height = 1000;
-float* depthBuffer;
+float *depthBuffer;
 
-int main() {
-	depthBuffer = (float*)malloc((width * height) * sizeof(float));
+int main()
+{
+	depthBuffer = (float *)malloc((width * height) * sizeof(float));
 	memset(depthBuffer, 0, width * height);
 
 	camera.pos = (vec3d_t){0, 0, 0, 1};
@@ -25,36 +26,42 @@ int main() {
 
 	char title[] = "Test";
 
-	if(SDL_Init(SDL_INIT_VIDEO)) {
+	if (SDL_Init(SDL_INIT_VIDEO))
+	{
 		printf("Error");
 	}
-	SDL_Window* window = SDL_CreateWindow(title, 0, 0, width, height, SDL_WINDOW_SHOWN);
+	SDL_Window *window = SDL_CreateWindow(title, 0, 0, width, height, SDL_WINDOW_SHOWN);
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-	SDL_Surface* screen = SDL_GetWindowSurface(window);
- 
-	mesh_t* ship = CreateCube();//ReadMeshFromFile("axis.obj");
-	SDL_Surface* texture = SDL_LoadBMP("mario.bmp");
-	while(1) {
+	SDL_Surface *screen = SDL_GetWindowSurface(window);
+
+	mesh_t *ship = CreateCube(); // ReadMeshFromFile("axis.obj");
+	SDL_Surface *texture = SDL_LoadBMP("mario.bmp");
+	while (1)
+	{
 		SDL_Event event;
 
-		while(SDL_PollEvent(&event)) {
-			switch( event.type ){
-				case SDL_QUIT:
+		while (SDL_PollEvent(&event))
+		{
+			switch (event.type)
+			{
+			case SDL_QUIT:
+				SDL_DestroyWindow(window);
+				return 0;
+			case SDL_KEYUP:
+			case SDL_KEYDOWN:
+				handleKeyboardInput(&event, &camera.mov);
+				if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+				{
 					SDL_DestroyWindow(window);
 					return 0;
-				case SDL_KEYUP:
-				case SDL_KEYDOWN:
-					handleKeyboardInput(&event, &camera.mov);
-					if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
-						SDL_DestroyWindow(window);
-						return 0;
-					}
+				}
 			}
 		}
 		camera_update();
 		memset(depthBuffer, 0, width * height);
-		for (int i = 0; i < width*height; i++) {
+		for (int i = 0; i < width * height; i++)
+		{
 			depthBuffer[i] = 1;
 		}
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
@@ -62,7 +69,7 @@ int main() {
 
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
 		DrawMesh(renderer, ship, texture);
-		
+
 		SDL_RenderPresent(renderer);
 		SDL_UpdateWindowSurface(window);
 	}
