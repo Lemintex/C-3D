@@ -591,4 +591,11 @@ void FillTriangleWithTexture(SDL_Renderer *renderer, triangle_t *triangle,
 		}
 	}
 }
+
+Uint32 GetPixel(SDL_Surface *surface, int x, int y)
+{
+	Uint32 *pixels = (Uint32 *)surface->pixels;
+	Uint32 pixel = pixels[y * surface->w + x];
+	return pixel;
+}
 // }

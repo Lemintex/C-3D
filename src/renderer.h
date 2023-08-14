@@ -23,4 +23,6 @@ void FillTriangleBottom(SDL_Renderer *renderer, vec3d_t *vTop, vec3d_t *vMid, fl
 
 void FillTriangleWithTexture(SDL_Renderer *renderer, triangle_t *triangle, SDL_Surface *texture);
 
+Uint32 GetPixel(SDL_Surface *surface, int x, int y);
+
 #endif
