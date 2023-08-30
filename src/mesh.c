@@ -33,7 +33,7 @@ mesh_t *CreateCube()
 	return cube;
 }
 
-mesh_t *ReadMeshFromFile(char *filename)
+mesh_t *ReadMeshFromFile(char *filename, int hasTexture)
 {
 	FILE *file = fopen(filename, "r");
 	if (file == NULL)
@@ -43,30 +43,47 @@ mesh_t *ReadMeshFromFile(char *filename)
 	}
 
 	vec3d_t *vertices = NULL;
+	vec2d_t *textures = NULL;
+
 	triangle_t *faces = NULL;
+	int texture_count = 0;
 	int vertex_count = 0;
 	int face_count = 0;
 
 	char line[256];
 	while (fgets(line, sizeof(line), file))
 	{
-		if (line[0] == 'v' && line[1] == ' ')
+		if (line[0] == 'v')
 		{
-			vec3d_t vertex;
-			sscanf(line, "v %f %f %f", &vertex.x, &vertex.y, &vertex.z);
-			vertex.w = 1;
-			vertices = (vec3d_t *)realloc(vertices, (vertex_count + 1) * sizeof(vec3d_t));
-			vertices[vertex_count++] = vertex;
+			if (line[1] == 't')
+			{
+				vec2d_t texture;
+				sscanf(line, 'vt %f %f', &texture.u, &texture.v);
+
+				textures = (vec2d_t *)realloc(textures, (texture_count + 1) * sizeof(vec2d_t));
+				textures[texture_count++] = texture;
+			}
+			else
+			{
+				vec3d_t vertex;
+				sscanf(line, "v %f %f %f", &vertex.x, &vertex.y, &vertex.z);
+				vertex.w = 1;
+				vertices = (vec3d_t *)realloc(vertices, (vertex_count + 1) * sizeof(vec3d_t));
+				vertices[vertex_count++] = vertex;
+			}
 		}
-		else if (line[0] == 'f' && line[1] == ' ')
+		if (!hasTexture)
 		{
-			int verts[3];
-			sscanf(line, "f %d %d %d", &verts[0], &verts[1], &verts[2]);
-			triangle_t face;
-			face = (triangle_t){vertices[verts[0] - 1], vertices[verts[1] - 1], vertices[verts[2] - 1]};
-			faces = (triangle_t *)realloc(faces, (face_count + 1) * sizeof(triangle_t));
-			faces[face_count] = face;
-			face_count++;
+			if (line[0] == 'f' && line[1] == ' ')
+			{
+				int verts[3];
+				sscanf(line, "f %d %d %d", &verts[0], &verts[1], &verts[2]);
+				triangle_t face;
+				face = (triangle_t){vertices[verts[0] - 1], vertices[verts[1] - 1], vertices[verts[2] - 1]};
+				faces = (triangle_t *)realloc(faces, (face_count + 1) * sizeof(triangle_t));
+				faces[face_count] = face;
+				face_count++;
+			}
 		}
 	}
 

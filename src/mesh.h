@@ -38,7 +38,7 @@ typedef struct mesh
 
 mesh_t *CreateCube();
 
-mesh_t *ReadMeshFromFile(char *file);
+mesh_t *ReadMeshFromFile(char *file, int hasTexture);
 
 color_t createColor(unsigned char r, unsigned char g, unsigned char b);
 
