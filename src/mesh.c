@@ -1,5 +1,6 @@
 #include "mesh.h"
 
+// this is a disgusting method
 mesh_t *CreateCube()
 {
 	mesh_t *cube = (mesh_t *)malloc(sizeof(mesh_t));

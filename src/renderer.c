@@ -86,7 +86,7 @@ void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 		int clippedTriangles = 0;
 		triangle_t clipped[2];
 
-		vec3d_t nearPlane = (vec3d_t){0, 0, 0.3, 1};
+		vec3d_t nearPlane = (vec3d_t){0, 0, 0.1, 1};
 		vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 1, 1}; // FRONT PLANE
 
 		clippedTriangles = triangle_clipAgainstPlane(&nearPlane, &nearPlaneNormal, &triangleViewed,
@@ -484,19 +484,16 @@ void FillTriangleWithTexture(SDL_Renderer *renderer, triangle_t *triangle,
 				texw = (1 - t) * sw + t * ew;
 
 				int u = (texture->w * (texu / texw));
-				int h = (texture->h * (int)(texv / texw));
-				int v = (texture->w * h);
+				int v = (texture->h * (texv / texw));
 
-				int pixel = texture->format->BytesPerPixel * (u + v);
-
-				unsigned char b = pixels[pixel + 0];
-				unsigned char g = pixels[pixel + 1];
-				unsigned char r = pixels[pixel + 2];
-				unsigned char a = pixels[pixel + 3];
+				SDL_Color rgb;
+				Uint32 pixel = GetPixel(texture, u, v);
+				SDL_GetRGB(pixel, texture->format, &rgb.r, &rgb.g, &rgb.b);
+				Uint8 alpha = SDL_ALPHA_OPAQUE; // or use SDL_GetRGBA() if you need the alpha value
 
 				if (texw <= depthBuffer[i * width + j])
 				{
-					SDL_SetRenderDrawColor(renderer, r, g, b, a);
+					SDL_SetRenderDrawColor(renderer, rgb.r, rgb.g, rgb.b, rgb.a);
 					SDL_RenderDrawPoint(renderer, j, i);
 					depthBuffer[i * width + j] = texw;
 				}
@@ -570,19 +567,16 @@ void FillTriangleWithTexture(SDL_Renderer *renderer, triangle_t *triangle,
 				texw = (1 - t) * sw + t * ew;
 
 				int u = (texture->w * (texu / texw));
-				int h = (texture->h * (int)(texv / texw));
-				int v = (texture->w * h);
+				int v = (texture->h * (texv / texw));
 
-				int pixel = texture->format->BytesPerPixel * (u + v);
-
-				unsigned char b = pixels[pixel + 0];
-				unsigned char g = pixels[pixel + 1];
-				unsigned char r = pixels[pixel + 2];
-				unsigned char a = pixels[pixel + 3];
+				SDL_Color rgb;
+				Uint32 pixel = GetPixel(texture, u, v);
+				SDL_GetRGB(pixel, texture->format, &rgb.r, &rgb.g, &rgb.b);
+				Uint8 alpha = SDL_ALPHA_OPAQUE; // or use SDL_GetRGBA() if you need the alpha value
 
 				if (texw <= depthBuffer[i * width + j])
 				{
-					SDL_SetRenderDrawColor(renderer, r, g, b, a);
+					SDL_SetRenderDrawColor(renderer, rgb.r, rgb.g, rgb.b, rgb.a);
 					SDL_RenderDrawPoint(renderer, j, i);
 					depthBuffer[i * width + j] = texw;
 				}
