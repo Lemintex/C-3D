@@ -85,6 +85,12 @@ mesh_t *ReadMeshFromFile(char *filename, int hasTexture)
 				face_count++;
 			}
 		}
+		else
+		{
+			if (line[0] == 'f')
+			{
+						}
+		}
 	}
 
 	fclose(file);
