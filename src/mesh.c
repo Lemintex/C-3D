@@ -58,7 +58,8 @@ mesh_t *ReadMeshFromFile(char *filename, int hasTexture)
 			if (line[1] == 't')
 			{
 				vec2d_t texture;
-				sscanf(line, 'vt %f %f', &texture.u, &texture.v);
+				sscanf(line, "vt %f %f", &texture.u, &texture.v);
+				texture.w = 1;
 
 				textures = (vec2d_t *)realloc(textures, (texture_count + 1) * sizeof(vec2d_t));
 				textures[texture_count++] = texture;
@@ -89,7 +90,26 @@ mesh_t *ReadMeshFromFile(char *filename, int hasTexture)
 		{
 			if (line[0] == 'f')
 			{
-						}
+				int tokens[6];
+				sscanf(line, "f %d/%d %d/%d %d/%d", &tokens[0], &tokens[1], &tokens[2], &tokens[3], &tokens[4], &tokens[5]);
+				triangle_t face;
+				face = (triangle_t){vertices[tokens[0] - 1], vertices[tokens[2] - 1], vertices[tokens[4] - 1], textures[tokens[1] - 1], textures[tokens[3] - 1], textures[tokens[5] - 1]};
+				faces = (triangle_t *)realloc(faces, (face_count + 1) * sizeof(triangle_t));
+				faces[face_count] = face;
+				face_count++;
+				int nTokens = 0;
+				char *token = strtok(line + 2, " \t\n");
+				while (token != NULL)
+				{
+					// Check if the token contains a '/'
+					char *slash = strchr(token, '/');
+					if (slash != NULL)
+					{
+						printf("Found 'f/t' pair: %s\n", token);
+					}
+					token = strtok(NULL, " \t\n");
+				}
+			}
 		}
 	}
 
@@ -103,7 +123,7 @@ mesh_t *ReadMeshFromFile(char *filename, int hasTexture)
 
 	// Free the allocated memory
 	free(vertices);
-
+	free(textures);
 	return mesh;
 }
 
