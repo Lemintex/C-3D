@@ -10,6 +10,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_image.h>
 
 SDL_Renderer *renderer;
 camera_t camera;
@@ -34,6 +35,9 @@ int main()
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
 	SDL_Surface *screen = SDL_GetWindowSurface(window);
+
+	mesh_t *ship = ReadMeshFromFile("../A001_Spyro.obj", 1);
+	SDL_Surface *texture = IMG_Load("A001_Spyro.png");
 
 	Uint64 previousFrameTime = SDL_GetPerformanceCounter();
 	double deltaTime = 0.0;
