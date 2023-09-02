@@ -59,6 +59,11 @@ mesh_t *ReadMeshFromFile(char *filename, int hasTexture)
 			{
 				vec2d_t texture;
 				sscanf(line, "vt %f %f", &texture.u, &texture.v);
+
+				// Depending on the sprite and the orientation of the map, we
+				// may have to invert either the u, v, or both coordinates
+				texture.v = 1 - texture.v;
+
 				texture.w = 1;
 
 				textures = (vec2d_t *)realloc(textures, (texture_count + 1) * sizeof(vec2d_t));
