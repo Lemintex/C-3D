@@ -10,6 +10,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_image.h>
 
 SDL_Renderer *renderer;
 camera_t camera;
@@ -35,8 +36,11 @@ int main()
 
 	SDL_Surface *screen = SDL_GetWindowSurface(window);
 
-	mesh_t *ship = CreateCube(); // ReadMeshFromFile("axis.obj");
-	SDL_Surface *texture = SDL_LoadBMP("mario.bmp");
+	mesh_t *ship = ReadMeshFromFile("../A001_Spyro.obj", 1);
+	SDL_Surface *texture = IMG_Load("A001_Spyro.png");
+
+	Uint64 previousFrameTime = SDL_GetPerformanceCounter();
+	double deltaTime = 0.0;
 	while (1)
 	{
 		SDL_Event event;
@@ -58,7 +62,11 @@ int main()
 				}
 			}
 		}
-		camera_update();
+		Uint64 currentFrameTime = SDL_GetPerformanceCounter();
+		deltaTime = (double)(currentFrameTime - previousFrameTime) / SDL_GetPerformanceFrequency();
+		previousFrameTime = currentFrameTime;
+
+		camera_update(deltaTime);
 		memset(depthBuffer, 0, width * height);
 		for (int i = 0; i < width * height; i++)
 		{

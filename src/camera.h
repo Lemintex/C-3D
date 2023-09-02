@@ -10,7 +10,7 @@ typedef struct camera
 	float yaw, pitch;
 } camera_t;
 
-void camera_update();
+void camera_update(double deltaTime);
 
 int camera_getMovementBit(int n);
 #endif

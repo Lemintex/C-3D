@@ -12,6 +12,7 @@
                 "-o",
                 "${workspaceFolder}/build/main",
                 "-lSDL2",
+                "-lSDL2_image",
                 "-lm"
             ],
             "options": {
