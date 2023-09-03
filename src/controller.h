@@ -3,8 +3,6 @@
 
 #include <SDL2/SDL.h>
 
-#include "3dmath.h" // TEMPORARY
-
 void handleKeyboardInput(SDL_Event *type, unsigned short *mov);
 
 int getBit(unsigned short *keystate, int n);

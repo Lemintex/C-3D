@@ -25,7 +25,7 @@ int main()
 	camera.pos = (vec3d_t){0, 0, 0, 1};
 	camera.lookDir = (vec3d_t){0, 0, 1, 1};
 
-	char title[] = "Test";
+	char title[] = "C-3D";
 
 	if (SDL_Init(SDL_INIT_VIDEO))
 	{
@@ -36,8 +36,8 @@ int main()
 
 	SDL_Surface *screen = SDL_GetWindowSurface(window);
 
-	mesh_t *ship = ReadMeshFromFile("../A001_Spyro.obj", 1);
-	SDL_Surface *texture = IMG_Load("A001_Spyro.png");
+	mesh_t *ship = ReadMeshFromFile("A001_Spyro.obj", 1);
+	SDL_Surface *texture = IMG_Load("src/A001_Spyro.png");
 
 	Uint64 previousFrameTime = SDL_GetPerformanceCounter();
 	double deltaTime = 0.0;

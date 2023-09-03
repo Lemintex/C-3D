@@ -113,18 +113,6 @@ void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 			triangleProjected.texture[0].w = 1.0 / triangleProjected.verts[0].w;
 			triangleProjected.texture[1].w = 1.0 / triangleProjected.verts[1].w;
 			triangleProjected.texture[2].w = 1.0 / triangleProjected.verts[2].w;
-			// triangleProjected.texture[0].u /= abs(triangleProjected.verts[0].w);
-			// triangleProjected.texture[1].u /= abs(triangleProjected.verts[1].w);
-			// triangleProjected.texture[2].u /= abs(triangleProjected.verts[2].w);
-
-			// triangleProjected.texture[0].v /= abs(triangleProjected.verts[0].w);
-			// triangleProjected.texture[1].v /= abs(triangleProjected.verts[1].w);
-			// triangleProjected.texture[2].v /= abs(triangleProjected.verts[2].w);
-
-			// triangleProjected.texture[0].w = 1.0 /
-			// abs(triangleProjected.verts[0].w); triangleProjected.texture[1].w = 1.0
-			// / abs(triangleProjected.verts[1].w); triangleProjected.texture[2].w
-			// = 1.0 / abs(triangleProjected.verts[2].w);
 
 			// normalise co-ordinates
 			triangleProjected.verts[0] = vec3_div(&triangleProjected.verts[0], triangleProjected.verts[0].w);
@@ -232,35 +220,24 @@ void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 	}
 	free(sortedTriangles);
 	free(clippedTrianglesToDraw);
-	delta += 0.001;
 }
 
 void DrawTriangle(SDL_Renderer *renderer, triangle_t *triangle,
 				  SDL_Surface *texture)
 {
 	vec3d_t normal, l1, l2;
-	l1.x = triangle->verts[1].x - triangle->verts[0].x;
-	l1.y = triangle->verts[1].y - triangle->verts[0].y;
-	l1.z = triangle->verts[1].z - triangle->verts[0].z;
+	l1 = vec3_sub(&triangle->verts[1], &triangle->verts[0]);
 
-	l2.x = triangle->verts[2].x - triangle->verts[0].x;
-	l2.y = triangle->verts[2].y - triangle->verts[0].y;
-	l2.z = triangle->verts[2].z - triangle->verts[0].z;
+	l2 = vec3_sub(&triangle->verts[2], &triangle->verts[0]);
 
-	normal.x = l1.y * l2.z - l1.z * l2.y;
-	normal.y = l1.z * l2.x - l1.x * l2.z;
-	normal.z = l1.x * l2.y - l1.y * l2.x;
+	normal = vec3_cross(&l1, &l2);
 
 	float length = sqrt(pow(normal.x, 2) + pow(normal.y, 2) + pow(normal.z, 2));
-	normal.x /= length;
-	normal.y /= length;
-	normal.z /= length;
-	vec3d_t light_direction = {0, 0, -1};
+	normal = vec3_div(&normal, length);
 
+	vec3d_t light_direction = {0, 0, -1};
 	float l = sqrt(light_direction.x * light_direction.x + light_direction.y * light_direction.y + light_direction.z * light_direction.z);
-	light_direction.x /= l;
-	light_direction.y /= l;
-	light_direction.z /= l;
+	light_direction = vec3_div(&light_direction, l);
 
 	float dp = normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z;
 
