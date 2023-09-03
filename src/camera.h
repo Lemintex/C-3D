@@ -13,4 +13,5 @@ typedef struct camera
 void camera_update(double deltaTime);
 
 int camera_getMovementBit(int n);
+
 #endif

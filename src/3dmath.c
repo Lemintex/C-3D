@@ -25,7 +25,10 @@ float vec3_dot(vec3d_t *v1, vec3d_t *v2)
 	return v1->x * v2->x + v1->y * v2->y + v1->z * v2->z;
 }
 
-float vec3_length(vec3d_t *v) { return sqrtf(vec3_dot(v, v)); }
+float vec3_length(vec3d_t *v)
+{
+	return sqrtf(vec3_dot(v, v));
+}
 
 vec3d_t vec3_normal(vec3d_t *v)
 {
@@ -65,9 +68,6 @@ vec3d_t vec3_intersectPlane(vec3d_t *planePoint, vec3d_t *planeNormal,
 	// calculate the dot product of planeNormal and lineDirection
 	float dotProduct = vec3_dot(planeNormal, &lineDirection);
 
-	// check if the line is parallel to the plane
-	// DO I NEED THIS?
-
 	// calculate the vector from the plane point to the line start
 	vec3d_t planeToPoint = vec3_add(lineStart, planePoint);
 
@@ -83,6 +83,7 @@ vec3d_t vec3_intersectPlane(vec3d_t *planePoint, vec3d_t *planeNormal,
 matrix_4x4_t matrix_identity()
 {
 	matrix_4x4_t matrix = {0};
+
 	matrix.m[0][0] = 1;
 	matrix.m[1][1] = 1;
 	matrix.m[2][2] = 1;
@@ -93,6 +94,7 @@ matrix_4x4_t matrix_identity()
 matrix_4x4_t matrix_rotationX(float angleRad)
 {
 	matrix_4x4_t matrix = {0};
+
 	matrix.m[0][0] = 1;
 	matrix.m[1][1] = cosf(angleRad);
 	matrix.m[1][2] = sinf(angleRad);
@@ -105,6 +107,7 @@ matrix_4x4_t matrix_rotationX(float angleRad)
 matrix_4x4_t matrix_rotationY(float angleRad)
 {
 	matrix_4x4_t matrix = {0};
+
 	matrix.m[0][0] = cosf(angleRad);
 	matrix.m[0][2] = sinf(angleRad);
 	matrix.m[1][1] = 1;
@@ -117,6 +120,7 @@ matrix_4x4_t matrix_rotationY(float angleRad)
 matrix_4x4_t matrix_rotationZ(float angleRad)
 {
 	matrix_4x4_t matrix = {0};
+
 	matrix.m[0][0] = cosf(angleRad);
 	matrix.m[0][1] = sinf(angleRad);
 	matrix.m[1][0] = -sinf(angleRad);
@@ -141,6 +145,7 @@ matrix_4x4_t matrix_projection(float fFovDegrees, float fAspectRatio,
 {
 	float fFovRad = 1 / tanf((fFovDegrees / 2) / 180 * M_PI);
 	matrix_4x4_t matrix = {0};
+
 	matrix.m[0][0] = fAspectRatio * fFovRad;
 	matrix.m[1][1] = fFovRad;
 	matrix.m[2][2] = fFar / (fFar - fNear);
@@ -153,6 +158,7 @@ matrix_4x4_t matrix_projection(float fFovDegrees, float fAspectRatio,
 matrix_4x4_t matrix_multiplyMatrix(matrix_4x4_t *m1, matrix_4x4_t *m2)
 {
 	matrix_4x4_t matrix = {0};
+
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 4; j++)
@@ -178,7 +184,8 @@ matrix_4x4_t matrix_pointAt(vec3d_t *pos, vec3d_t *target, vec3d_t *up)
 
 	vec3d_t newRight = vec3_cross(&newUp, &newForward);
 
-	matrix_4x4_t matrix;
+	matrix_4x4_t matrix = {0};
+
 	matrix.m[0][0] = newRight.x;
 	matrix.m[0][1] = newRight.y;
 	matrix.m[0][2] = newRight.z;
@@ -206,18 +213,22 @@ matrix_4x4_t matrix_quickInverse(
 {
 	matrix_4x4_t m = *mat;
 	matrix_4x4_t matrix;
+
 	matrix.m[0][0] = m.m[0][0];
 	matrix.m[0][1] = m.m[1][0];
 	matrix.m[0][2] = m.m[2][0];
 	matrix.m[0][3] = 0.0f;
+
 	matrix.m[1][0] = m.m[0][1];
 	matrix.m[1][1] = m.m[1][1];
 	matrix.m[1][2] = m.m[2][1];
 	matrix.m[1][3] = 0.0f;
+
 	matrix.m[2][0] = m.m[0][2];
 	matrix.m[2][1] = m.m[1][2];
 	matrix.m[2][2] = m.m[2][2];
 	matrix.m[2][3] = 0.0f;
+
 	matrix.m[3][0] = -(m.m[3][0] * matrix.m[0][0] + m.m[3][1] * matrix.m[1][0] + m.m[3][2] * matrix.m[2][0]);
 	matrix.m[3][1] = -(m.m[3][0] * matrix.m[0][1] + m.m[3][1] * matrix.m[1][1] + m.m[3][2] * matrix.m[2][1]);
 	matrix.m[3][2] = -(m.m[3][0] * matrix.m[0][2] + m.m[3][1] * matrix.m[1][2] + m.m[3][2] * matrix.m[2][2]);

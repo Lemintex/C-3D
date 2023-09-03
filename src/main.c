@@ -17,8 +17,11 @@ camera_t camera;
 const int width = 1000, height = 1000;
 float *depthBuffer;
 
-int main()
+int main(int argc, char **argv)
 {
+	Uint64 previousFrameTime = SDL_GetPerformanceCounter();
+	double deltaTime = 0.0;
+
 	depthBuffer = (float *)malloc((width * height) * sizeof(float));
 	memset(depthBuffer, 0, width * height);
 
@@ -36,11 +39,9 @@ int main()
 
 	SDL_Surface *screen = SDL_GetWindowSurface(window);
 
-	mesh_t *ship = ReadMeshFromFile("A001_Spyro.obj", 1);
-	SDL_Surface *texture = IMG_Load("src/A001_Spyro.png");
+	mesh_t *ship = ReadMeshFromFile("res/A001_Spyro.obj", 1);
+	SDL_Surface *texture = IMG_Load("res/A001_Spyro.png");
 
-	Uint64 previousFrameTime = SDL_GetPerformanceCounter();
-	double deltaTime = 0.0;
 	while (1)
 	{
 		SDL_Event event;

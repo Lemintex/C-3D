@@ -5,14 +5,14 @@ mesh_t *ReadMeshFromFile(char *filename, int hasTexture)
 	FILE *file = fopen(filename, "r");
 	if (file == NULL)
 	{
-		printf("Error: Unable to open file %s\n", filename);
+		printf("Error: Unable to open file %s. Is the file in the correct folder?\n", filename);
 		return NULL;
 	}
 
 	vec3d_t *vertices = NULL;
 	vec2d_t *textures = NULL;
-
 	triangle_t *faces = NULL;
+
 	int texture_count = 0;
 	int vertex_count = 0;
 	int face_count = 0;
@@ -40,7 +40,9 @@ mesh_t *ReadMeshFromFile(char *filename, int hasTexture)
 			{
 				vec3d_t vertex;
 				sscanf(line, "v %f %f %f", &vertex.x, &vertex.y, &vertex.z);
+
 				vertex.w = 1;
+
 				vertices = (vec3d_t *)realloc(vertices, (vertex_count + 1) * sizeof(vec3d_t));
 				vertices[vertex_count++] = vertex;
 			}
@@ -51,11 +53,12 @@ mesh_t *ReadMeshFromFile(char *filename, int hasTexture)
 			{
 				int verts[3];
 				sscanf(line, "f %d %d %d", &verts[0], &verts[1], &verts[2]);
+
 				triangle_t face;
 				face = (triangle_t){vertices[verts[0] - 1], vertices[verts[1] - 1], vertices[verts[2] - 1]};
+
 				faces = (triangle_t *)realloc(faces, (face_count + 1) * sizeof(triangle_t));
-				faces[face_count] = face;
-				face_count++;
+				faces[face_count++] = face;
 			}
 		}
 		else
@@ -64,23 +67,12 @@ mesh_t *ReadMeshFromFile(char *filename, int hasTexture)
 			{
 				int tokens[6];
 				sscanf(line, "f %d/%d %d/%d %d/%d", &tokens[0], &tokens[1], &tokens[2], &tokens[3], &tokens[4], &tokens[5]);
+
 				triangle_t face;
 				face = (triangle_t){vertices[tokens[0] - 1], vertices[tokens[2] - 1], vertices[tokens[4] - 1], textures[tokens[1] - 1], textures[tokens[3] - 1], textures[tokens[5] - 1]};
+
 				faces = (triangle_t *)realloc(faces, (face_count + 1) * sizeof(triangle_t));
-				faces[face_count] = face;
-				face_count++;
-				int nTokens = 0;
-				char *token = strtok(line + 2, " \t\n");
-				while (token != NULL)
-				{
-					// Check if the token contains a '/'
-					char *slash = strchr(token, '/');
-					if (slash != NULL)
-					{
-						printf("Found 'f/t' pair: %s\n", token);
-					}
-					token = strtok(NULL, " \t\n");
-				}
+				faces[face_count++] = face;
 			}
 		}
 	}
@@ -108,6 +100,7 @@ color_t createColor(unsigned char r, unsigned char g, unsigned char b)
 	return color;
 }
 
+// REMOVE THIS? NOT NEEDED NOW DEPTH BUFFER IS FUNCTIONAL?
 int compareZ(const void *e1, const void *e2)
 {
 	triangle_t *a = (triangle_t *)e1;
@@ -155,7 +148,7 @@ int triangle_clipAgainstPlane(vec3d_t *planePoint, vec3d_t *planeNormal, triangl
 			inside_points[nInsidePointCount++] = &triangleIn->verts[i];
 			inside_texture[nInsideTextureCount++] = &triangleIn->texture[i];
 		}
-		// oherwise, it is 'outside' plane
+		// otherwise, it is 'outside' plane
 		else
 		{
 			outside_points[nOutsidePointCount++] = &triangleIn->verts[i];
@@ -170,7 +163,6 @@ int triangle_clipAgainstPlane(vec3d_t *planePoint, vec3d_t *planeNormal, triangl
 	{
 		*triangleOut1 = *triangleIn;
 
-		//		triangleOut1->color = createColor(0, 0, 255);
 		return 1;
 	}
 
@@ -179,17 +171,19 @@ int triangle_clipAgainstPlane(vec3d_t *planePoint, vec3d_t *planeNormal, triangl
 		triangleOut1->verts[0] = *inside_points[0];
 		triangleOut1->texture[0] = *inside_texture[0];
 		float t;
+
 		triangleOut1->verts[1] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[0], &t);
+
 		triangleOut1->texture[1].u = t * (outside_texture[0]->u - inside_texture[0]->u) + inside_texture[0]->u;
 		triangleOut1->texture[1].v = t * (outside_texture[0]->v - inside_texture[0]->v) + inside_texture[0]->v;
 		triangleOut1->texture[1].w = t * (outside_texture[0]->w - inside_texture[0]->w) + inside_texture[0]->w;
 
 		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[1], &t);
+
 		triangleOut1->texture[2].u = t * (outside_texture[1]->u - inside_texture[0]->u) + inside_texture[0]->u;
 		triangleOut1->texture[2].v = t * (outside_texture[1]->v - inside_texture[0]->v) + inside_texture[0]->v;
 		triangleOut1->texture[2].w = t * (outside_texture[1]->w - inside_texture[0]->w) + inside_texture[0]->w;
 
-		triangleOut1->color = createColor(0, 255, 0);
 		return 1;
 	}
 
@@ -221,7 +215,6 @@ int triangle_clipAgainstPlane(vec3d_t *planePoint, vec3d_t *planeNormal, triangl
 		triangleOut2->texture[2].u = t * (outside_texture[0]->u - inside_texture[1]->u) + inside_texture[1]->u;
 		triangleOut2->texture[2].v = t * (outside_texture[0]->v - inside_texture[1]->v) + inside_texture[1]->v;
 		triangleOut2->texture[2].w = t * (outside_texture[0]->w - inside_texture[1]->w) + inside_texture[1]->w;
-		triangleOut2->color = createColor(255, 0, 0);
 
 		return 2;
 	}
