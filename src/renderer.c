@@ -236,10 +236,10 @@ void DrawTriangle(SDL_Renderer *renderer, triangle_t *triangle,
 	normal = vec3_div(&normal, length);
 
 	vec3d_t light_direction = {0, 0, -1};
-	float l = sqrt(light_direction.x * light_direction.x + light_direction.y * light_direction.y + light_direction.z * light_direction.z);
+	float l = sqrt(vec3_dot(&light_direction, &light_direction));
 	light_direction = vec3_div(&light_direction, l);
 
-	float dp = normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z;
+	float dp = vec3_dot(&normal, &light_direction);
 
 	SDL_SetRenderDrawColor(renderer, triangle->color.r, triangle->color.g,
 						   triangle->color.b, SDL_ALPHA_OPAQUE);

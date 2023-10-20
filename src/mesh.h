@@ -8,27 +8,6 @@
 #include <stdlib.h>
 #include "3dmath.h"
 
-typedef struct color
-{
-	unsigned char r;
-	unsigned char g;
-	unsigned char b;
-} color_t;
-
-typedef struct vec2d
-{
-	float u;
-	float v;
-	float w;
-} vec2d_t;
-
-typedef struct triangle
-{
-	vec3d_t verts[3];
-	vec2d_t texture[3];
-	color_t color;
-} triangle_t;
-
 typedef struct mesh
 {
 	triangle_t *triangles;

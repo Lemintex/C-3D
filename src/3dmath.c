@@ -80,6 +80,15 @@ vec3d_t vec3_intersectPlane(vec3d_t *planePoint, vec3d_t *planeNormal,
 	return vec3_add(lineStart, &distanceToPoint);
 }
 
+triangle_t triangle_mul_mat4(triangle_t *t, matrix_4x4_t *m)
+{
+	triangle_t triangle;
+	triangle.verts[0] = vec3_mul_mat4(&t->verts[0], m);
+	triangle.verts[1] = vec3_mul_mat4(&t->verts[1], m);
+	triangle.verts[2] = vec3_mul_mat4(&t->verts[2], m);
+	return triangle;
+}
+
 matrix_4x4_t matrix_identity()
 {
 	matrix_4x4_t matrix = {0};
