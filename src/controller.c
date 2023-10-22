@@ -56,5 +56,3 @@ void handleKeyboardInput(SDL_Event *e, unsigned short *mov)
 	}
 	*mov ^= 1UL << bit;
 }
-
-void keyboard_flipBit(unsigned short *keyState);
