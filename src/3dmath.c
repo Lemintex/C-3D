@@ -83,10 +83,10 @@ vec3d_t vec3_intersectPlane(vec3d_t *planePoint, vec3d_t *planeNormal,
 triangle_t triangle_mul_mat4(triangle_t *t, matrix_4x4_t *m)
 {
 	triangle_t triangle;
-	triangle.verts[0] = vec3_mul_mat4(&t->verts[0], m);
-	triangle.verts[1] = vec3_mul_mat4(&t->verts[1], m);
-	triangle.verts[2] = vec3_mul_mat4(&t->verts[2], m);
-	return triangle;
+	t->verts[0] = vec3_mul_mat4(&t->verts[0], m);
+	t->verts[1] = vec3_mul_mat4(&t->verts[1], m);
+	t->verts[2] = vec3_mul_mat4(&t->verts[2], m);
+	return *t;
 }
 
 matrix_4x4_t matrix_identity()

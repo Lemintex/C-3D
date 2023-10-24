@@ -48,15 +48,11 @@ void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 		triangle_t triangleTransformed;
 		triangle_t triangleViewed;
 
-		triangleTransformed.verts[0] = vec3_mul_mat4(&triangle.verts[0], &matWorld);
-		triangleTransformed.verts[1] = vec3_mul_mat4(&triangle.verts[1], &matWorld);
-		triangleTransformed.verts[2] = vec3_mul_mat4(&triangle.verts[2], &matWorld);
+		triangleTransformed = triangle_mul_mat4(&triangle, &matWorld);
 
-		triangleTransformed.texture[0] = triangle.texture[0];
-		triangleTransformed.texture[1] = triangle.texture[1];
-		triangleTransformed.texture[2] = triangle.texture[2];
-		//	CALCULATE SHADING TO STORE IN TRIANGLE INFO
+		*triangleTransformed.texture = *triangle.texture;
 
+		// CALCULATE COLOUR OF TRIANGLE
 		vec3d_t normal, l1, l2;
 
 		l1 = vec3_sub(&triangleTransformed.verts[1], &triangleTransformed.verts[0]);
@@ -69,19 +65,18 @@ void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 		vec3d_t rayFromCamera = vec3_sub(&triangleTransformed.verts[1], &camera.pos);
 
 		if (vec3_dot(&normal, &rayFromCamera) >= 0)
+		{
 			continue;
+		}
 		vec3d_t light_direction = {0, 0, -1};
 		light_direction = vec3_normal(&light_direction);
 
 		float dp = vec3_dot(&light_direction, &normal);
 
-		triangleViewed.verts[0] = vec3_mul_mat4(&triangleTransformed.verts[0], &cameraView);
-		triangleViewed.verts[1] = vec3_mul_mat4(&triangleTransformed.verts[1], &cameraView);
-		triangleViewed.verts[2] = vec3_mul_mat4(&triangleTransformed.verts[2], &cameraView);
+		triangleViewed = triangle_mul_mat4(&triangleTransformed, &cameraView);
 
-		triangleViewed.texture[0] = triangleTransformed.texture[0];
-		triangleViewed.texture[1] = triangleTransformed.texture[1];
-		triangleViewed.texture[2] = triangleTransformed.texture[2];
+		*triangleViewed.texture = *triangleTransformed.texture;
+
 		// clip against near plane of camera
 		int clippedTriangles = 0;
 		triangle_t clipped[2];
@@ -94,13 +89,9 @@ void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 
 		for (int j = 0; j < clippedTriangles; j++)
 		{
-			triangleProjected.verts[0] = vec3_mul_mat4(&clipped[j].verts[0], &matProj);
-			triangleProjected.verts[1] = vec3_mul_mat4(&clipped[j].verts[1], &matProj);
-			triangleProjected.verts[2] = vec3_mul_mat4(&clipped[j].verts[2], &matProj);
+			triangleProjected = triangle_mul_mat4(&clipped[j], &matProj);
 
-			triangleProjected.texture[0] = clipped[j].texture[0];
-			triangleProjected.texture[1] = clipped[j].texture[1];
-			triangleProjected.texture[2] = clipped[j].texture[2];
+			*triangleProjected.texture = *clipped[j].texture;
 
 			triangleProjected.texture[0].u /= triangleProjected.verts[0].w;
 			triangleProjected.texture[1].u /= triangleProjected.verts[1].w;
@@ -119,7 +110,7 @@ void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 			triangleProjected.verts[1] = vec3_div(&triangleProjected.verts[1], triangleProjected.verts[1].w);
 			triangleProjected.verts[2] = vec3_div(&triangleProjected.verts[2], triangleProjected.verts[2].w);
 
-			uint8_t shade = dp * 128 + 127;
+			uint8_t shade = dp * 200 + 55;
 			triangleProjected.color = createColor(shade, shade, shade);
 
 			// offset into view
@@ -244,7 +235,7 @@ void DrawTriangle(SDL_Renderer *renderer, triangle_t *triangle,
 	SDL_SetRenderDrawColor(renderer, triangle->color.r, triangle->color.g,
 						   triangle->color.b, SDL_ALPHA_OPAQUE);
 	FillTriangle(renderer, triangle);
-	FillTriangleWithTexture(renderer, triangle, texture);
+//	FillTriangleWithTexture(renderer, triangle, texture);
 	SDL_SetRenderDrawColor(renderer, 250, 250, 250, SDL_ALPHA_OPAQUE);
 	DrawWireframeTriangle(renderer, triangle);
 }
