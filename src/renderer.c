@@ -272,22 +272,30 @@ void FillTriangle(SDL_Renderer *renderer, triangle_t *triangle)
 	float slopeHypot = (vMax.x - vMin.x) / (vMax.y - vMin.y);
 	float xHyp = vMin.x;
 
-	FillTriangleTop(renderer, &vMin, &vMid, slopeHypot, &xHyp);
+	FillTriangleSolid(renderer, &vMin, &vMid, slopeHypot, &xHyp, 1);
 
-	FillTriangleBottom(renderer, &vMid, &vMax, slopeHypot, &xHyp);
+	FillTriangleSolid(renderer, &vMid, &vMax, slopeHypot, &xHyp, 0);
 }
 
-void FillTriangleTop(SDL_Renderer *renderer, vec3d_t *vTop, vec3d_t *vMid,
-					 float slopeHyp, float *xHyp)
+void FillTriangleSolid(SDL_Renderer *renderer, vec3d_t *v1, vec3d_t *v2,
+					 float slopeHyp, float *xHyp, int isTop)
 {
-	if (vMid->y - vTop->y < 1)
+	if (v2->y - v1->y < 1)
 		return;
 
-	float slopeA = (vTop->x - vMid->x) / (vTop->y - vMid->y);
-	float x1 = vTop->x;
+	float slopeA = (v1->x - v2->x) / (v1->y - v2->y);
+	float x1 = v1->x;
 	float *a, *b;
-
-	if (slopeA < slopeHyp)
+	int result = 0;
+	if (isTop)
+	{
+		result = slopeA < slopeHyp;
+	}
+	else
+	{
+		result = slopeA > slopeHyp;
+	}
+	if (result)
 	{
 		a = &x1;
 		b = xHyp;
@@ -298,7 +306,7 @@ void FillTriangleTop(SDL_Renderer *renderer, vec3d_t *vTop, vec3d_t *vMid,
 		b = &x1;
 	}
 
-	for (int y = vTop->y; y < vMid->y; y++)
+	for (int y = v1->y; y < v2->y; y++)
 	{
 		for (int x = *a; x < *b; x++)
 		{
@@ -309,37 +317,6 @@ void FillTriangleTop(SDL_Renderer *renderer, vec3d_t *vTop, vec3d_t *vMid,
 	}
 }
 
-void FillTriangleBottom(SDL_Renderer *renderer, vec3d_t *vMid, vec3d_t *vBot,
-						float slopeHyp, float *xHyp)
-{
-	if (vBot->y - vMid->y < 1)
-		return;
-
-	float slopeB = (vMid->x - vBot->x) / (vMid->y - vBot->y);
-	float x1 = vMid->x;
-	float *a, *b;
-
-	if (slopeB > slopeHyp)
-	{
-		a = &x1;
-		b = xHyp;
-	}
-	else
-	{
-		a = xHyp;
-		b = &x1;
-	}
-
-	for (int y = vMid->y; y < vBot->y; y++)
-	{
-		for (int x = *a; x < *b; x++)
-		{
-			SDL_RenderDrawPoint(renderer, x, y);
-		}
-		x1 += slopeB;
-		*xHyp += slopeHyp;
-	}
-}
 
 void FillTriangleWithTexture(SDL_Renderer *renderer, triangle_t *triangle,
 							 SDL_Surface *texture)
