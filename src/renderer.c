@@ -537,4 +537,3 @@ Uint32 GetPixel(SDL_Surface *surface, int x, int y)
 	Uint32 pixel = pixels[y * surface->w + x];
 	return pixel;
 }
-// }
