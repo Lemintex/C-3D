@@ -272,12 +272,12 @@ void FillTriangle(SDL_Renderer *renderer, triangle_t *triangle)
 	float slopeHypot = (vMax.x - vMin.x) / (vMax.y - vMin.y);
 	float xHyp = vMin.x;
 
-	FillTriangleSolid(renderer, &vMin, &vMid, slopeHypot, &xHyp, 1);
+	FillTriangleHalf(renderer, &vMin, &vMid, slopeHypot, &xHyp, 1);
 
-	FillTriangleSolid(renderer, &vMid, &vMax, slopeHypot, &xHyp, 0);
+	FillTriangleHalf(renderer, &vMid, &vMax, slopeHypot, &xHyp, 0);
 }
 
-void FillTriangleSolid(SDL_Renderer *renderer, vec3d_t *v1, vec3d_t *v2,
+void FillTriangleHalf(SDL_Renderer *renderer, vec3d_t *v1, vec3d_t *v2,
 					 float slopeHyp, float *xHyp, int isTop)
 {
 	if (v2->y - v1->y < 1)
