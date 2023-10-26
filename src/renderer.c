@@ -16,7 +16,7 @@ void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 	int trianglesToDraw = 0;
 	triangle_t *sortedTriangles = (triangle_t *)malloc(0);
 
-	matrix_4x4_t matProj = matrix_projection(90, 1 /*w/h*/, 0.1, 1000);
+	matrix_4x4_t matProj = matrix_projection(90, width / height, 0.1, 1000);
 
 	static float delta = 0;
 	matrix_4x4_t matRotZ = matrix_rotationZ(delta);
