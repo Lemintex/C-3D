@@ -235,7 +235,7 @@ void DrawTriangle(SDL_Renderer *renderer, triangle_t *triangle,
 	SDL_SetRenderDrawColor(renderer, triangle->color.r, triangle->color.g,
 						   triangle->color.b, SDL_ALPHA_OPAQUE);
 	FillTriangle(renderer, triangle);
-//	FillTriangleWithTexture(renderer, triangle, texture);
+	FillTriangleWithTexture(renderer, triangle, texture);
 	SDL_SetRenderDrawColor(renderer, 250, 250, 250, SDL_ALPHA_OPAQUE);
 	DrawWireframeTriangle(renderer, triangle);
 }
@@ -257,9 +257,13 @@ void FillTriangle(SDL_Renderer *renderer, triangle_t *triangle)
 	for (int i = 1; i < 3; i++)
 	{
 		if (triangle->verts[i].y >= triangle->verts[maxY].y)
+		{
 			maxY = i;
+		}
 		else if (triangle->verts[i].y <= triangle->verts[minY].y)
+		{
 			minY = i;
+		}
 	}
 	int midY = 3 - minY - maxY; // it works!
 
