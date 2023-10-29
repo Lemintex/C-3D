@@ -71,14 +71,6 @@ vec3d_t vec3_intersectPlane(vec3d_t *planePoint, vec3d_t *planeNormal,
 							vec3d_t *lineStart, vec3d_t *lineEnd, float *t);
 
 // TRIANGLE
-// triangle_t triangle_add(triangle_t *t1, triangle_t *t2);
-
-// triangle_t triangle_sub(triangle_t *t1, triangle_t *t2);
-
-// triangle_t triangle_mul(triangle_t *t1, float k);
-
-// triangle_t triangle_div(triangle_t *t1, float k);
-
 triangle_t triangle_mul_mat4(triangle_t *t1, matrix_4x4_t *m);
 
 // MAT4
