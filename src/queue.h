@@ -25,7 +25,4 @@ void enqueue(queue_t *queue, triangle_t triangle);
 
 triangle_t dequeue(queue_t *queue);
 
-// Function to print the contents of the queue
-void printQueue(queue_t *queue);
-
 #endif

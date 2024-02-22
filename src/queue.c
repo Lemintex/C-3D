@@ -41,26 +41,9 @@ triangle_t dequeue(queue_t *queue)
 
     node_t *front = queue->front;
     triangle_t triangle = front->triangle;
+
     queue->front = front->next;
+
     free(front);
     return triangle;
-}
-
-// Function to print the contents of the queue
-void printQueue(queue_t *queue)
-{
-    if (isEmpty(queue))
-    {
-        printf("Queue is empty.\n");
-        return;
-    }
-
-    printf("Queue contents: ");
-    node_t *current = queue->front;
-    while (current != NULL)
-    {
-        printf("t ");
-        current = current->next;
-    }
-    printf("\n");
 }

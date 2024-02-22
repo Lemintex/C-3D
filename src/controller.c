@@ -51,25 +51,8 @@ void handleKeyboardInput(SDL_Event *e, unsigned short *mov)
 	}
 
 	if (e->key.repeat)
+	{
 		return;
+	}
 	*mov ^= 1UL << bit;
 }
-
-void keyboard_flipBit(unsigned short *keyState);
-// void handleKeyboardInput(SDL_KeyboardEvent* type) {
-//	static short keyState = 0;
-//	switch (type->state) {
-//		case SDL_KEYDOWN:
-//			onKeyPressed();
-//			break;
-//		case SDL_KEYUP:
-//
-//			break;
-//
-//		default:
-//			break;
-//	}
-// }
-//
-//
-////void handleMouseInput();

@@ -1,13 +1,19 @@
 #ifndef _3DMATH_H_
 #define _3DMATH_H_
 
-#define _USE_MATH_DEFINES
 #include <math.h>
 
 typedef struct matrix_4x4
 {
 	float m[4][4];
 } matrix_4x4_t;
+
+typedef struct vec2d
+{
+	float u;
+	float v;
+	float w;
+} vec2d_t;
 
 typedef struct vec3d
 {
@@ -16,6 +22,31 @@ typedef struct vec3d
 	float z;
 	float w;
 } vec3d_t;
+
+typedef struct color
+{
+	unsigned char r;
+	unsigned char g;
+	unsigned char b;
+} color_t;
+
+typedef struct triangle
+{
+	vec3d_t verts[3];
+	vec2d_t texture[3];
+	color_t color;
+} triangle_t;
+
+// VEC2D
+// vec2d_t vec2_add(vec2d_t *v1, vec2d_t *v2);
+
+// vec2d_t vec2_sub(vec2d_t *v1, vec2d_t *v2);
+
+// vec2d_t vec2_mul(vec2d_t *v1, float k);
+
+// vec2d_t vec2_div(vec2d_t *v1, float k);
+
+// vec2d_t vec2_div_vec2(vec2d_t *v1, vec2d_t *v2);
 
 // VEC3D
 vec3d_t vec3_add(vec3d_t *v1, vec3d_t *v2);
@@ -39,6 +70,9 @@ vec3d_t vec3_mul_mat4(vec3d_t *v, matrix_4x4_t *m);
 vec3d_t vec3_intersectPlane(vec3d_t *planePoint, vec3d_t *planeNormal,
 							vec3d_t *lineStart, vec3d_t *lineEnd, float *t);
 
+// TRIANGLE
+triangle_t triangle_mul_mat4(triangle_t *t1, matrix_4x4_t *m);
+
 // MAT4
 matrix_4x4_t matrix_identity();
 
@@ -58,4 +92,5 @@ matrix_4x4_t matrix_multiplyMatrix(matrix_4x4_t *m1, matrix_4x4_t *m2);
 matrix_4x4_t matrix_pointAt(vec3d_t *pos, vec3d_t *target, vec3d_t *up);
 
 matrix_4x4_t matrix_quickInverse(matrix_4x4_t *mat);
+
 #endif

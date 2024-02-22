@@ -16,7 +16,7 @@ void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 	int trianglesToDraw = 0;
 	triangle_t *sortedTriangles = (triangle_t *)malloc(0);
 
-	matrix_4x4_t matProj = matrix_projection(90, 1 /*w/h*/, 0.1, 1000);
+	matrix_4x4_t matProj = matrix_projection(90, width / height, 0.1, 1000);
 
 	static float delta = 0;
 	matrix_4x4_t matRotZ = matrix_rotationZ(delta);
@@ -48,15 +48,11 @@ void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 		triangle_t triangleTransformed;
 		triangle_t triangleViewed;
 
-		triangleTransformed.verts[0] = vec3_mul_mat4(&triangle.verts[0], &matWorld);
-		triangleTransformed.verts[1] = vec3_mul_mat4(&triangle.verts[1], &matWorld);
-		triangleTransformed.verts[2] = vec3_mul_mat4(&triangle.verts[2], &matWorld);
+		triangleTransformed = triangle_mul_mat4(&triangle, &matWorld);
 
-		triangleTransformed.texture[0] = triangle.texture[0];
-		triangleTransformed.texture[1] = triangle.texture[1];
-		triangleTransformed.texture[2] = triangle.texture[2];
-		//	CALCULATE SHADING TO STORE IN TRIANGLE INFO
+		*triangleTransformed.texture = *triangle.texture;
 
+		// CALCULATE COLOUR OF TRIANGLE
 		vec3d_t normal, l1, l2;
 
 		l1 = vec3_sub(&triangleTransformed.verts[1], &triangleTransformed.verts[0]);
@@ -69,19 +65,18 @@ void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 		vec3d_t rayFromCamera = vec3_sub(&triangleTransformed.verts[1], &camera.pos);
 
 		if (vec3_dot(&normal, &rayFromCamera) >= 0)
+		{
 			continue;
+		}
 		vec3d_t light_direction = {0, 0, -1};
 		light_direction = vec3_normal(&light_direction);
 
 		float dp = vec3_dot(&light_direction, &normal);
 
-		triangleViewed.verts[0] = vec3_mul_mat4(&triangleTransformed.verts[0], &cameraView);
-		triangleViewed.verts[1] = vec3_mul_mat4(&triangleTransformed.verts[1], &cameraView);
-		triangleViewed.verts[2] = vec3_mul_mat4(&triangleTransformed.verts[2], &cameraView);
+		triangleViewed = triangle_mul_mat4(&triangleTransformed, &cameraView);
 
-		triangleViewed.texture[0] = triangleTransformed.texture[0];
-		triangleViewed.texture[1] = triangleTransformed.texture[1];
-		triangleViewed.texture[2] = triangleTransformed.texture[2];
+		*triangleViewed.texture = *triangleTransformed.texture;
+
 		// clip against near plane of camera
 		int clippedTriangles = 0;
 		triangle_t clipped[2];
@@ -94,13 +89,9 @@ void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 
 		for (int j = 0; j < clippedTriangles; j++)
 		{
-			triangleProjected.verts[0] = vec3_mul_mat4(&clipped[j].verts[0], &matProj);
-			triangleProjected.verts[1] = vec3_mul_mat4(&clipped[j].verts[1], &matProj);
-			triangleProjected.verts[2] = vec3_mul_mat4(&clipped[j].verts[2], &matProj);
+			triangleProjected = triangle_mul_mat4(&clipped[j], &matProj);
 
-			triangleProjected.texture[0] = clipped[j].texture[0];
-			triangleProjected.texture[1] = clipped[j].texture[1];
-			triangleProjected.texture[2] = clipped[j].texture[2];
+			*triangleProjected.texture = *clipped[j].texture;
 
 			triangleProjected.texture[0].u /= triangleProjected.verts[0].w;
 			triangleProjected.texture[1].u /= triangleProjected.verts[1].w;
@@ -113,25 +104,13 @@ void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 			triangleProjected.texture[0].w = 1.0 / triangleProjected.verts[0].w;
 			triangleProjected.texture[1].w = 1.0 / triangleProjected.verts[1].w;
 			triangleProjected.texture[2].w = 1.0 / triangleProjected.verts[2].w;
-			// triangleProjected.texture[0].u /= abs(triangleProjected.verts[0].w);
-			// triangleProjected.texture[1].u /= abs(triangleProjected.verts[1].w);
-			// triangleProjected.texture[2].u /= abs(triangleProjected.verts[2].w);
-
-			// triangleProjected.texture[0].v /= abs(triangleProjected.verts[0].w);
-			// triangleProjected.texture[1].v /= abs(triangleProjected.verts[1].w);
-			// triangleProjected.texture[2].v /= abs(triangleProjected.verts[2].w);
-
-			// triangleProjected.texture[0].w = 1.0 /
-			// abs(triangleProjected.verts[0].w); triangleProjected.texture[1].w = 1.0
-			// / abs(triangleProjected.verts[1].w); triangleProjected.texture[2].w
-			// = 1.0 / abs(triangleProjected.verts[2].w);
 
 			// normalise co-ordinates
 			triangleProjected.verts[0] = vec3_div(&triangleProjected.verts[0], triangleProjected.verts[0].w);
 			triangleProjected.verts[1] = vec3_div(&triangleProjected.verts[1], triangleProjected.verts[1].w);
 			triangleProjected.verts[2] = vec3_div(&triangleProjected.verts[2], triangleProjected.verts[2].w);
 
-			uint8_t shade = dp * 128 + 127;
+			uint8_t shade = dp * 200 + 55;
 			triangleProjected.color = createColor(shade, shade, shade);
 
 			// offset into view
@@ -232,37 +211,26 @@ void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 	}
 	free(sortedTriangles);
 	free(clippedTrianglesToDraw);
-	delta += 0.001;
 }
 
 void DrawTriangle(SDL_Renderer *renderer, triangle_t *triangle,
 				  SDL_Surface *texture)
 {
 	vec3d_t normal, l1, l2;
-	l1.x = triangle->verts[1].x - triangle->verts[0].x;
-	l1.y = triangle->verts[1].y - triangle->verts[0].y;
-	l1.z = triangle->verts[1].z - triangle->verts[0].z;
+	l1 = vec3_sub(&triangle->verts[1], &triangle->verts[0]);
 
-	l2.x = triangle->verts[2].x - triangle->verts[0].x;
-	l2.y = triangle->verts[2].y - triangle->verts[0].y;
-	l2.z = triangle->verts[2].z - triangle->verts[0].z;
+	l2 = vec3_sub(&triangle->verts[2], &triangle->verts[0]);
 
-	normal.x = l1.y * l2.z - l1.z * l2.y;
-	normal.y = l1.z * l2.x - l1.x * l2.z;
-	normal.z = l1.x * l2.y - l1.y * l2.x;
+	normal = vec3_cross(&l1, &l2);
 
 	float length = sqrt(pow(normal.x, 2) + pow(normal.y, 2) + pow(normal.z, 2));
-	normal.x /= length;
-	normal.y /= length;
-	normal.z /= length;
+	normal = vec3_div(&normal, length);
+
 	vec3d_t light_direction = {0, 0, -1};
+	float l = sqrt(vec3_dot(&light_direction, &light_direction));
+	light_direction = vec3_div(&light_direction, l);
 
-	float l = sqrt(light_direction.x * light_direction.x + light_direction.y * light_direction.y + light_direction.z * light_direction.z);
-	light_direction.x /= l;
-	light_direction.y /= l;
-	light_direction.z /= l;
-
-	float dp = normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z;
+	float dp = vec3_dot(&normal, &light_direction);
 
 	SDL_SetRenderDrawColor(renderer, triangle->color.r, triangle->color.g,
 						   triangle->color.b, SDL_ALPHA_OPAQUE);
@@ -289,9 +257,13 @@ void FillTriangle(SDL_Renderer *renderer, triangle_t *triangle)
 	for (int i = 1; i < 3; i++)
 	{
 		if (triangle->verts[i].y >= triangle->verts[maxY].y)
+		{
 			maxY = i;
+		}
 		else if (triangle->verts[i].y <= triangle->verts[minY].y)
+		{
 			minY = i;
+		}
 	}
 	int midY = 3 - minY - maxY; // it works!
 
@@ -304,22 +276,30 @@ void FillTriangle(SDL_Renderer *renderer, triangle_t *triangle)
 	float slopeHypot = (vMax.x - vMin.x) / (vMax.y - vMin.y);
 	float xHyp = vMin.x;
 
-	FillTriangleTop(renderer, &vMin, &vMid, slopeHypot, &xHyp);
+	FillTriangleHalf(renderer, &vMin, &vMid, slopeHypot, &xHyp, 1);
 
-	FillTriangleBottom(renderer, &vMid, &vMax, slopeHypot, &xHyp);
+	FillTriangleHalf(renderer, &vMid, &vMax, slopeHypot, &xHyp, 0);
 }
 
-void FillTriangleTop(SDL_Renderer *renderer, vec3d_t *vTop, vec3d_t *vMid,
-					 float slopeHyp, float *xHyp)
+void FillTriangleHalf(SDL_Renderer *renderer, vec3d_t *v1, vec3d_t *v2,
+					 float slopeHyp, float *xHyp, int isTop)
 {
-	if (vMid->y - vTop->y < 1)
+	if (v2->y - v1->y < 1)
 		return;
 
-	float slopeA = (vTop->x - vMid->x) / (vTop->y - vMid->y);
-	float x1 = vTop->x;
+	float slopeA = (v1->x - v2->x) / (v1->y - v2->y);
+	float x1 = v1->x;
 	float *a, *b;
-
-	if (slopeA < slopeHyp)
+	int result = 0;
+	if (isTop)
+	{
+		result = slopeA < slopeHyp;
+	}
+	else
+	{
+		result = slopeA > slopeHyp;
+	}
+	if (result)
 	{
 		a = &x1;
 		b = xHyp;
@@ -330,7 +310,7 @@ void FillTriangleTop(SDL_Renderer *renderer, vec3d_t *vTop, vec3d_t *vMid,
 		b = &x1;
 	}
 
-	for (int y = vTop->y; y < vMid->y; y++)
+	for (int y = v1->y; y < v2->y; y++)
 	{
 		for (int x = *a; x < *b; x++)
 		{
@@ -341,37 +321,6 @@ void FillTriangleTop(SDL_Renderer *renderer, vec3d_t *vTop, vec3d_t *vMid,
 	}
 }
 
-void FillTriangleBottom(SDL_Renderer *renderer, vec3d_t *vMid, vec3d_t *vBot,
-						float slopeHyp, float *xHyp)
-{
-	if (vBot->y - vMid->y < 1)
-		return;
-
-	float slopeB = (vMid->x - vBot->x) / (vMid->y - vBot->y);
-	float x1 = vMid->x;
-	float *a, *b;
-
-	if (slopeB > slopeHyp)
-	{
-		a = &x1;
-		b = xHyp;
-	}
-	else
-	{
-		a = xHyp;
-		b = &x1;
-	}
-
-	for (int y = vMid->y; y < vBot->y; y++)
-	{
-		for (int x = *a; x < *b; x++)
-		{
-			SDL_RenderDrawPoint(renderer, x, y);
-		}
-		x1 += slopeB;
-		*xHyp += slopeHyp;
-	}
-}
 
 void FillTriangleWithTexture(SDL_Renderer *renderer, triangle_t *triangle,
 							 SDL_Surface *texture)
@@ -592,4 +541,3 @@ Uint32 GetPixel(SDL_Surface *surface, int x, int y)
 	Uint32 pixel = pixels[y * surface->w + x];
 	return pixel;
 }
-// }
