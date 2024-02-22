@@ -1,6 +1,6 @@
 #include "mesh.h"
 
-mesh_t *ReadMeshFromFile(char *filename, int hasTexture)
+mesh_t *read_mesh_from_file(char *filename, int has_texture)
 {
 	FILE *file = fopen(filename, "r");
 	if (file == NULL)
@@ -47,7 +47,7 @@ mesh_t *ReadMeshFromFile(char *filename, int hasTexture)
 				vertices[vertex_count++] = vertex;
 			}
 		}
-		if (!hasTexture)
+		if (!has_texture)
 		{
 			if (line[0] == 'f' && line[1] == ' ')
 			{
@@ -82,8 +82,8 @@ mesh_t *ReadMeshFromFile(char *filename, int hasTexture)
 	// Process the vertices and faces as needed
 	// ...
 	mesh_t *mesh = (mesh_t *)malloc(sizeof(mesh_t));
-	mesh->triangleCount = face_count;
-	mesh->triangles = faces; //(triangle_t)malloc(sizeof(triangle_t) * mesh->triangleCount;
+	mesh->triangle_count = face_count;
+	mesh->triangles = faces;
 
 	// Free the allocated memory
 	free(vertices);
@@ -91,7 +91,7 @@ mesh_t *ReadMeshFromFile(char *filename, int hasTexture)
 	return mesh;
 }
 
-color_t createColor(unsigned char r, unsigned char g, unsigned char b)
+color_t create_color(unsigned char r, unsigned char g, unsigned char b)
 {
 	color_t color;
 	color.r = r;
@@ -116,105 +116,105 @@ int compareZ(const void *e1, const void *e2)
 	return 0;
 }
 
-int triangle_clipAgainstPlane(vec3d_t *planePoint, vec3d_t *planeNormal, triangle_t *triangleIn, triangle_t *triangleOut1, triangle_t *triangleOut2)
+int triangle_clip_against_plane(vec3d_t *plane_point, vec3d_t *plane_normal, triangle_t *triangle_in, triangle_t *triangle_out_1, triangle_t *triangle_out_2)
 {
-	*planeNormal = vec3_normal(planeNormal);
+	*plane_normal = vec3_normal(plane_normal);
 
 	float distance[3];
-	// gets signed distance from planePoint to triangle point
+	// gets signed distance from plane_point to triangle point
 	for (int i = 0; i < 3; i++)
 	{
-		vec3d_t v = triangleIn->verts[i];
-		v = vec3_add(&v, planePoint);
-		distance[i] = vec3_dot(planeNormal, &v); // planePoint) - (planeNormal->x * v.x +planeNormal->y * v.y + planeNormal->z * v.z);
+		vec3d_t v = triangle_in->verts[i];
+		v = vec3_add(&v, plane_point);
+		distance[i] = vec3_dot(plane_normal, &v); // plane_point) - (plane_normal->x * v.x +plane_normal->y * v.y + plane_normal->z * v.z);
 	}
 
 	// create temporary inside and outside arrays used to classify points
 	vec3d_t *inside_points[3];
-	int nInsidePointCount = 0;
+	int n_inside_point_count = 0;
 	vec3d_t *outside_points[3];
-	int nOutsidePointCount = 0;
+	int n_outside_point_count = 0;
 
 	vec2d_t *inside_texture[3];
-	int nInsideTextureCount = 0;
+	int n_inside_texture_count = 0;
 	vec2d_t *outside_texture[3];
-	int nOutsideTextureCount = 0;
+	int n_outside_texture_count = 0;
 
 	for (int i = 0; i < 3; i++)
 	{
 		// if distance is more than 0, point is 'inside' plane
 		if (distance[i] < 0)
 		{
-			inside_points[nInsidePointCount++] = &triangleIn->verts[i];
-			inside_texture[nInsideTextureCount++] = &triangleIn->texture[i];
+			inside_points[n_inside_point_count++] = &triangle_in->verts[i];
+			inside_texture[n_inside_texture_count++] = &triangle_in->texture[i];
 		}
 		// otherwise, it is 'outside' plane
 		else
 		{
-			outside_points[nOutsidePointCount++] = &triangleIn->verts[i];
-			outside_texture[nOutsideTextureCount++] = &triangleIn->texture[i];
+			outside_points[n_outside_point_count++] = &triangle_in->verts[i];
+			outside_texture[n_outside_texture_count++] = &triangle_in->texture[i];
 		}
 	}
 
-	if (nInsidePointCount == 0)
+	if (n_inside_point_count == 0)
 		return 0;
 
-	if (nInsidePointCount == 3)
+	if (n_inside_point_count == 3)
 	{
-		*triangleOut1 = *triangleIn;
+		*triangle_out_1 = *triangle_in;
 
 		return 1;
 	}
 
-	if (nInsidePointCount == 1 && nOutsidePointCount == 2)
+	if (n_inside_point_count == 1 && n_outside_point_count == 2)
 	{
-		triangleOut1->verts[0] = *inside_points[0];
-		triangleOut1->texture[0] = *inside_texture[0];
+		triangle_out_1->verts[0] = *inside_points[0];
+		triangle_out_1->texture[0] = *inside_texture[0];
 		float t;
 
-		triangleOut1->verts[1] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[0], &t);
+		triangle_out_1->verts[1] = vec3_intersect_plane(plane_point, plane_normal, inside_points[0], outside_points[0], &t);
 
-		triangleOut1->texture[1].u = t * (outside_texture[0]->u - inside_texture[0]->u) + inside_texture[0]->u;
-		triangleOut1->texture[1].v = t * (outside_texture[0]->v - inside_texture[0]->v) + inside_texture[0]->v;
-		triangleOut1->texture[1].w = t * (outside_texture[0]->w - inside_texture[0]->w) + inside_texture[0]->w;
+		triangle_out_1->texture[1].u = t * (outside_texture[0]->u - inside_texture[0]->u) + inside_texture[0]->u;
+		triangle_out_1->texture[1].v = t * (outside_texture[0]->v - inside_texture[0]->v) + inside_texture[0]->v;
+		triangle_out_1->texture[1].w = t * (outside_texture[0]->w - inside_texture[0]->w) + inside_texture[0]->w;
 
-		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[1], &t);
+		triangle_out_1->verts[2] = vec3_intersect_plane(plane_point, plane_normal, inside_points[0], outside_points[1], &t);
 
-		triangleOut1->texture[2].u = t * (outside_texture[1]->u - inside_texture[0]->u) + inside_texture[0]->u;
-		triangleOut1->texture[2].v = t * (outside_texture[1]->v - inside_texture[0]->v) + inside_texture[0]->v;
-		triangleOut1->texture[2].w = t * (outside_texture[1]->w - inside_texture[0]->w) + inside_texture[0]->w;
+		triangle_out_1->texture[2].u = t * (outside_texture[1]->u - inside_texture[0]->u) + inside_texture[0]->u;
+		triangle_out_1->texture[2].v = t * (outside_texture[1]->v - inside_texture[0]->v) + inside_texture[0]->v;
+		triangle_out_1->texture[2].w = t * (outside_texture[1]->w - inside_texture[0]->w) + inside_texture[0]->w;
 
 		return 1;
 	}
 
-	if (nInsidePointCount == 2 && nOutsidePointCount == 1)
+	if (n_inside_point_count == 2 && n_outside_point_count == 1)
 	{
-		triangleOut1->verts[0] = *inside_points[0];
-		triangleOut1->verts[1] = *inside_points[1];
+		triangle_out_1->verts[0] = *inside_points[0];
+		triangle_out_1->verts[1] = *inside_points[1];
 
-		triangleOut1->texture[0] = *inside_texture[0];
-		triangleOut1->texture[1] = *inside_texture[1];
+		triangle_out_1->texture[0] = *inside_texture[0];
+		triangle_out_1->texture[1] = *inside_texture[1];
 
 		float t;
-		triangleOut1->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[0], outside_points[0], &t);
+		triangle_out_1->verts[2] = vec3_intersect_plane(plane_point, plane_normal, inside_points[0], outside_points[0], &t);
 
-		triangleOut1->texture[2].u = t * (outside_texture[0]->u - inside_texture[0]->u) + inside_texture[0]->u;
-		triangleOut1->texture[2].v = t * (outside_texture[0]->v - inside_texture[0]->v) + inside_texture[0]->v;
-		triangleOut1->texture[2].w = t * (outside_texture[0]->w - inside_texture[0]->w) + inside_texture[0]->w;
+		triangle_out_1->texture[2].u = t * (outside_texture[0]->u - inside_texture[0]->u) + inside_texture[0]->u;
+		triangle_out_1->texture[2].v = t * (outside_texture[0]->v - inside_texture[0]->v) + inside_texture[0]->v;
+		triangle_out_1->texture[2].w = t * (outside_texture[0]->w - inside_texture[0]->w) + inside_texture[0]->w;
 
-		triangleOut1->color = createColor(255, 0, 0);
+		triangle_out_1->color = create_color(255, 0, 0);
 
-		triangleOut2->verts[0] = *inside_points[1];
-		triangleOut2->verts[1] = triangleOut1->verts[2];
+		triangle_out_2->verts[0] = *inside_points[1];
+		triangle_out_2->verts[1] = triangle_out_1->verts[2];
 
-		triangleOut2->texture[0] = *inside_texture[1];
-		triangleOut2->texture[1] = triangleOut1->texture[2];
+		triangle_out_2->texture[0] = *inside_texture[1];
+		triangle_out_2->texture[1] = triangle_out_1->texture[2];
 
-		triangleOut2->verts[2] = vec3_intersectPlane(planePoint, planeNormal, inside_points[1], outside_points[0], &t);
+		triangle_out_2->verts[2] = vec3_intersect_plane(plane_point, plane_normal, inside_points[1], outside_points[0], &t);
 
-		triangleOut2->texture[2].u = t * (outside_texture[0]->u - inside_texture[1]->u) + inside_texture[1]->u;
-		triangleOut2->texture[2].v = t * (outside_texture[0]->v - inside_texture[1]->v) + inside_texture[1]->v;
-		triangleOut2->texture[2].w = t * (outside_texture[0]->w - inside_texture[1]->w) + inside_texture[1]->w;
+		triangle_out_2->texture[2].u = t * (outside_texture[0]->u - inside_texture[1]->u) + inside_texture[1]->u;
+		triangle_out_2->texture[2].v = t * (outside_texture[0]->v - inside_texture[1]->v) + inside_texture[1]->v;
+		triangle_out_2->texture[2].w = t * (outside_texture[0]->w - inside_texture[1]->w) + inside_texture[1]->w;
 
 		return 2;
 	}

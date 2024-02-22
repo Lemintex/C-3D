@@ -5,13 +5,13 @@
 typedef struct camera
 {
 	vec3d_t pos;
-	vec3d_t lookDir;
+	vec3d_t look_dir;
 	unsigned short mov;
 	float yaw, pitch;
 } camera_t;
 
-void camera_update(double deltaTime);
+void camera_update(double delta_time);
 
-int camera_getMovementBit(int n);
+int camera_get_movement_bit(int n);
 
 #endif
