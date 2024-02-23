@@ -7,20 +7,20 @@
 #include "camera.h"
 #include "queue.h"
 
-void Render();
+void render();
 
-void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture);
+void draw_mesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture);
 
-void DrawTriangle(SDL_Renderer *renderer, triangle_t *triangle, SDL_Surface *texture);
+void draw_triangle(SDL_Renderer *renderer, triangle_t *triangle, SDL_Surface *texture);
 
-void DrawWireframeTriangle(SDL_Renderer *renderer, triangle_t *triangle);
+void draw_wireframe_triangle(SDL_Renderer *renderer, triangle_t *triangle);
 
-void FillTriangle(SDL_Renderer *renderer, triangle_t *triangle);
+void fill_triangle(SDL_Renderer *renderer, triangle_t *triangle);
 
-void FillTriangleHalf(SDL_Renderer *renderer, vec3d_t *vTop, vec3d_t *vMid, float slopeHyp, float *xHyp, int isTop);
+void fill_triangle_half(SDL_Renderer *renderer, vec3d_t *v_top, vec3d_t *v_mid, float slope_hyp, float *x_hyp, int is_top);
 
-void FillTriangleWithTexture(SDL_Renderer *renderer, triangle_t *triangle, SDL_Surface *texture);
+void fill_triangle_with_texture(SDL_Renderer *renderer, triangle_t *triangle, SDL_Surface *texture);
 
-Uint32 GetPixel(SDL_Surface *surface, int x, int y);
+Uint32 get_pixel(SDL_Surface *surface, int x, int y);
 
 #endif

@@ -9,7 +9,7 @@
  * 7 = yaw left
  * 8 = yaw right
  */
-void handleKeyboardInput(SDL_Event *e, unsigned short *mov)
+void handle_keyboard_input(SDL_Event *e, unsigned short *mov)
 {
 	int bit = 0;
 	switch (e->key.keysym.sym)

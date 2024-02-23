@@ -1,32 +1,32 @@
 #include "camera.h"
 
 extern camera_t camera;
-static int movementSpeed = 1000;
+static int movement_speed = 1000;
 
-void camera_update(double deltaTime)
+void camera_update(double delta_time)
 {
-	camera.lookDir = vec3_normal(&camera.lookDir);
-	vec3d_t forward = vec3_mul(&camera.lookDir, deltaTime * movementSpeed);
+	camera.look_dir = vec3_normal(&camera.look_dir);
+	vec3d_t forward = vec3_mul(&camera.look_dir, delta_time * movement_speed);
 
-	if (camera_getMovementBit(1))
+	if (camera_get_movement_bit(1))
 		camera.pos = vec3_add(&camera.pos, &forward);
-	if (camera_getMovementBit(2))
+	if (camera_get_movement_bit(2))
 		camera.pos = vec3_sub(&camera.pos, &forward);
-	if (camera_getMovementBit(3))
-		camera.pos.x += deltaTime * movementSpeed;
-	if (camera_getMovementBit(4))
-		camera.pos.x -= deltaTime * movementSpeed;
-	if (camera_getMovementBit(5))
-		camera.pos.y += deltaTime * movementSpeed;
-	if (camera_getMovementBit(6))
-		camera.pos.y -= deltaTime * movementSpeed;
-	if (camera_getMovementBit(7))
-		camera.yaw += deltaTime;
-	if (camera_getMovementBit(8))
-		camera.yaw -= deltaTime;
+	if (camera_get_movement_bit(3))
+		camera.pos.x += delta_time * movement_speed;
+	if (camera_get_movement_bit(4))
+		camera.pos.x -= delta_time * movement_speed;
+	if (camera_get_movement_bit(5))
+		camera.pos.y += delta_time * movement_speed;
+	if (camera_get_movement_bit(6))
+		camera.pos.y -= delta_time * movement_speed;
+	if (camera_get_movement_bit(7))
+		camera.yaw += delta_time;
+	if (camera_get_movement_bit(8))
+		camera.yaw -= delta_time;
 }
 
-int camera_getMovementBit(int n)
+int camera_get_movement_bit(int n)
 {
 	return (camera.mov >> n) & 1U;
 }

@@ -12,21 +12,23 @@
 #include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_image.h>
 
+void init();
+void init_camera();
+
 SDL_Renderer *renderer;
 camera_t camera;
 const int width = 1000, height = 1000;
-float *depthBuffer;
+float *depth_buffer;
 
 int main(int argc, char **argv)
 {
-	Uint64 previousFrameTime = SDL_GetPerformanceCounter();
+	Uint64 previous_frame_time = SDL_GetPerformanceCounter();
 	double deltaTime = 0.0;
+  
+  init();
 
-	depthBuffer = (float *)malloc((width * height) * sizeof(float));
-	memset(depthBuffer, 0, width * height);
-
-	camera.pos = (vec3d_t){0, 0, 0, 1};
-	camera.lookDir = (vec3d_t){0, 0, 1, 1};
+	depth_buffer = (float *)malloc((width * height) * sizeof(float));
+	memset(depth_buffer, 0, width * height);
 
 	char title[] = "C-3D";
 
@@ -39,7 +41,7 @@ int main(int argc, char **argv)
 
 	SDL_Surface *screen = SDL_GetWindowSurface(window);
 
-	mesh_t *ship = ReadMeshFromFile("res/A001_Spyro.obj", 1);
+	mesh_t *ship = read_mesh_from_file("res/A001_Spyro.obj", 1);
 	SDL_Surface *texture = IMG_Load("res/A001_Spyro.png");
 
 	while (1)
@@ -55,7 +57,7 @@ int main(int argc, char **argv)
 				return 0;
 			case SDL_KEYUP:
 			case SDL_KEYDOWN:
-				handleKeyboardInput(&event, &camera.mov);
+				handle_keyboard_input(&event, &camera.mov);
 				if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
 				{
 					SDL_DestroyWindow(window);
@@ -63,23 +65,34 @@ int main(int argc, char **argv)
 				}
 			}
 		}
-		Uint64 currentFrameTime = SDL_GetPerformanceCounter();
-		deltaTime = (double)(currentFrameTime - previousFrameTime) / SDL_GetPerformanceFrequency();
-		previousFrameTime = currentFrameTime;
+		Uint64 current_frame_time = SDL_GetPerformanceCounter();
+		deltaTime = (double)(current_frame_time - previous_frame_time) / SDL_GetPerformanceFrequency();
+		previous_frame_time = current_frame_time;
 
 		camera_update(deltaTime);
-		memset(depthBuffer, 0, width * height);
+		memset(depth_buffer, 0, width * height);
 		for (int i = 0; i < width * height; i++)
 		{
-			depthBuffer[i] = 1;
+			depth_buffer[i] = 1;
 		}
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 		SDL_RenderClear(renderer);
 
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-		DrawMesh(renderer, ship, texture);
+		draw_mesh(renderer, ship, texture);
 
 		SDL_RenderPresent(renderer);
 		SDL_UpdateWindowSurface(window);
 	}
+}
+
+void init()
+{
+  init_camera();
+}
+
+void init_camera()
+{
+	camera.pos = (vec3d_t){0, 0, 0, 1};
+	camera.look_dir = (vec3d_t){0, 0, 1, 1};
 }

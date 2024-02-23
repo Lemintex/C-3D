@@ -17,9 +17,9 @@ typedef struct queue
 	size_t len;
 } queue_t;
 
-queue_t *createQueue();
+queue_t *create_queue();
 
-int isEmpty(queue_t *queue);
+int is_empty(queue_t *queue);
 
 void enqueue(queue_t *queue, triangle_t triangle);
 

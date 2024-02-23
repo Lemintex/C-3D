@@ -1,6 +1,6 @@
 #include "queue.h"
 
-queue_t *createQueue()
+queue_t *create_queue()
 {
     queue_t *queue = (queue_t *)malloc(sizeof(queue_t));
     queue->front = queue->rear = NULL;
@@ -8,7 +8,7 @@ queue_t *createQueue()
     return queue;
 }
 
-int isEmpty(queue_t *queue)
+int is_empty(queue_t *queue)
 {
     return (queue->len == 0);
 }
@@ -23,7 +23,7 @@ void enqueue(queue_t *queue, triangle_t triangle)
     new_node->triangle = triangle;
     new_node->next = NULL;
 
-    if (isEmpty(queue))
+    if (is_empty(queue))
     {
         queue->front = queue->rear = new_node;
     }

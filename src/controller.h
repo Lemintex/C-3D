@@ -3,6 +3,6 @@
 
 #include <SDL2/SDL.h>
 
-void handleKeyboardInput(SDL_Event *type, unsigned short *mov);
+void handle_keyboard_input(SDL_Event *type, unsigned short *mov);
 
 #endif
