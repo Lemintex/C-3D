@@ -6,6 +6,8 @@
 #include "mesh.h"
 #include "camera.h"
 #include "queue.h"
+#include "options.h"
+#include "3dmath.h"
 
 void render();
 
@@ -23,4 +25,5 @@ void fill_triangle_with_texture(SDL_Renderer *renderer, triangle_t *triangle, SD
 
 Uint32 get_pixel(SDL_Surface *surface, int x, int y);
 
+void render_mode();
 #endif

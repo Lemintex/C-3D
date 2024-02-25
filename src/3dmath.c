@@ -1,43 +1,35 @@
 #include "3dmath.h"
 
-vec3d_t vec3_add(vec3d_t *v1, vec3d_t *v2)
-{
+vec3d_t vec3_add(vec3d_t *v1, vec3d_t *v2) {
 	return (vec3d_t){v1->x + v2->x, v1->y + v2->y, v1->z + v2->z, 1};
 }
 
-vec3d_t vec3_sub(vec3d_t *v1, vec3d_t *v2)
-{
+vec3d_t vec3_sub(vec3d_t *v1, vec3d_t *v2) {
 	return (vec3d_t){v1->x - v2->x, v1->y - v2->y, v1->z - v2->z, 1};
 }
 
-vec3d_t vec3_mul(vec3d_t *v, float k)
-{
+vec3d_t vec3_mul(vec3d_t *v, float k) {
 	return (vec3d_t){v->x * k, v->y * k, v->z * k, 1};
 }
 
-vec3d_t vec3_div(vec3d_t *v, float k)
-{
+vec3d_t vec3_div(vec3d_t *v, float k) {
 	return (vec3d_t){v->x / k, v->y / k, v->z / k, 1};
 }
 
-float vec3_dot(vec3d_t *v1, vec3d_t *v2)
-{
+float vec3_dot(vec3d_t *v1, vec3d_t *v2) {
 	return v1->x * v2->x + v1->y * v2->y + v1->z * v2->z;
 }
 
-float vec3_length(vec3d_t *v)
-{
+float vec3_length(vec3d_t *v) {
 	return sqrtf(vec3_dot(v, v));
 }
 
-vec3d_t vec3_normal(vec3d_t *v)
-{
+vec3d_t vec3_normal(vec3d_t *v) {
 	float l = vec3_length(v);
 	return (vec3d_t){v->x / l, v->y / l, v->z / l, 1};
 }
 
-vec3d_t vec3_cross(vec3d_t *v1, vec3d_t *v2)
-{
+vec3d_t vec3_cross(vec3d_t *v1, vec3d_t *v2) {
 	vec3d_t vec;
 
 	vec.x = v1->y * v2->z - v1->z * v2->y;
@@ -47,8 +39,7 @@ vec3d_t vec3_cross(vec3d_t *v1, vec3d_t *v2)
 	return vec;
 }
 
-vec3d_t vec3_mul_mat4(vec3d_t *v, matrix_4x4_t *m)
-{
+vec3d_t vec3_mul_mat4(vec3d_t *v, matrix_4x4_t *m) {
 	vec3d_t vec;
 
 	vec.x = v->x * m->m[0][0] + v->y * m->m[1][0] + v->z * m->m[2][0] + v->w * m->m[3][0];
@@ -59,8 +50,7 @@ vec3d_t vec3_mul_mat4(vec3d_t *v, matrix_4x4_t *m)
 }
 
 vec3d_t vec3_intersect_plane(vec3d_t *plane_point, vec3d_t *plane_normal,
-							vec3d_t *line_start, vec3d_t *line_end, float *t)
-{
+							               vec3d_t *line_start, vec3d_t *line_end, float *t) {
 	// ensure the normal is normalised
 	*plane_normal = vec3_normal(plane_normal);
 
@@ -82,8 +72,7 @@ vec3d_t vec3_intersect_plane(vec3d_t *plane_point, vec3d_t *plane_normal,
 	return vec3_add(line_start, &distance_to_point);
 }
 
-triangle_t triangle_mul_mat4(triangle_t *t, matrix_4x4_t *m)
-{
+triangle_t triangle_mul_mat4(triangle_t *t, matrix_4x4_t *m) {
 	triangle_t triangle;
 
 	t->verts[0] = vec3_mul_mat4(&t->verts[0], m);
@@ -92,8 +81,7 @@ triangle_t triangle_mul_mat4(triangle_t *t, matrix_4x4_t *m)
 	return *t;
 }
 
-matrix_4x4_t matrix_identity()
-{
+matrix_4x4_t matrix_identity() {
 	matrix_4x4_t matrix = {0};
 
 	matrix.m[0][0] = 1;
@@ -103,8 +91,7 @@ matrix_4x4_t matrix_identity()
 	return matrix;
 }
 
-matrix_4x4_t matrix_rotation_x(float angle_rad)
-{
+matrix_4x4_t matrix_rotation_x(float angle_rad) {
 	matrix_4x4_t matrix = {0};
 
 	matrix.m[0][0] = 1;
@@ -116,8 +103,7 @@ matrix_4x4_t matrix_rotation_x(float angle_rad)
 	return matrix;
 }
 
-matrix_4x4_t matrix_rotation_y(float angle_rad)
-{
+matrix_4x4_t matrix_rotation_y(float angle_rad) {
 	matrix_4x4_t matrix = {0};
 
 	matrix.m[0][0] = cosf(angle_rad);
@@ -129,8 +115,7 @@ matrix_4x4_t matrix_rotation_y(float angle_rad)
 	return matrix;
 }
 
-matrix_4x4_t matrix_rotation_z(float angle_rad)
-{
+matrix_4x4_t matrix_rotation_z(float angle_rad) {
 	matrix_4x4_t matrix = {0};
 
 	matrix.m[0][0] = cosf(angle_rad);
@@ -142,8 +127,7 @@ matrix_4x4_t matrix_rotation_z(float angle_rad)
 	return matrix;
 }
 
-matrix_4x4_t matrix_translation(float x, float y, float z)
-{
+matrix_4x4_t matrix_translation(float x, float y, float z) {
 	matrix_4x4_t matrix = matrix_identity();
 
 	matrix.m[3][0] = x;
@@ -153,8 +137,7 @@ matrix_4x4_t matrix_translation(float x, float y, float z)
 }
 
 matrix_4x4_t matrix_projection(float f_fov_degrees, float f_aspect_ratio,
-							   float f_near, float f_far)
-{
+							                 float f_near, float f_far) {
 	float f_fov_rad = 1 / tanf((f_fov_degrees / 2) / 180 * M_PI);
 	matrix_4x4_t matrix = {0};
 
@@ -167,8 +150,7 @@ matrix_4x4_t matrix_projection(float f_fov_degrees, float f_aspect_ratio,
 	return matrix;
 }
 
-matrix_4x4_t matrix_multiply_matrix(matrix_4x4_t *m1, matrix_4x4_t *m2)
-{
+matrix_4x4_t matrix_multiply_matrix(matrix_4x4_t *m1, matrix_4x4_t *m2) {
 	matrix_4x4_t matrix = {0};
 
 	for (int i = 0; i < 4; i++)
@@ -185,8 +167,7 @@ matrix_4x4_t matrix_multiply_matrix(matrix_4x4_t *m1, matrix_4x4_t *m2)
 	return matrix;
 }
 
-matrix_4x4_t matrix_point_at(vec3d_t *pos, vec3d_t *target, vec3d_t *up)
-{
+matrix_4x4_t matrix_point_at(vec3d_t *pos, vec3d_t *target, vec3d_t *up) {
 	vec3d_t new_forward = vec3_sub(pos, target);
 	new_forward = vec3_normal(&new_forward);
 
@@ -220,8 +201,7 @@ matrix_4x4_t matrix_point_at(vec3d_t *pos, vec3d_t *target, vec3d_t *up)
 	return matrix;
 }
 
-matrix_4x4_t matrix_quick_inverse(matrix_4x4_t *mat) // Only for Rotation/Translation Matrices
-{
+matrix_4x4_t matrix_quick_inverse(matrix_4x4_t *mat) { // Only for Rotation/Translation Matrices
 	matrix_4x4_t m = *mat;
 	matrix_4x4_t matrix;
 

@@ -4,9 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "3dmath.h"
-#include "queue.h"
-
+extern options_t options;
 extern camera_t camera;
 extern int width, height;
 extern float *depth_buffer;
@@ -234,10 +232,21 @@ void draw_triangle(SDL_Renderer *renderer, triangle_t *triangle,
 
 	SDL_SetRenderDrawColor(renderer, triangle->color.r, triangle->color.g,
 						   triangle->color.b, SDL_ALPHA_OPAQUE);
-	fill_triangle(renderer, triangle);
-	fill_triangle_with_texture(renderer, triangle, texture);
-	SDL_SetRenderDrawColor(renderer, 250, 250, 250, SDL_ALPHA_OPAQUE);
-	draw_wireframe_triangle(renderer, triangle);
+
+  switch (options.display_type) {
+    case WIREFRAME:
+	    SDL_SetRenderDrawColor(renderer, 250, 250, 250, SDL_ALPHA_OPAQUE);
+	    draw_wireframe_triangle(renderer, triangle);
+      break;
+
+    case MONOCHROME:
+	    fill_triangle(renderer, triangle);
+      break;
+
+    case TEXTURE:
+	    fill_triangle_with_texture(renderer, triangle, texture);
+      break;
+  }
 }
 
 void draw_wireframe_triangle(SDL_Renderer *renderer, triangle_t *triangle)

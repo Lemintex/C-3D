@@ -1,6 +1,7 @@
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
 #include "3dmath.h"
+#include "options.h"
 
 typedef struct camera
 {

@@ -1,10 +1,11 @@
 #include "camera.h"
 
 extern camera_t camera;
-static int movement_speed = 1000;
+extern options_t options;
 
 void camera_update(double delta_time)
 {
+  unsigned short movement_speed = options.movement_speed;
 	camera.look_dir = vec3_normal(&camera.look_dir);
 	vec3d_t forward = vec3_mul(&camera.look_dir, delta_time * movement_speed);
 
