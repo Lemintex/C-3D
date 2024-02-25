@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 		delta_time = (double)(current_frame_time - previous_frame_time) / SDL_GetPerformanceFrequency();
 		previous_frame_time = current_frame_time;
 
-		camera_update(delta_time);
+		camera_update();
 		memset(depth_buffer, 0, width * height);
 		for (int i = 0; i < width * height; i++) {
 			depth_buffer[i] = 1;

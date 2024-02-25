@@ -12,4 +12,8 @@ void handle_movement(SDL_Event *e, unsigned short *mov);
 void handle_speed(SDL_Event *e);
 
 void handle_render_mode(SDL_Event *e);
+
+void handle_mouse_input(SDL_Event *e);
+
+void handle_look(SDL_Event *e);
 #endif

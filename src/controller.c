@@ -8,6 +8,10 @@ void handle_keyboard_input(SDL_Event *e, unsigned short *mov) {
   handle_render_mode(e);
 }
 
+void handle_mouse_input(SDL_Event *e) {
+
+}
+
 /*
  * 1 = forward
  * 2 = backwards
@@ -99,4 +103,8 @@ void handle_render_mode(SDL_Event *e) {
           break;
       }
   }
+}
+
+void handle_look(SDL_Event *e) {
+
 }
