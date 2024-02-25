@@ -7,6 +7,7 @@ void handle_keyboard_input(SDL_Event *e, unsigned short *mov) {
   handle_speed(e);
   handle_render_mode(e);
 }
+
 /*
  * 1 = forward
  * 2 = backwards
@@ -20,40 +21,40 @@ void handle_keyboard_input(SDL_Event *e, unsigned short *mov) {
 void handle_movement(SDL_Event *e, unsigned short *mov) {
 	int bit = 0;
 	switch (e->key.keysym.sym) {
-	case SDLK_w:
-		bit = 1;
-		break;
-
-	case SDLK_s:
-		bit = 2;
-		break;
-
-	case SDLK_d:
-		bit = 3;
-		break;
-
-	case SDLK_a:
-		bit = 4;
-		break;
-
-	case SDLK_r:
-		bit = 5;
-		break;
-
-	case SDLK_f:
-		bit = 6;
-		break;
-
-	case SDLK_q:
-		bit = 7;
-		break;
-
-	case SDLK_e:
-		bit = 8;
-		break;
-
-	default:
-		break;
+  	case SDLK_w:
+  		bit = 1;
+  		break;
+  
+  	case SDLK_s:
+  		bit = 2;
+  		break;
+  
+  	case SDLK_d:
+  		bit = 3;
+  		break;
+  
+  	case SDLK_a:
+  		bit = 4;
+  		break;
+  
+  	case SDLK_r:
+  		bit = 5;
+  		break;
+  
+  	case SDLK_f:
+  		bit = 6;
+  		break;
+  
+  	case SDLK_q:
+  		bit = 7;
+  		break;
+  
+  	case SDLK_e:
+  		bit = 8;
+  		break;
+  
+  	default:
+  		break;
 	}
 
 	if (e->key.repeat) {

@@ -3,35 +3,30 @@
 
 #include <math.h>
 
-typedef struct matrix_4x4
-{
+typedef struct matrix_4x4 {
 	float m[4][4];
 } matrix_4x4_t;
 
-typedef struct vec2d
-{
+typedef struct vec2d {
 	float u;
 	float v;
 	float w;
 } vec2d_t;
 
-typedef struct vec3d
-{
+typedef struct vec3d {
 	float x;
 	float y;
 	float z;
 	float w;
 } vec3d_t;
 
-typedef struct color
-{
+typedef struct color {
 	unsigned char r;
 	unsigned char g;
 	unsigned char b;
 } color_t;
 
-typedef struct triangle
-{
+typedef struct triangle {
 	vec3d_t verts[3];
 	vec2d_t texture[3];
 	color_t color;

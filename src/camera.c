@@ -3,8 +3,7 @@
 extern camera_t camera;
 extern options_t options;
 
-void camera_update(double delta_time)
-{
+void camera_update(double delta_time) {
   unsigned short movement_speed = options.movement_speed;
 	camera.look_dir = vec3_normal(&camera.look_dir);
 	vec3d_t forward = vec3_mul(&camera.look_dir, delta_time * movement_speed);
@@ -27,7 +26,6 @@ void camera_update(double delta_time)
 		camera.yaw -= delta_time;
 }
 
-int camera_get_movement_bit(int n)
-{
+int camera_get_movement_bit(int n) {
 	return (camera.mov >> n) & 1U;
 }

@@ -9,8 +9,7 @@ extern camera_t camera;
 extern int width, height;
 extern float *depth_buffer;
 
-void draw_mesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
-{
+void draw_mesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture) {
 	int triangles_to_draw = 0;
 	triangle_t *sorted_triangles = (triangle_t *)malloc(0);
 
@@ -38,8 +37,7 @@ void draw_mesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 
 	matrix_4x4_t camera_view = matrix_quick_inverse(&camera_matrix);
 
-	for (int i = 0; i < mesh->triangle_count; i++)
-	{
+	for (int i = 0; i < mesh->triangle_count; i++) {
 		triangle_t triangle = mesh->triangles[i];
 
 		triangle_t triangle_projected;
@@ -62,8 +60,7 @@ void draw_mesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 
 		vec3d_t ray_from_camera = vec3_sub(&triangle_transformed.verts[1], &camera.pos);
 
-		if (vec3_dot(&normal, &ray_from_camera) >= 0)
-		{
+		if (vec3_dot(&normal, &ray_from_camera) >= 0) {
 			continue;
 		}
 		vec3d_t light_direction = {0, 0, -1};
@@ -85,8 +82,7 @@ void draw_mesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 		clipped_triangles = triangle_clip_against_plane(&near_plane, &near_plane_normal, &triangle_viewed,
 													 &clipped[0], &clipped[1]);
 
-		for (int j = 0; j < clipped_triangles; j++)
-		{
+		for (int j = 0; j < clipped_triangles; j++) {
 			triangle_projected = triangle_mul_mat4(&clipped[j], &mat_proj);
 
 			*triangle_projected.texture = *clipped[j].texture;
@@ -138,8 +134,7 @@ void draw_mesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 
 	queue_t *clipped_triangles_to_draw = create_queue();
 
-	for (int i = 0; i < triangles_to_draw; i++)
-	{
+	for (int i = 0; i < triangles_to_draw; i++) {
 		triangle_t clipped[2];
 
 		queue_t *queue = create_queue();
@@ -147,63 +142,58 @@ void draw_mesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 
 		int n_new_triangles = 1;
 
-		for (int p = 0; p < 4; p++)
-		{
+		for (int p = 0; p < 4; p++) {
 			int triangles_to_add = 1;
-			while (n_new_triangles > 0)
-			{
+			while (n_new_triangles > 0) {
 				n_new_triangles--;
-				if (is_empty(queue))
+				if (is_empty(queue)) {
 					continue;
+        }
 				triangle_t test = dequeue(queue);
 
-				switch (p)
-				{
-				case 0:
-					triangles_to_add = triangle_clip_against_plane(
-						&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){0, -1, 0, 1}), &test,
-						&clipped[0], &clipped[1]); // TOP
-					break;
-
-				case 1:
-					triangles_to_add = triangle_clip_against_plane(
-						&((vec3d_t){0, -width, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test,
-						&clipped[0], &clipped[1]); // BOTTOM
-					break;
-
-				case 2:
-					triangles_to_add = triangle_clip_against_plane(
-						&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test,
-						&clipped[0], &clipped[1]); // LEFT
-					break;
-
-				case 3:
-					triangles_to_add = triangle_clip_against_plane(
-						&((vec3d_t){-height, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test,
-						&clipped[0], &clipped[1]); // RIGHT
-					break;
-
-				default:
-					break;
+				switch (p) {
+  				case 0:
+  					triangles_to_add = triangle_clip_against_plane(
+  						&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){0, -1, 0, 1}), &test,
+  						&clipped[0], &clipped[1]); // TOP
+  					break;
+  
+  				case 1:
+  					triangles_to_add = triangle_clip_against_plane(
+  						&((vec3d_t){0, -width, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test,
+  						&clipped[0], &clipped[1]); // BOTTOM
+  					break;
+  
+  				case 2:
+  					triangles_to_add = triangle_clip_against_plane(
+  						&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test,
+  						&clipped[0], &clipped[1]); // LEFT
+  					break;
+  
+  				case 3:
+  					triangles_to_add = triangle_clip_against_plane(
+  						&((vec3d_t){-height, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test,
+  						&clipped[0], &clipped[1]); // RIGHT
+  					break;
+  
+  				default:
+  					break;
 				}
 
-				for (int t = 0; t < triangles_to_add; t++)
-				{
+				for (int t = 0; t < triangles_to_add; t++) {
 					enqueue(queue, clipped[t]);
 				}
 			}
 			n_new_triangles = queue->len;
 		}
-		while (!is_empty(queue))
-		{
+		while (!is_empty(queue)) {
 			enqueue(clipped_triangles_to_draw, dequeue(queue));
 		}
 
 		free(queue);
 	}
 
-	while (!is_empty(clipped_triangles_to_draw))
-	{
+	while (!is_empty(clipped_triangles_to_draw)) {
 		triangle_t t = dequeue(clipped_triangles_to_draw);
 		draw_triangle(renderer, &t, texture);
 	}
@@ -211,9 +201,7 @@ void draw_mesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
 	free(clipped_triangles_to_draw);
 }
 
-void draw_triangle(SDL_Renderer *renderer, triangle_t *triangle,
-				  SDL_Surface *texture)
-{
+void draw_triangle(SDL_Renderer *renderer, triangle_t *triangle, SDL_Surface *texture) {
 	vec3d_t normal, l1, l2;
 	l1 = vec3_sub(&triangle->verts[1], &triangle->verts[0]);
 
@@ -230,8 +218,7 @@ void draw_triangle(SDL_Renderer *renderer, triangle_t *triangle,
 
 	float dp = vec3_dot(&normal, &light_direction);
 
-	SDL_SetRenderDrawColor(renderer, triangle->color.r, triangle->color.g,
-						   triangle->color.b, SDL_ALPHA_OPAQUE);
+	SDL_SetRenderDrawColor(renderer, triangle->color.r, triangle->color.g, triangle->color.b, SDL_ALPHA_OPAQUE);
 
   switch (options.display_type) {
     case WIREFRAME:
@@ -249,28 +236,20 @@ void draw_triangle(SDL_Renderer *renderer, triangle_t *triangle,
   }
 }
 
-void draw_wireframe_triangle(SDL_Renderer *renderer, triangle_t *triangle)
-{
-	SDL_RenderDrawLine(renderer, triangle->verts[0].x, triangle->verts[0].y,
-					   triangle->verts[1].x, triangle->verts[1].y);
-	SDL_RenderDrawLine(renderer, triangle->verts[1].x, triangle->verts[1].y,
-					   triangle->verts[2].x, triangle->verts[2].y);
-	SDL_RenderDrawLine(renderer, triangle->verts[2].x, triangle->verts[2].y,
-					   triangle->verts[0].x, triangle->verts[0].y);
+void draw_wireframe_triangle(SDL_Renderer *renderer, triangle_t *triangle) {
+	SDL_RenderDrawLine(renderer, triangle->verts[0].x, triangle->verts[0].y, triangle->verts[1].x, triangle->verts[1].y);
+	SDL_RenderDrawLine(renderer, triangle->verts[1].x, triangle->verts[1].y, triangle->verts[2].x, triangle->verts[2].y);
+	SDL_RenderDrawLine(renderer, triangle->verts[2].x, triangle->verts[2].y, triangle->verts[0].x, triangle->verts[0].y);
 }
 
-void fill_triangle(SDL_Renderer *renderer, triangle_t *triangle)
-{
+void fill_triangle(SDL_Renderer *renderer, triangle_t *triangle) {
 	int max_y = 0;
 	int min_y = 0;
-	for (int i = 1; i < 3; i++)
-	{
-		if (triangle->verts[i].y >= triangle->verts[max_y].y)
-		{
+	for (int i = 1; i < 3; i++) {
+		if (triangle->verts[i].y >= triangle->verts[max_y].y) {
 			max_y = i;
 		}
-		else if (triangle->verts[i].y <= triangle->verts[min_y].y)
-		{
+		else if (triangle->verts[i].y <= triangle->verts[min_y].y) {
 			min_y = i;
 		}
 	}
@@ -290,39 +269,32 @@ void fill_triangle(SDL_Renderer *renderer, triangle_t *triangle)
 	fill_triangle_half(renderer, &v_mid, &v_max, slope_hypot, &x_hyp, 0);
 }
 
-void fill_triangle_half(SDL_Renderer *renderer, vec3d_t *v1, vec3d_t *v2,
-					 float slope_hyp, float *x_hyp, int isTop)
-{
-	if (v2->y - v1->y < 1)
+void fill_triangle_half(SDL_Renderer *renderer, vec3d_t *v1, vec3d_t *v2, float slope_hyp, float *x_hyp, int isTop) {
+	if (v2->y - v1->y < 1) {
 		return;
+  }
 
 	float slope_a = (v1->x - v2->x) / (v1->y - v2->y);
 	float x1 = v1->x;
 	float *a, *b;
 	int result = 0;
-	if (isTop)
-	{
+	if (isTop) {
 		result = slope_a < slope_hyp;
 	}
-	else
-	{
+	else {
 		result = slope_a > slope_hyp;
 	}
-	if (result)
-	{
+	if (result) {
 		a = &x1;
 		b = x_hyp;
 	}
-	else
-	{
+	else {
 		a = x_hyp;
 		b = &x1;
 	}
 
-	for (int y = v1->y; y < v2->y; y++)
-	{
-		for (int x = *a; x < *b; x++)
-		{
+	for (int y = v1->y; y < v2->y; y++) {
+		for (int x = *a; x < *b; x++) {
 			SDL_RenderDrawPoint(renderer, x, y);
 		}
 		x1 += slope_a;
@@ -331,33 +303,29 @@ void fill_triangle_half(SDL_Renderer *renderer, vec3d_t *v1, vec3d_t *v2,
 }
 
 
-void fill_triangle_with_texture(SDL_Renderer *renderer, triangle_t *triangle,
-							 SDL_Surface *texture)
-{
+void fill_triangle_with_texture(SDL_Renderer *renderer, triangle_t *triangle, SDL_Surface *texture) {
 	unsigned char *pixels = (unsigned char *)texture->pixels;
 
 	int max_y = 0;
 	int min_y = 0;
-	for (int i = 1; i < 3; i++)
-	{
-		if (triangle->verts[i].y >= triangle->verts[max_y].y)
+	for (int i = 1; i < 3; i++) {
+		if (triangle->verts[i].y >= triangle->verts[max_y].y) {
 			max_y = i;
-		else if (triangle->verts[i].y <= triangle->verts[min_y].y)
+    }
+		else if (triangle->verts[i].y <= triangle->verts[min_y].y) {
 			min_y = i;
+    }
 	}
 	int mid_y = 3 - min_y - max_y; // it works!
 
 	vec3d_t v_max = {triangle->verts[max_y].x, triangle->verts[max_y].y, 0};
-	vec2d_t t_max = {triangle->texture[max_y].u, triangle->texture[max_y].v,
-					triangle->texture[max_y].w};
+	vec2d_t t_max = {triangle->texture[max_y].u, triangle->texture[max_y].v, triangle->texture[max_y].w};
 
 	vec3d_t v_mid = {triangle->verts[mid_y].x, triangle->verts[mid_y].y, 0};
-	vec2d_t t_mid = {triangle->texture[mid_y].u, triangle->texture[mid_y].v,
-					triangle->texture[mid_y].w};
+	vec2d_t t_mid = {triangle->texture[mid_y].u, triangle->texture[mid_y].v, triangle->texture[mid_y].w};
 
 	vec3d_t v_min = {triangle->verts[min_y].x, triangle->verts[min_y].y, 0};
-	vec2d_t t_min = {triangle->texture[min_y].u, triangle->texture[min_y].v,
-					triangle->texture[min_y].w};
+	vec2d_t t_min = {triangle->texture[min_y].u, triangle->texture[min_y].v, triangle->texture[min_y].w};
 
 	int dx1 = v_mid.x - v_min.x;
 	int dy1 = v_mid.y - v_min.y;
@@ -375,30 +343,36 @@ void fill_triangle_with_texture(SDL_Renderer *renderer, triangle_t *triangle,
 	float dx1_step = 0, dx2_step = 0, du1_step = 0, du2_step = 0, dv1_step = 0,
 		  dv2_step = 0, dw1_step = 0, dw2_step = 0;
 
-	if (dy1)
+	if (dy1) {
 		dx1_step = dx1 / (float)abs(dy1);
-	if (dy2)
+  }
+	if (dy2) {
 		dx2_step = dx2 / (float)abs(dy2);
+  }
 
-	if (dy1)
+	if (dy1) {
 		du1_step = du1 / (float)abs(dy1);
-	if (dy2)
+  }
+	if (dy2) {
 		du2_step = du2 / (float)abs(dy2);
+  }
 
-	if (dy1)
+	if (dy1) {
 		dv1_step = dv1 / (float)abs(dy1);
-	if (dy2)
+  }
+	if (dy2) {
 		dv2_step = dv2 / (float)abs(dy2);
+  }
 
-	if (dy1)
+	if (dy1) {
 		dw1_step = dw1 / (float)abs(dy1);
-	if (dy2)
+  }
+	if (dy2) {
 		dw2_step = dw2 / (float)abs(dy2);
+  }
 
-	if (dy1)
-	{
-		for (int i = v_min.y; i <= v_mid.y; i++)
-		{
+	if (dy1) {
+		for (int i = v_min.y; i <= v_mid.y; i++) {
 			int x1 = v_min.x + (float)(i - (int)v_min.y) * dx1_step;
 			int x2 = v_min.x + (float)(i - (int)v_min.y) * dx2_step;
 
@@ -411,8 +385,7 @@ void fill_triangle_with_texture(SDL_Renderer *renderer, triangle_t *triangle,
 			float sw = t_min.w + (float)(i - (int)v_min.y) * dw1_step;
 			float ew = t_min.w + (float)(i - (int)v_min.y) * dw2_step;
 
-			if (x1 > x2)
-			{
+			if (x1 > x2) {
 				int temp = x1;
 				x1 = x2;
 				x2 = temp;
@@ -435,8 +408,7 @@ void fill_triangle_with_texture(SDL_Renderer *renderer, triangle_t *triangle,
 
 			float t_step = 1 / ((float)(x2 - x1));
 			float t = 0;
-			for (int j = x1; j < x2; j++)
-			{
+			for (int j = x1; j < x2; j++) {
 				texu = (1 - t) * su + t * eu;
 				texv = (1 - t) * sv + t * ev;
 				texw = (1 - t) * sw + t * ew;
@@ -449,8 +421,7 @@ void fill_triangle_with_texture(SDL_Renderer *renderer, triangle_t *triangle,
 				SDL_GetRGB(pixel, texture->format, &rgb.r, &rgb.g, &rgb.b);
 				Uint8 alpha = SDL_ALPHA_OPAQUE;
 
-				if (texw <= depth_buffer[i * width + j])
-				{
+				if (texw <= depth_buffer[i * width + j]) {
 					SDL_SetRenderDrawColor(renderer, rgb.r, rgb.g, rgb.b, rgb.a);
 					SDL_RenderDrawPoint(renderer, j, i);
 					depth_buffer[i * width + j] = texw;
@@ -466,22 +437,24 @@ void fill_triangle_with_texture(SDL_Renderer *renderer, triangle_t *triangle,
 	dv1 = t_max.v - t_mid.v;
 	dw1 = t_max.w - t_mid.w;
 
-	if (dy1)
+	if (dy1) {
 		dx1_step = dx1 / (float)abs(dy1);
+  }
 
-	if (dy1)
+	if (dy1) {
 		du1_step = du1 / (float)abs(dy1);
+  }
 
-	if (dy1)
+	if (dy1) {
 		dv1_step = dv1 / (float)abs(dy1);
+  }
 
-	if (dy1)
+	if (dy1) {
 		dw1_step = dw1 / (float)abs(dy1);
+  }
 
-	if (dy1)
-	{
-		for (int i = v_mid.y; i <= v_max.y; i++)
-		{
+	if (dy1) {
+		for (int i = v_mid.y; i <= v_max.y; i++) {
 			int x1 = v_mid.x + (float)(i - v_mid.y) * dx1_step;
 			int x2 = v_min.x + (float)(i - v_min.y) * dx2_step;
 
@@ -494,8 +467,7 @@ void fill_triangle_with_texture(SDL_Renderer *renderer, triangle_t *triangle,
 			float sw = t_mid.w + (float)(i - (int)v_mid.y) * dw1_step;
 			float ew = t_min.w + (float)(i - (int)v_min.y) * dw2_step;
 
-			if (x1 > x2)
-			{
+			if (x1 > x2) {
 				int temp = x1;
 				x1 = x2;
 				x2 = temp;
@@ -518,8 +490,7 @@ void fill_triangle_with_texture(SDL_Renderer *renderer, triangle_t *triangle,
 
 			float t_step = 1 / ((float)(x2 - x1));
 			float t = 0;
-			for (int j = x1; j < x2; j++)
-			{
+			for (int j = x1; j < x2; j++) {
 				texu = (1 - t) * su + t * eu;
 				texv = (1 - t) * sv + t * ev;
 				texw = (1 - t) * sw + t * ew;
@@ -532,8 +503,7 @@ void fill_triangle_with_texture(SDL_Renderer *renderer, triangle_t *triangle,
 				SDL_GetRGB(pixel, texture->format, &rgb.r, &rgb.g, &rgb.b);
 				Uint8 alpha = SDL_ALPHA_OPAQUE; // or use SDL_GetRGBA() if you need the alpha value
 
-				if (texw <= depth_buffer[i * width + j])
-				{
+				if (texw <= depth_buffer[i * width + j]) {
 					SDL_SetRenderDrawColor(renderer, rgb.r, rgb.g, rgb.b, rgb.a);
 					SDL_RenderDrawPoint(renderer, j, i);
 					depth_buffer[i * width + j] = texw;
@@ -544,8 +514,7 @@ void fill_triangle_with_texture(SDL_Renderer *renderer, triangle_t *triangle,
 	}
 }
 
-Uint32 get_pixel(SDL_Surface *surface, int x, int y)
-{
+Uint32 get_pixel(SDL_Surface *surface, int x, int y) {
 	Uint32 *pixels = (Uint32 *)surface->pixels;
 	Uint32 pixel = pixels[y * surface->w + x];
 	return pixel;

@@ -8,8 +8,7 @@
 #include <stdlib.h>
 #include "3dmath.h"
 
-typedef struct mesh
-{
+typedef struct mesh {
 	triangle_t *triangles;
 	int triangle_count;
 	struct mesh *self;

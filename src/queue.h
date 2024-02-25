@@ -4,14 +4,12 @@
 #include <stdlib.h>
 #include "mesh.h"
 
-typedef struct node
-{
+typedef struct node {
 	triangle_t triangle;
 	struct node *next;
 } node_t;
 
-typedef struct queue
-{
+typedef struct queue {
 	node_t *front;
 	node_t *rear;
 	size_t len;

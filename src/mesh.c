@@ -1,10 +1,8 @@
 #include "mesh.h"
 
-mesh_t *read_mesh_from_file(char *filename, int has_texture)
-{
+mesh_t *read_mesh_from_file(char *filename, int has_texture) {
 	FILE *file = fopen(filename, "r");
-	if (file == NULL)
-	{
+	if (file == NULL) {
 		printf("Error: Unable to open file %s. Is the file in the correct folder?\n", filename);
 		return NULL;
 	}
@@ -18,12 +16,9 @@ mesh_t *read_mesh_from_file(char *filename, int has_texture)
 	int face_count = 0;
 
 	char line[256];
-	while (fgets(line, sizeof(line), file))
-	{
-		if (line[0] == 'v')
-		{
-			if (line[1] == 't')
-			{
+	while (fgets(line, sizeof(line), file)) {
+		if (line[0] == 'v') {
+			if (line[1] == 't') {
 				vec2d_t texture;
 				sscanf(line, "vt %f %f", &texture.u, &texture.v);
 
@@ -36,8 +31,7 @@ mesh_t *read_mesh_from_file(char *filename, int has_texture)
 				textures = (vec2d_t *)realloc(textures, (texture_count + 1) * sizeof(vec2d_t));
 				textures[texture_count++] = texture;
 			}
-			else
-			{
+			else {
 				vec3d_t vertex;
 				sscanf(line, "v %f %f %f", &vertex.x, &vertex.y, &vertex.z);
 
@@ -47,10 +41,8 @@ mesh_t *read_mesh_from_file(char *filename, int has_texture)
 				vertices[vertex_count++] = vertex;
 			}
 		}
-		if (!has_texture)
-		{
-			if (line[0] == 'f' && line[1] == ' ')
-			{
+		if (!has_texture) {
+			if (line[0] == 'f' && line[1] == ' ') {
 				int verts[3];
 				sscanf(line, "f %d %d %d", &verts[0], &verts[1], &verts[2]);
 
@@ -61,10 +53,8 @@ mesh_t *read_mesh_from_file(char *filename, int has_texture)
 				faces[face_count++] = face;
 			}
 		}
-		else
-		{
-			if (line[0] == 'f')
-			{
+		else {
+			if (line[0] == 'f') {
 				int tokens[6];
 				sscanf(line, "f %d/%d %d/%d %d/%d", &tokens[0], &tokens[1], &tokens[2], &tokens[3], &tokens[4], &tokens[5]);
 
@@ -91,8 +81,7 @@ mesh_t *read_mesh_from_file(char *filename, int has_texture)
 	return mesh;
 }
 
-color_t create_color(unsigned char r, unsigned char g, unsigned char b)
-{
+color_t create_color(unsigned char r, unsigned char g, unsigned char b) {
 	color_t color;
 	color.r = r;
 	color.g = g;
@@ -101,29 +90,28 @@ color_t create_color(unsigned char r, unsigned char g, unsigned char b)
 }
 
 // REMOVE THIS? NOT NEEDED NOW DEPTH BUFFER IS FUNCTIONAL?
-int compareZ(const void *e1, const void *e2)
-{
+int compareZ(const void *e1, const void *e2) {
 	triangle_t *a = (triangle_t *)e1;
 	float averageA = a->verts[0].z + a->verts[1].z + a->verts[2].z / 3;
 
 	triangle_t *b = (triangle_t *)e2;
 	float averageB = b->verts[0].z + b->verts[1].z + b->verts[2].z / 3;
 
-	if (averageA < averageB)
+	if (averageA < averageB) {
 		return -1;
-	if (averageA > averageB)
+  }
+	if (averageA > averageB) {
 		return 1;
+  }
 	return 0;
 }
 
-int triangle_clip_against_plane(vec3d_t *plane_point, vec3d_t *plane_normal, triangle_t *triangle_in, triangle_t *triangle_out_1, triangle_t *triangle_out_2)
-{
+int triangle_clip_against_plane(vec3d_t *plane_point, vec3d_t *plane_normal, triangle_t *triangle_in, triangle_t *triangle_out_1, triangle_t *triangle_out_2) {
 	*plane_normal = vec3_normal(plane_normal);
 
 	float distance[3];
 	// gets signed distance from plane_point to triangle point
-	for (int i = 0; i < 3; i++)
-	{
+	for (int i = 0; i < 3; i++) {
 		vec3d_t v = triangle_in->verts[i];
 		v = vec3_add(&v, plane_point);
 		distance[i] = vec3_dot(plane_normal, &v); // plane_point) - (plane_normal->x * v.x +plane_normal->y * v.y + plane_normal->z * v.z);
@@ -140,34 +128,30 @@ int triangle_clip_against_plane(vec3d_t *plane_point, vec3d_t *plane_normal, tri
 	vec2d_t *outside_texture[3];
 	int n_outside_texture_count = 0;
 
-	for (int i = 0; i < 3; i++)
-	{
+	for (int i = 0; i < 3; i++) {
 		// if distance is more than 0, point is 'inside' plane
-		if (distance[i] < 0)
-		{
+		if (distance[i] < 0) {
 			inside_points[n_inside_point_count++] = &triangle_in->verts[i];
 			inside_texture[n_inside_texture_count++] = &triangle_in->texture[i];
 		}
 		// otherwise, it is 'outside' plane
-		else
-		{
+		else {
 			outside_points[n_outside_point_count++] = &triangle_in->verts[i];
 			outside_texture[n_outside_texture_count++] = &triangle_in->texture[i];
 		}
 	}
 
-	if (n_inside_point_count == 0)
+	if (n_inside_point_count == 0) {
 		return 0;
+  }
 
-	if (n_inside_point_count == 3)
-	{
+	if (n_inside_point_count == 3) {
 		*triangle_out_1 = *triangle_in;
 
 		return 1;
 	}
 
-	if (n_inside_point_count == 1 && n_outside_point_count == 2)
-	{
+	if (n_inside_point_count == 1 && n_outside_point_count == 2) {
 		triangle_out_1->verts[0] = *inside_points[0];
 		triangle_out_1->texture[0] = *inside_texture[0];
 		float t;
@@ -187,8 +171,7 @@ int triangle_clip_against_plane(vec3d_t *plane_point, vec3d_t *plane_normal, tri
 		return 1;
 	}
 
-	if (n_inside_point_count == 2 && n_outside_point_count == 1)
-	{
+	if (n_inside_point_count == 2 && n_outside_point_count == 1) {
 		triangle_out_1->verts[0] = *inside_points[0];
 		triangle_out_1->verts[1] = *inside_points[1];
 
@@ -218,4 +201,4 @@ int triangle_clip_against_plane(vec3d_t *plane_point, vec3d_t *plane_normal, tri
 
 		return 2;
 	}
-}
+
