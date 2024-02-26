@@ -15,4 +15,7 @@ void camera_update(double delta_time);
 
 int camera_get_movement_bit(int n);
 
+void camera_move();
+
+void camera_look();
 #endif
