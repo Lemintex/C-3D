@@ -4,32 +4,32 @@
 #include <math.h>
 
 typedef struct matrix_4x4 {
-	float m[4][4];
+  float m[4][4];
 } matrix_4x4_t;
 
 typedef struct vec2d {
-	float u;
-	float v;
-	float w;
+  float u;
+  float v;
+  float w;
 } vec2d_t;
 
 typedef struct vec3d {
-	float x;
-	float y;
-	float z;
-	float w;
+  float x;
+  float y;
+  float z;
+  float w;
 } vec3d_t;
 
 typedef struct color {
-	unsigned char r;
-	unsigned char g;
-	unsigned char b;
+  unsigned char r;
+  unsigned char g;
+  unsigned char b;
 } color_t;
 
 typedef struct triangle {
-	vec3d_t verts[3];
-	vec2d_t texture[3];
-	color_t color;
+  vec3d_t verts[3];
+  vec2d_t texture[3];
+  color_t color;
 } triangle_t;
 
 // VEC2D
@@ -63,7 +63,7 @@ vec3d_t vec3_cross(vec3d_t *v1, vec3d_t *v2);
 vec3d_t vec3_mul_mat4(vec3d_t *v, matrix_4x4_t *m);
 
 vec3d_t vec3_intersect_plane(vec3d_t *plane_point, vec3d_t *plane_normal,
-              							 vec3d_t *line_start, vec3d_t *line_end, float *t);
+                             vec3d_t *line_start, vec3d_t *line_end, float *t);
 
 // TRIANGLE
 triangle_t triangle_mul_mat4(triangle_t *t1, matrix_4x4_t *m);
@@ -80,7 +80,7 @@ matrix_4x4_t matrix_rotation_z(float angleRad);
 matrix_4x4_t matrix_translation(float x, float y, float z);
 
 matrix_4x4_t matrix_projection(float f_fov_degrees, float f_aspect_ratio,
-							                 float f_near, float f_far);
+                               float f_near, float f_far);
 
 matrix_4x4_t matrix_multiply_matrix(matrix_4x4_t *m1, matrix_4x4_t *m2);
 

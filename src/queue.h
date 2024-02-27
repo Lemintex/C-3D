@@ -1,18 +1,18 @@
 #ifndef _QUEUE_H
 #define _QUEUE_H
 
-#include <stdlib.h>
 #include "mesh.h"
+#include <stdlib.h>
 
 typedef struct node {
-	triangle_t triangle;
-	struct node *next;
+  triangle_t triangle;
+  struct node *next;
 } node_t;
 
 typedef struct queue {
-	node_t *front;
-	node_t *rear;
-	size_t len;
+  node_t *front;
+  node_t *rear;
+  size_t len;
 } queue_t;
 
 queue_t *create_queue();
