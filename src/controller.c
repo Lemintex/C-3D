@@ -1,6 +1,6 @@
 #include "controller.h"
 #include <SDL2/SDL_events.h>
-#include <stdint.h>
+#include <stdio.h>
 
 extern options_t options;
 
@@ -10,16 +10,13 @@ void handle_keyboard_input(SDL_Event *e, unsigned short *mov) {
   handle_render_mode(e);
 }
 
-void handle_mouse_input(SDL_Event *e) {
+void handle_mouse_input(SDL_Event *e, unsigned short *mov) {
   if (e->type != SDL_MOUSEMOTION) {
     return;
   }
 
   // this is only reached if the event is mouse movement
-  SDL_MouseMotionEvent mouse_motion = e->motion;
-  int32_t x = mouse_motion.xrel;
-  int32_t y = mouse_motion.yrel;
-
+  handle_look(e, mov);
 
 }
 
@@ -116,4 +113,19 @@ void handle_render_mode(SDL_Event *e) {
   }
 }
 
-void handle_look(SDL_Event *e) {}
+void handle_look(SDL_Event *e, unsigned short *mov) {
+  SDL_MouseMotionEvent mouse_motion = e->motion;
+  int x = mouse_motion.xrel;
+  int y = mouse_motion.yrel;
+
+  printf("X: %d, Y: %d\n", x, y);
+  int bit = 0;
+  if (x < 0) {
+    bit = 7;
+  }
+  else if (x > 0)
+  {
+    bit = 8;
+  }
+  *mov ^= 1UL << bit;
+}

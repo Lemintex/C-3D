@@ -61,6 +61,10 @@ int main(int argc, char **argv) {
           SDL_DestroyWindow(window);
           return 0;
         }
+        break;
+      case SDL_MOUSEMOTION:
+        handle_mouse_input(&event, &camera.mov);
+        break;
       }
     }
     Uint64 current_frame_time = SDL_GetPerformanceCounter();
