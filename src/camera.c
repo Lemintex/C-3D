@@ -1,4 +1,7 @@
 #include "camera.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <SDL2/SDL_events.h>
 
 extern camera_t camera;
 extern options_t options;
@@ -24,12 +27,16 @@ void camera_move() {
   camera.look_dir = vec3_normal(&camera.look_dir);
   vec3d_t forward = vec3_mul(&camera.look_dir, delta_time * movement_speed);
 
+  // move forwards
   if (camera_get_movement_bit(1)) {
     camera.pos = vec3_add(&camera.pos, &forward);
   }
+
+  // move backwards
   if (camera_get_movement_bit(2)) {
     camera.pos = vec3_sub(&camera.pos, &forward);
   }
+
   if (camera_get_movement_bit(3)) {
     camera.pos.x += delta_time * movement_speed;
   }
@@ -45,12 +52,36 @@ void camera_move() {
 }
 
 void camera_look() {
-  if (camera_get_movement_bit(7)) {
-    camera.yaw += delta_time;
+  int x, y;
+  SDL_GetRelativeMouseState(&x, &y);
+
+  // look up
+  // TODO
+  
+  // look down
+  // TODO
+
+  // look left
+  // TODO
+  if (camera_get_look_bit(3)) {
+    printf("%f\n",(float)camera.yaw_speed);
+    camera.yaw += delta_time * (float)camera.yaw_speed;
   }
-  if (camera_get_movement_bit(8)) {
-    camera.yaw -= delta_time;
+
+  // look right
+  // TODO4
+  if (camera_get_look_bit(4)) {
+    camera.yaw -= delta_time * camera.yaw_speed;
   }
+  // if (camera_get_movement_bit(7)) {
+  //   camera.yaw += delta_time;
+  // }
+  // if (camera_get_movement_bit(8)) {
+  //   printf("%s\n", "Yaw Decreased");
+  //   camera.yaw -= delta_time;
+  // }
 }
 
 int camera_get_movement_bit(int n) { return (camera.mov >> n) & 1U; }
+
+int camera_get_look_bit(int n) { return (camera.look >> n) & 1U; }

@@ -8,6 +8,7 @@
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_video.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -49,6 +50,7 @@ int main(int argc, char **argv) {
   while (1) {
     SDL_Event event;
 
+        bool mouse_moved = false;
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
       case SDL_QUIT:
@@ -63,10 +65,17 @@ int main(int argc, char **argv) {
         }
         break;
       case SDL_MOUSEMOTION:
-        handle_mouse_input(&event, &camera.mov);
+        handle_mouse_input(&event, &camera.look);
+          mouse_moved = true;
         break;
       }
     }
+    
+    // if the mouse want's moved, the user isn't looking with the camera and all look bits should be 0
+    if (!mouse_moved) {
+      camera.look &= 0;
+    }
+
     Uint64 current_frame_time = SDL_GetPerformanceCounter();
     delta_time = (double)(current_frame_time - previous_frame_time) /
                  SDL_GetPerformanceFrequency();

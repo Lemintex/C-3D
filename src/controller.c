@@ -1,7 +1,9 @@
 #include "controller.h"
+#include "camera.h"
 #include <SDL2/SDL_events.h>
 #include <stdio.h>
 
+extern camera_t camera;
 extern options_t options;
 
 void handle_keyboard_input(SDL_Event *e, unsigned short *mov) {
@@ -17,7 +19,6 @@ void handle_mouse_input(SDL_Event *e, unsigned short *mov) {
 
   // this is only reached if the event is mouse movement
   handle_look(e, mov);
-
 }
 
 /*
@@ -27,8 +28,6 @@ void handle_mouse_input(SDL_Event *e, unsigned short *mov) {
  * 4 = right
  * 5 = ascend
  * 6 = descend
- * 7 = yaw left
- * 8 = yaw right
  */
 void handle_movement(SDL_Event *e, unsigned short *mov) {
   int bit = 0;
@@ -115,17 +114,28 @@ void handle_render_mode(SDL_Event *e) {
 
 void handle_look(SDL_Event *e, unsigned short *mov) {
   SDL_MouseMotionEvent mouse_motion = e->motion;
-  int x = mouse_motion.xrel;
-  int y = mouse_motion.yrel;
+  int x = 0, y = 0;
+  // Enable relative mouse mode
+  if (SDL_SetRelativeMouseMode(SDL_TRUE) != 0) {
+    SDL_Log("Unable to enable relative mouse mode: %s", SDL_GetError());
+  }
 
-  printf("X: %d, Y: %d\n", x, y);
+  SDL_GetRelativeMouseState(&x, &y);
+
+  camera.yaw_speed = abs(x);
+  camera.pitch_speed = abs(y);
+
   int bit = 0;
+    bit = 3;
   if (x < 0) {
-    bit = 7;
+    *mov |= (1UL << bit);
+  } else {
+    *mov &= ~(1UL << bit);
   }
-  else if (x > 0)
-  {
-    bit = 8;
+    bit = 4;
+  if (x > 0) {
+    *mov |= (1UL << bit);
+  } else {
+    *mov &= ~(1UL << bit);
   }
-  *mov ^= 1UL << bit;
 }
