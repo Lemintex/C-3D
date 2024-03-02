@@ -1,7 +1,5 @@
 #include "camera.h"
 #include <stdio.h>
-#include <stdlib.h>
-#include <SDL2/SDL_events.h>
 
 extern camera_t camera;
 extern options_t options;
@@ -52,27 +50,38 @@ void camera_move() {
 }
 
 void camera_look() {
-  int x, y;
-  SDL_GetRelativeMouseState(&x, &y);
+  float mouse_sensitivity = .25;
 
   // look up
   // TODO
+  if (camera_get_look_bit(1)) {
+
+  }
   
   // look down
   // TODO
+  if (camera_get_look_bit(2)) {
+
+  }
 
   // look left
   // TODO
   if (camera_get_look_bit(3)) {
-    printf("%f\n",(float)camera.yaw_speed);
-    camera.yaw += delta_time * (float)camera.yaw_speed;
+    camera.yaw += delta_time * camera.yaw_speed * mouse_sensitivity;
+  // reset yaw speed
+  // printf("RESET YAW SPEED");
+  camera.yaw_speed = 0;
+    // printf("CAMERA Left yaw speed: %d\n", camera.yaw_speed);
+  } else {
+    // printf("%s", "Not looking left\n");
   }
 
   // look right
   // TODO4
   if (camera_get_look_bit(4)) {
-    camera.yaw -= delta_time * camera.yaw_speed;
+    camera.yaw -= delta_time * camera.yaw_speed * mouse_sensitivity;
   }
+
   // if (camera_get_movement_bit(7)) {
   //   camera.yaw += delta_time;
   // }
@@ -80,6 +89,7 @@ void camera_look() {
   //   printf("%s\n", "Yaw Decreased");
   //   camera.yaw -= delta_time;
   // }
+  //
 }
 
 int camera_get_movement_bit(int n) { return (camera.mov >> n) & 1U; }

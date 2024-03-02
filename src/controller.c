@@ -122,7 +122,8 @@ void handle_look(SDL_Event *e, unsigned short *mov) {
 
   SDL_GetRelativeMouseState(&x, &y);
 
-  camera.yaw_speed = abs(x);
+  camera.yaw_speed += abs(x);
+  // printf("Yaw speed: %d", x);
   camera.pitch_speed = abs(y);
 
   int bit = 0;
