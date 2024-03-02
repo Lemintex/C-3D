@@ -53,43 +53,28 @@ void camera_look() {
   float mouse_sensitivity = .25;
 
   // look up
-  // TODO
   if (camera_get_look_bit(1)) {
-
+    camera.pitch += delta_time * camera.pitch_speed * mouse_sensitivity;
+    camera.pitch_speed = 0;
   }
   
   // look down
-  // TODO
   if (camera_get_look_bit(2)) {
-
+    camera.pitch -= delta_time * camera.pitch_speed * mouse_sensitivity;
+    camera.pitch_speed = 0;
   }
 
   // look left
-  // TODO
   if (camera_get_look_bit(3)) {
     camera.yaw += delta_time * camera.yaw_speed * mouse_sensitivity;
-  // reset yaw speed
-  // printf("RESET YAW SPEED");
-  camera.yaw_speed = 0;
-    // printf("CAMERA Left yaw speed: %d\n", camera.yaw_speed);
-  } else {
-    // printf("%s", "Not looking left\n");
+    camera.yaw_speed = 0;
   }
 
   // look right
-  // TODO4
   if (camera_get_look_bit(4)) {
     camera.yaw -= delta_time * camera.yaw_speed * mouse_sensitivity;
+    camera.yaw_speed = 0;
   }
-
-  // if (camera_get_movement_bit(7)) {
-  //   camera.yaw += delta_time;
-  // }
-  // if (camera_get_movement_bit(8)) {
-  //   printf("%s\n", "Yaw Decreased");
-  //   camera.yaw -= delta_time;
-  // }
-  //
 }
 
 int camera_get_movement_bit(int n) { return (camera.mov >> n) & 1U; }

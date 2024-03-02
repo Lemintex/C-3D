@@ -29,8 +29,11 @@ void draw_mesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture) {
   vec3d_t up = (vec3d_t){0, 1, 0, 1};
   vec3d_t target = (vec3d_t){0, 0, 1, 1};
   matrix_4x4_t yaw = matrix_rotation_y(camera.yaw);
+  matrix_4x4_t pitch = matrix_rotation_z(camera.pitch);
 
-  camera.look_dir = vec3_mul_mat4(&target, &yaw);
+  matrix_4x4_t look = matrix_multiply_matrix(&yaw, &pitch);
+
+  camera.look_dir = vec3_mul_mat4(&target, &look);
   target = vec3_add(&camera.pos, &camera.look_dir);
 
   matrix_4x4_t camera_matrix = matrix_point_at(&camera.pos, &target, &up);

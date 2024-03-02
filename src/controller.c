@@ -123,17 +123,31 @@ void handle_look(SDL_Event *e, unsigned short *mov) {
   SDL_GetRelativeMouseState(&x, &y);
 
   camera.yaw_speed += abs(x);
-  // printf("Yaw speed: %d", x);
-  camera.pitch_speed = abs(y);
+  camera.pitch_speed += abs(y);
 
   int bit = 0;
-    bit = 3;
+  bit = 1;
+  if (y < 0) {
+    *mov |= (1UL << bit);
+  } else {
+    *mov &= ~(1UL << bit);
+  }
+
+  bit = 2;
+  if (y > 0) {
+    *mov |= (1UL << bit);
+  } else {
+    *mov &= ~(1UL << bit);
+  }
+
+  bit = 3;
   if (x < 0) {
     *mov |= (1UL << bit);
   } else {
     *mov &= ~(1UL << bit);
   }
-    bit = 4;
+
+  bit = 4;
   if (x > 0) {
     *mov |= (1UL << bit);
   } else {
