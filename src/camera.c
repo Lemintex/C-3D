@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "3dmath.h"
 #include <stdio.h>
 
 extern camera_t camera;
@@ -22,30 +23,35 @@ void camera_update() {
 
 void camera_move() {
   unsigned short movement_speed = options.movement_speed;
-  camera.look_dir = vec3_normal(&camera.look_dir);
-  vec3d_t forward = vec3_mul(&camera.look_dir, delta_time * movement_speed);
 
-  // move forwards
+  // FORWARD
   if (camera_get_movement_bit(1)) {
-    camera.pos = vec3_add(&camera.pos, &forward);
+    camera.pos = vec3_add(&camera.pos, &camera.look_dir.forward);
   }
 
-  // move backwards
+  // BACK
   if (camera_get_movement_bit(2)) {
-    camera.pos = vec3_sub(&camera.pos, &forward);
+    camera.pos = vec3_sub(&camera.pos, &camera.look_dir.forward);
   }
 
+  // LEFT
   if (camera_get_movement_bit(3)) {
-    camera.pos.x += delta_time * movement_speed;
+    camera.pos = vec3_sub(&camera.pos, &camera.look_dir.right);
   }
+
+  // RIGHT
   if (camera_get_movement_bit(4)) {
-    camera.pos.x -= delta_time * movement_speed;
+    camera.pos = vec3_add(&camera.pos, &camera.look_dir.right);
   }
+
+  // UP
   if (camera_get_movement_bit(5)) {
-    camera.pos.y += delta_time * movement_speed;
+    camera.pos = vec3_add(&camera.pos, &camera.look_dir.up);
   }
+
+  // DOWN
   if (camera_get_movement_bit(6)) {
-    camera.pos.y -= delta_time * movement_speed;
+    camera.pos = vec3_sub(&camera.pos, &camera.look_dir.up);
   }
 }
 
@@ -54,13 +60,13 @@ void camera_look() {
 
   // look up
   if (camera_get_look_bit(1)) {
-    camera.pitch += delta_time * camera.pitch_speed * mouse_sensitivity;
+    camera.pitch -= delta_time * camera.pitch_speed * mouse_sensitivity;
     camera.pitch_speed = 0;
   }
-  
+
   // look down
   if (camera_get_look_bit(2)) {
-    camera.pitch -= delta_time * camera.pitch_speed * mouse_sensitivity;
+    camera.pitch += delta_time * camera.pitch_speed * mouse_sensitivity;
     camera.pitch_speed = 0;
   }
 

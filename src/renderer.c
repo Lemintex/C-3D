@@ -36,15 +36,13 @@ void draw_mesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture) {
   matrix_4x4_t pitch = matrix_rotation_x(camera.pitch);
 
   matrix_4x4_t look = matrix_multiply_matrix(&pitch, &yaw);
-  vec3d_t vLookDir = vec3_mul_mat4(&vLookTemp, &look);
-  vec3d_t vUp = vec3_mul_mat4(&vUpTemp, &look);
-  vec3d_t vRight = vec3_cross(&vLookDir, &vUp);
-  // matrix_4x4_t look = yaw;
+  camera.look_dir.forward = vec3_mul_mat4(&vLookTemp, &look);
+  camera.look_dir.up = vec3_mul_mat4(&vUpTemp, &look);
+  camera.look_dir.right = vec3_cross(&camera.look_dir.forward, &camera.look_dir.up);
 
-  camera.look_dir = vLookDir;
-  target = vec3_add(&camera.pos, &camera.look_dir);
+  target = vec3_add(&camera.pos, &camera.look_dir.forward);
 
-  matrix_4x4_t camera_matrix = matrix_point_at(&camera.pos, &target, &vUp);
+  matrix_4x4_t camera_matrix = matrix_point_at(&camera.pos, &target, &camera.look_dir.up);
 
   matrix_4x4_t camera_view = matrix_quick_inverse(&camera_matrix);
 

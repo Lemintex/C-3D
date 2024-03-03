@@ -82,6 +82,8 @@ matrix_4x4_t matrix_translation(float x, float y, float z);
 matrix_4x4_t matrix_projection(float f_fov_degrees, float f_aspect_ratio,
                                float f_near, float f_far);
 
+matrix_4x4_t matrix_add_matrix(matrix_4x4_t *m1, matrix_4x4_t *m2);
+
 matrix_4x4_t matrix_multiply_matrix(matrix_4x4_t *m1, matrix_4x4_t *m2);
 
 matrix_4x4_t matrix_point_at(vec3d_t *pos, vec3d_t *target, vec3d_t *up);

@@ -152,6 +152,18 @@ matrix_4x4_t matrix_projection(float f_fov_degrees, float f_aspect_ratio,
   return matrix;
 }
 
+// function that adds two matrices together
+matrix_4x4_t matrix_add_matrix(matrix_4x4_t *m1, matrix_4x4_t *m2) {
+  matrix_4x4_t matrix = {0};
+
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      matrix.m[i][j] = m1->m[i][j] + m2->m[i][j];
+    }
+  }
+  return matrix;
+}
+
 matrix_4x4_t matrix_multiply_matrix(matrix_4x4_t *m1, matrix_4x4_t *m2) {
   matrix_4x4_t matrix = {0};
 

@@ -104,7 +104,9 @@ void init() {
 
 void init_camera() {
   camera.pos = (vec3d_t){0, 0, 0, 1};
-  camera.look_dir = (vec3d_t){0, 0, 1, 1};
+  camera.look_dir.up = (vec3d_t){0, 0, 1, 1};
+  camera.look_dir.forward = (vec3d_t){1, 0, 0, 1};
+  camera.look_dir.right = (vec3d_t){0, 1, 0, 1};
 }
 
 void init_options() {

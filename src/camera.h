@@ -4,9 +4,15 @@
 #include "3dmath.h"
 #include "options.h"
 
+typedef struct look {
+  vec3d_t forward;
+  vec3d_t up;
+  vec3d_t right;
+} look_t;
+
 typedef struct camera {
   vec3d_t pos;
-  vec3d_t look_dir;
+  look_t look_dir;
   unsigned short mov;
   unsigned short look;
   float pitch,yaw; 
