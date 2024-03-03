@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "3dmath.h"
 
 #include <SDL2/SDL_render.h>
 #include <stdio.h>
@@ -26,17 +27,24 @@ void draw_mesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture) {
 
   mat_world = matrix_multiply_matrix(&mat_world, &mat_trans);
 
-  vec3d_t up = (vec3d_t){0, 1, 0, 1};
+  vec3d_t vRightTemp = (vec3d_t) {1, 0, 0, 1};
+  vec3d_t vUpTemp = (vec3d_t){0, 1, 0, 1};
+  vec3d_t vLookTemp = (vec3d_t){0, 0, 1, 1};
+
   vec3d_t target = (vec3d_t){0, 0, 1, 1};
   matrix_4x4_t yaw = matrix_rotation_y(camera.yaw);
-  matrix_4x4_t pitch = matrix_rotation_z(camera.pitch);
+  matrix_4x4_t pitch = matrix_rotation_x(camera.pitch);
 
-  matrix_4x4_t look = matrix_multiply_matrix(&yaw, &pitch);
+  matrix_4x4_t look = matrix_multiply_matrix(&pitch, &yaw);
+  vec3d_t vLookDir = vec3_mul_mat4(&vLookTemp, &look);
+  vec3d_t vUp = vec3_mul_mat4(&vUpTemp, &look);
+  vec3d_t vRight = vec3_cross(&vLookDir, &vUp);
+  // matrix_4x4_t look = yaw;
 
-  camera.look_dir = vec3_mul_mat4(&target, &look);
+  camera.look_dir = vLookDir;
   target = vec3_add(&camera.pos, &camera.look_dir);
 
-  matrix_4x4_t camera_matrix = matrix_point_at(&camera.pos, &target, &up);
+  matrix_4x4_t camera_matrix = matrix_point_at(&camera.pos, &target, &vUp);
 
   matrix_4x4_t camera_view = matrix_quick_inverse(&camera_matrix);
 

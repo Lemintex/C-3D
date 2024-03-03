@@ -122,8 +122,8 @@ void handle_look(SDL_Event *e, unsigned short *mov) {
 
   SDL_GetRelativeMouseState(&x, &y);
 
-  camera.yaw_speed += abs(x);
-  camera.pitch_speed += abs(y);
+  camera.yaw_speed = abs(x);
+  camera.pitch_speed = abs(y);
 
   int bit = 0;
   bit = 1;
@@ -153,4 +153,5 @@ void handle_look(SDL_Event *e, unsigned short *mov) {
   } else {
     *mov &= ~(1UL << bit);
   }
+  camera_look();
 }
