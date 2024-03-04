@@ -26,6 +26,11 @@ float *depth_buffer;
 double delta_time = 0;
 
 int main(int argc, char **argv) {
+  printf("You have entered %d arguments:\n", argc);
+ 
+    for (int i = 0; i < argc; i++) {
+        printf("%s\n", argv[i]);
+    }
   Uint64 previous_frame_time = SDL_GetPerformanceCounter();
 
   init();
