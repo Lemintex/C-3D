@@ -5,15 +5,19 @@
 #include "options.h"
 #include "renderer.h"
 
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include <dirent.h>
+
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_video.h>
-#include <stdio.h>
-#include <stdbool.h>
-
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_surface.h>
 
+char* get_extension(char* file);
+void read_mash_files();
 void init();
 void init_camera();
 void init_options();
@@ -26,6 +30,7 @@ float *depth_buffer;
 double delta_time = 0;
 
 int main(int argc, char **argv) {
+  read_mash_files();
   printf("You have entered %d arguments:\n", argc);
  
     for (int i = 0; i < argc; i++) {
@@ -117,4 +122,40 @@ void init_camera() {
 void init_options() {
   options.movement_speed = 0;
   options.display_type = WIREFRAME;
+}
+
+void read_mash_files() {
+  bool obj_found = false;
+  bool texture_found = false;
+
+  struct dirent **file_list;
+  int files = 0;
+
+  files = scandir("./res", &file_list, NULL, alphasort);
+  while (files > 2) {// we don't care about "."  or ".."
+    files--;
+    char* file_name = file_list[files]->d_name;
+    char *ext = get_extension(file_name);
+
+    if (!obj_found && strcmp(ext, "obj")) {
+      obj_found = true;
+      printf("Object: %s\n", file_name);
+    }
+
+    if (!texture_found && strcmp(ext, "png")) {
+      texture_found = true;
+      printf("Texture: %s\n", file_name);
+    }
+
+    free(file_list[files]);
+  }
+}
+
+char* get_extension(char* ext) {
+
+  char *dot_position = strchr(ext, '.');
+  if (dot_position) {
+    dot_position++;
+  }
+  return dot_position;
 }
