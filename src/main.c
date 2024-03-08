@@ -17,7 +17,7 @@
 #include <SDL2/SDL_surface.h>
 
 char* get_extension(char* file);
-void read_mash_files();
+void read_mash_files(char* mesh_string, char* texture_string);
 void init();
 void init_camera();
 void init_options();
@@ -54,6 +54,8 @@ int main(int argc, char **argv) {
 
   SDL_Surface *screen = SDL_GetWindowSurface(window);
 
+  char* mesh_string;
+  char* texture_string;
   mesh_t *ship = read_mesh_from_file("res/A001_Spyro.obj", 1);
   SDL_Surface *texture = IMG_Load("res/A001_Spyro.png");
 
@@ -124,7 +126,7 @@ void init_options() {
   options.display_type = WIREFRAME;
 }
 
-void read_mash_files() {
+void read_mash_files(char* mesh_string, char* texture_string) {
   bool obj_found = false;
   bool texture_found = false;
 
