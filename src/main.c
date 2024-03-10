@@ -6,6 +6,7 @@
 #include "renderer.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <dirent.h>
@@ -17,7 +18,7 @@
 #include <SDL2/SDL_surface.h>
 
 char* get_extension(char* file);
-void read_mash_files(char* mesh_string, char* texture_string);
+void read_mash_files(char** mesh_string, char** texture_string);
 void init();
 void init_camera();
 void init_options();
@@ -30,12 +31,6 @@ float *depth_buffer;
 double delta_time = 0;
 
 int main(int argc, char **argv) {
-  read_mash_files();
-  printf("You have entered %d arguments:\n", argc);
- 
-    for (int i = 0; i < argc; i++) {
-        printf("%s\n", argv[i]);
-    }
   Uint64 previous_frame_time = SDL_GetPerformanceCounter();
 
   init();
@@ -56,8 +51,31 @@ int main(int argc, char **argv) {
 
   char* mesh_string;
   char* texture_string;
-  mesh_t *ship = read_mesh_from_file("res/A001_Spyro.obj", 1);
-  SDL_Surface *texture = IMG_Load("res/A001_Spyro.png");
+  read_mash_files(&mesh_string, &texture_string);
+  printf("Mesh: %s\n", mesh_string);
+  printf("Texture: %s\n", texture_string);
+  char* full_mesh_string = (char*)malloc(sizeof(char) * (strlen("res/") + strlen(mesh_string)) + 1);
+  char* full_texture_string = (char*)malloc(sizeof(char) * (strlen("res/") + strlen(texture_string)) + 1);
+    
+    // Copy "res/" to the result string
+    strcpy(full_mesh_string, "res/");
+    
+    // Concatenate the original filename to the result string
+    strcat(full_mesh_string, mesh_string);
+    
+    // Use the result string
+    printf("Result: '%s'\n", full_mesh_string);
+    
+  strcpy(full_texture_string, "res/");
+  strcat(full_texture_string, texture_string);
+  printf("Result: '%s'\n", full_texture_string);
+  char* mesh = (char*)malloc(sizeof(char) * (strlen("res/") + strlen(mesh_string)) + 1);
+  strcpy(mesh, "res/");
+  strcat(mesh, mesh_string);
+  printf("Mesh: %s\n", mesh);
+
+  mesh_t *ship = read_mesh_from_file(mesh, 1);
+  SDL_Surface *texture = IMG_Load(full_texture_string);
 
   while (1) {
     SDL_Event event;
@@ -126,7 +144,7 @@ void init_options() {
   options.display_type = WIREFRAME;
 }
 
-void read_mash_files(char* mesh_string, char* texture_string) {
+void read_mash_files(char** mesh_string, char** texture_string) {
   bool obj_found = false;
   bool texture_found = false;
 
@@ -139,13 +157,17 @@ void read_mash_files(char* mesh_string, char* texture_string) {
     char* file_name = file_list[files]->d_name;
     char *ext = get_extension(file_name);
 
-    if (!obj_found && strcmp(ext, "obj")) {
+    if (!obj_found && !strcmp(ext, "obj")) {
       obj_found = true;
-      printf("Object: %s\n", file_name);
+      *mesh_string = (char*)malloc(sizeof(char) * strlen(file_name) + 1);
+      strcpy(*mesh_string, file_name);
+      printf("Object: %s\n", *mesh_string);
     }
 
-    if (!texture_found && strcmp(ext, "png")) {
+    if (!texture_found && !strcmp(ext, "png")) {
       texture_found = true;
+      *texture_string = (char*)malloc(sizeof(char) * strlen(file_name) + 1);
+      strcpy(*texture_string, file_name);
       printf("Texture: %s\n", file_name);
     }
 
