@@ -5,20 +5,20 @@
 #include "options.h"
 #include "renderer.h"
 
+#include <dirent.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include <dirent.h>
 
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_video.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_events.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_video.h>
 
-char* get_extension(char* file);
-void read_mash_files(char** mesh_string, char** texture_string);
+char *get_extension(char *file);
+void read_mash_files(char **mesh_string, char **texture_string);
 void init();
 void init_camera();
 void init_options();
@@ -49,38 +49,27 @@ int main(int argc, char **argv) {
 
   SDL_Surface *screen = SDL_GetWindowSurface(window);
 
-  char* mesh_string;
-  char* texture_string;
+  char *mesh_string;
+  char *texture_string;
   read_mash_files(&mesh_string, &texture_string);
-  printf("Mesh: %s\n", mesh_string);
-  printf("Texture: %s\n", texture_string);
-  char* full_mesh_string = (char*)malloc(sizeof(char) * (strlen("res/") + strlen(mesh_string)) + 1);
-  char* full_texture_string = (char*)malloc(sizeof(char) * (strlen("res/") + strlen(texture_string)) + 1);
-    
-    // Copy "res/" to the result string
-    strcpy(full_mesh_string, "res/");
-    
-    // Concatenate the original filename to the result string
-    strcat(full_mesh_string, mesh_string);
-    
-    // Use the result string
-    printf("Result: '%s'\n", full_mesh_string);
-    
+  char *full_mesh_string =
+      (char *)malloc(sizeof(char) * (strlen("res/") + strlen(mesh_string)) + 1);
+  char *full_texture_string = (char *)malloc(
+      sizeof(char) * (strlen("res/") + strlen(texture_string)) + 1);
+  strcpy(full_mesh_string, "res/");
+  strcat(full_mesh_string, mesh_string);
   strcpy(full_texture_string, "res/");
   strcat(full_texture_string, texture_string);
-  printf("Result: '%s'\n", full_texture_string);
-  char* mesh = (char*)malloc(sizeof(char) * (strlen("res/") + strlen(mesh_string)) + 1);
-  strcpy(mesh, "res/");
-  strcat(mesh, mesh_string);
-  printf("Mesh: %s\n", mesh);
 
-  mesh_t *ship = read_mesh_from_file(mesh, 1);
+  mesh_t *ship = read_mesh_from_file(full_mesh_string, 1);
   SDL_Surface *texture = IMG_Load(full_texture_string);
 
+  free(full_mesh_string);
+  free(full_texture_string);
   while (1) {
     SDL_Event event;
 
-        bool mouse_moved = false;
+    bool mouse_moved = false;
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
       case SDL_QUIT:
@@ -96,12 +85,13 @@ int main(int argc, char **argv) {
         break;
       case SDL_MOUSEMOTION:
         handle_mouse_input(&event, &camera.look);
-          mouse_moved = true;
+        mouse_moved = true;
         break;
       }
     }
-    
-    // if the mouse want's moved, the user isn't looking with the camera and all look bits should be 0
+
+    // if the mouse want's moved, the user isn't looking with the camera and all
+    // look bits should be 0
     if (!mouse_moved) {
       camera.look &= 0;
     }
@@ -144,7 +134,7 @@ void init_options() {
   options.display_type = WIREFRAME;
 }
 
-void read_mash_files(char** mesh_string, char** texture_string) {
+void read_mash_files(char **mesh_string, char **texture_string) {
   bool obj_found = false;
   bool texture_found = false;
 
@@ -152,30 +142,28 @@ void read_mash_files(char** mesh_string, char** texture_string) {
   int files = 0;
 
   files = scandir("./res", &file_list, NULL, alphasort);
-  while (files > 2) {// we don't care about "."  or ".."
+  while (files > 2) { // we don't care about "."  or ".."
     files--;
-    char* file_name = file_list[files]->d_name;
+    char *file_name = file_list[files]->d_name;
     char *ext = get_extension(file_name);
 
     if (!obj_found && !strcmp(ext, "obj")) {
       obj_found = true;
-      *mesh_string = (char*)malloc(sizeof(char) * strlen(file_name) + 1);
+      *mesh_string = (char *)malloc(sizeof(char) * strlen(file_name) + 1);
       strcpy(*mesh_string, file_name);
-      printf("Object: %s\n", *mesh_string);
     }
 
     if (!texture_found && !strcmp(ext, "png")) {
       texture_found = true;
-      *texture_string = (char*)malloc(sizeof(char) * strlen(file_name) + 1);
+      *texture_string = (char *)malloc(sizeof(char) * strlen(file_name) + 1);
       strcpy(*texture_string, file_name);
-      printf("Texture: %s\n", file_name);
     }
 
     free(file_list[files]);
   }
 }
 
-char* get_extension(char* ext) {
+char *get_extension(char *ext) {
 
   char *dot_position = strchr(ext, '.');
   if (dot_position) {
