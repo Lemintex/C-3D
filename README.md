@@ -1,6 +1,6 @@
 # C-3D
 ## What is C-3D
-C-3D is a 3D rendering engine using as few libraries as possible, meaning no OpenGL or Vulcan for easy rendering. I did this as a challenge and to allow me to gain a better undersanding of the rendering pipeline.
+C-3D is a 3D rendering engine using few libraries, meaning no OpenGL or Vulcan for easy rendering. I did this as a challenge and to allow me to gain a better undersanding of the rendering pipeline.
 
 ## Features
 C-3D has the following features:
@@ -22,6 +22,12 @@ C-3D can be run by doing the follwing:
 - cd into the root directory of the cloned repository and run ```gcc src/*.c -o build/main -lSDL2 -lm -lSDL2_image```
 - run ```./build/main```
 
+### 1.1
+- cd into the root directory and run the command ```chmod +x install_dependencies.sh``` and ```chmod +x compile.sh```
+- run ```./install_dependencies.sh``` to install the required libraries
+- put the .obj file and texture .png file in the res/ folder
+- run ```./compile.sh``` to compile and run C-3D
+
 ## libraries
 As well as some standard libraries, C-3D uses the following 3rd party libraries:
 - SDL2
@@ -38,10 +44,19 @@ As well as some standard libraries, C-3D uses the following 3rd party libraries:
 ### 1.0
 - Initial implementation of rendering engine
 
+### 1.1
+- Improved camera directional movement
+- Added modifiable speed to camera movement ```press up/down arrow keys!```
+- Added render mode control to options ```press left tab!```
+- Improved camera look by adding mouse compatability
+- Improved camera look by adding pitch
+- Added dynamic .obj/.png file reading (no more hard coded filenames!)
+- Added helper scripts for debian users
+
 ## Future Development
 Depending on future demand, development on C-3D may continue with the following improvements in mind
 - Bug fixes
-- Improved camera movement
+- ~~Improved camera movement~~
 - Dynamic movement/rotation/scaling of meshes
-- Drawing settings as settings
+- ~~Drawing settings as settings~~
 - Animations
