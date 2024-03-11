@@ -1,543 +1,548 @@
 #include "renderer.h"
+#include "3dmath.h"
 
 #include <SDL2/SDL_render.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "3dmath.h"
-#include "queue.h"
-
+extern options_t options;
 extern camera_t camera;
 extern int width, height;
-extern float *depthBuffer;
+extern float *depth_buffer;
 
-void DrawMesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture)
-{
-	int trianglesToDraw = 0;
-	triangle_t *sortedTriangles = (triangle_t *)malloc(0);
+void draw_mesh(SDL_Renderer *renderer, mesh_t *mesh, SDL_Surface *texture) {
+  int triangles_to_draw = 0;
+  triangle_t *sorted_triangles = (triangle_t *)malloc(0);
 
-	matrix_4x4_t matProj = matrix_projection(90, width / height, 0.1, 1000);
+  matrix_4x4_t mat_proj = matrix_projection(90, width / height, 0.1, 1000);
 
-	static float delta = 0;
-	matrix_4x4_t matRotZ = matrix_rotationZ(delta);
-	matrix_4x4_t matRotX = matrix_rotationX(delta);
-	matrix_4x4_t matRotA;
-	matrix_4x4_t matTrans = matrix_translation(5, 0, 10);
+  static float delta = 0;
+  matrix_4x4_t mat_rot_z = matrix_rotation_z(delta);
+  matrix_4x4_t mat_rot_x = matrix_rotation_x(delta);
+  matrix_4x4_t mat_rot_a;
+  matrix_4x4_t mat_trans = matrix_translation(5, 0, 10);
 
-	matrix_4x4_t matWorld = matrix_identity();
-	matRotA = matrix_multiplyMatrix(&matRotZ, &matRotX);
+  matrix_4x4_t mat_world = matrix_identity();
+  mat_rot_a = matrix_multiply_matrix(&mat_rot_z, &mat_rot_x);
 
-	matWorld = matrix_multiplyMatrix(&matWorld, &matTrans);
+  mat_world = matrix_multiply_matrix(&mat_world, &mat_trans);
 
-	vec3d_t up = (vec3d_t){0, 1, 0, 1};
-	vec3d_t target = (vec3d_t){0, 0, 1, 1};
-	matrix_4x4_t yaw = matrix_rotationY(camera.yaw);
+  vec3d_t vRightTemp = (vec3d_t){1, 0, 0, 1};
+  vec3d_t vUpTemp = (vec3d_t){0, 1, 0, 1};
+  vec3d_t vLookTemp = (vec3d_t){0, 0, 1, 1};
 
-	camera.lookDir = vec3_mul_mat4(&target, &yaw);
-	target = vec3_add(&camera.pos, &camera.lookDir);
+  vec3d_t target = (vec3d_t){0, 0, 1, 1};
+  matrix_4x4_t yaw = matrix_rotation_y(camera.yaw);
+  matrix_4x4_t pitch = matrix_rotation_x(camera.pitch);
 
-	matrix_4x4_t cameraMatrix = matrix_pointAt(&camera.pos, &target, &up);
+  matrix_4x4_t look = matrix_multiply_matrix(&pitch, &yaw);
+  camera.look_dir.forward = vec3_mul_mat4(&vLookTemp, &look);
+  camera.look_dir.up = vec3_mul_mat4(&vUpTemp, &look);
+  camera.look_dir.right =
+      vec3_cross(&camera.look_dir.forward, &camera.look_dir.up);
 
-	matrix_4x4_t cameraView = matrix_quickInverse(&cameraMatrix);
+  target = vec3_add(&camera.pos, &camera.look_dir.forward);
 
-	for (int i = 0; i < mesh->triangleCount; i++)
-	{
-		triangle_t triangle = mesh->triangles[i];
+  matrix_4x4_t camera_matrix =
+      matrix_point_at(&camera.pos, &target, &camera.look_dir.up);
 
-		triangle_t triangleProjected;
-		triangle_t triangleTransformed;
-		triangle_t triangleViewed;
+  matrix_4x4_t camera_view = matrix_quick_inverse(&camera_matrix);
 
-		triangleTransformed = triangle_mul_mat4(&triangle, &matWorld);
+  for (int i = 0; i < mesh->triangle_count; i++) {
+    triangle_t triangle = mesh->triangles[i];
 
-		*triangleTransformed.texture = *triangle.texture;
+    triangle_t triangle_projected;
+    triangle_t triangle_transformed;
+    triangle_t triangle_viewed;
 
-		// CALCULATE COLOUR OF TRIANGLE
-		vec3d_t normal, l1, l2;
+    triangle_transformed = triangle_mul_mat4(&triangle, &mat_world);
 
-		l1 = vec3_sub(&triangleTransformed.verts[1], &triangleTransformed.verts[0]);
-		l2 = vec3_sub(&triangleTransformed.verts[2], &triangleTransformed.verts[0]);
+    *triangle_transformed.texture = *triangle.texture;
 
-		normal = vec3_cross(&l1, &l2);
+    // CALCULATE COLOUR OF TRIANGLE
+    vec3d_t normal, l1, l2;
 
-		normal = vec3_normal(&normal);
+    l1 = vec3_sub(&triangle_transformed.verts[1],
+                  &triangle_transformed.verts[0]);
+    l2 = vec3_sub(&triangle_transformed.verts[2],
+                  &triangle_transformed.verts[0]);
 
-		vec3d_t rayFromCamera = vec3_sub(&triangleTransformed.verts[1], &camera.pos);
+    normal = vec3_cross(&l1, &l2);
 
-		if (vec3_dot(&normal, &rayFromCamera) >= 0)
-		{
-			continue;
-		}
-		vec3d_t light_direction = {0, 0, -1};
-		light_direction = vec3_normal(&light_direction);
+    normal = vec3_normal(&normal);
 
-		float dp = vec3_dot(&light_direction, &normal);
+    vec3d_t ray_from_camera =
+        vec3_sub(&triangle_transformed.verts[1], &camera.pos);
 
-		triangleViewed = triangle_mul_mat4(&triangleTransformed, &cameraView);
+    if (vec3_dot(&normal, &ray_from_camera) >= 0) {
+      continue;
+    }
+    vec3d_t light_direction = {0, 0, -1};
+    light_direction = vec3_normal(&light_direction);
 
-		*triangleViewed.texture = *triangleTransformed.texture;
+    float dp = vec3_dot(&light_direction, &normal);
 
-		// clip against near plane of camera
-		int clippedTriangles = 0;
-		triangle_t clipped[2];
+    triangle_viewed = triangle_mul_mat4(&triangle_transformed, &camera_view);
 
-		vec3d_t nearPlane = (vec3d_t){0, 0, 0.1, 1};
-		vec3d_t nearPlaneNormal = (vec3d_t){0, 0, 1, 1}; // FRONT PLANE
+    *triangle_viewed.texture = *triangle_transformed.texture;
 
-		clippedTriangles = triangle_clipAgainstPlane(&nearPlane, &nearPlaneNormal, &triangleViewed,
-													 &clipped[0], &clipped[1]);
+    // clip against near plane of camera
+    int clipped_triangles = 0;
+    triangle_t clipped[2];
 
-		for (int j = 0; j < clippedTriangles; j++)
-		{
-			triangleProjected = triangle_mul_mat4(&clipped[j], &matProj);
+    vec3d_t near_plane = (vec3d_t){0, 0, 0.1, 1};
+    vec3d_t near_plane_normal = (vec3d_t){0, 0, 1, 1}; // FRONT PLANE
 
-			*triangleProjected.texture = *clipped[j].texture;
+    clipped_triangles =
+        triangle_clip_against_plane(&near_plane, &near_plane_normal,
+                                    &triangle_viewed, &clipped[0], &clipped[1]);
 
-			triangleProjected.texture[0].u /= triangleProjected.verts[0].w;
-			triangleProjected.texture[1].u /= triangleProjected.verts[1].w;
-			triangleProjected.texture[2].u /= triangleProjected.verts[2].w;
+    for (int j = 0; j < clipped_triangles; j++) {
+      triangle_projected = triangle_mul_mat4(&clipped[j], &mat_proj);
 
-			triangleProjected.texture[0].v /= triangleProjected.verts[0].w;
-			triangleProjected.texture[1].v /= triangleProjected.verts[1].w;
-			triangleProjected.texture[2].v /= triangleProjected.verts[2].w;
+      *triangle_projected.texture = *clipped[j].texture;
 
-			triangleProjected.texture[0].w = 1.0 / triangleProjected.verts[0].w;
-			triangleProjected.texture[1].w = 1.0 / triangleProjected.verts[1].w;
-			triangleProjected.texture[2].w = 1.0 / triangleProjected.verts[2].w;
+      triangle_projected.texture[0].u /= triangle_projected.verts[0].w;
+      triangle_projected.texture[1].u /= triangle_projected.verts[1].w;
+      triangle_projected.texture[2].u /= triangle_projected.verts[2].w;
 
-			// normalise co-ordinates
-			triangleProjected.verts[0] = vec3_div(&triangleProjected.verts[0], triangleProjected.verts[0].w);
-			triangleProjected.verts[1] = vec3_div(&triangleProjected.verts[1], triangleProjected.verts[1].w);
-			triangleProjected.verts[2] = vec3_div(&triangleProjected.verts[2], triangleProjected.verts[2].w);
+      triangle_projected.texture[0].v /= triangle_projected.verts[0].w;
+      triangle_projected.texture[1].v /= triangle_projected.verts[1].w;
+      triangle_projected.texture[2].v /= triangle_projected.verts[2].w;
 
-			uint8_t shade = dp * 200 + 55;
-			triangleProjected.color = createColor(shade, shade, shade);
+      triangle_projected.texture[0].w = 1.0 / triangle_projected.verts[0].w;
+      triangle_projected.texture[1].w = 1.0 / triangle_projected.verts[1].w;
+      triangle_projected.texture[2].w = 1.0 / triangle_projected.verts[2].w;
 
-			// offset into view
-			vec3d_t vOffsetView = (vec3d_t){1, 1, 0};
+      // normalise co-ordinates
+      triangle_projected.verts[0] =
+          vec3_div(&triangle_projected.verts[0], triangle_projected.verts[0].w);
+      triangle_projected.verts[1] =
+          vec3_div(&triangle_projected.verts[1], triangle_projected.verts[1].w);
+      triangle_projected.verts[2] =
+          vec3_div(&triangle_projected.verts[2], triangle_projected.verts[2].w);
 
-			triangleProjected.verts[0] = vec3_add(&triangleProjected.verts[0], &vOffsetView);
-			triangleProjected.verts[1] = vec3_add(&triangleProjected.verts[1], &vOffsetView);
-			triangleProjected.verts[2] = vec3_add(&triangleProjected.verts[2], &vOffsetView);
+      uint8_t shade = dp * 200 + 55;
+      triangle_projected.color = create_color(shade, shade, shade);
 
-			triangleProjected.verts[0].x *= 0.5 * width;
-			triangleProjected.verts[0].y *= 0.5 * height;
+      // offset into view
+      vec3d_t vOffsetView = (vec3d_t){1, 1, 0};
 
-			triangleProjected.verts[1].x *= 0.5 * width;
-			triangleProjected.verts[1].y *= 0.5 * height;
+      triangle_projected.verts[0] =
+          vec3_add(&triangle_projected.verts[0], &vOffsetView);
+      triangle_projected.verts[1] =
+          vec3_add(&triangle_projected.verts[1], &vOffsetView);
+      triangle_projected.verts[2] =
+          vec3_add(&triangle_projected.verts[2], &vOffsetView);
 
-			triangleProjected.verts[2].x *= 0.5 * width;
-			triangleProjected.verts[2].y *= 0.5 * height;
+      triangle_projected.verts[0].x *= 0.5 * width;
+      triangle_projected.verts[0].y *= 0.5 * height;
 
-			trianglesToDraw++;
-			sortedTriangles = (triangle_t *)realloc(
-				sortedTriangles, sizeof(triangle_t) * trianglesToDraw);
-			sortedTriangles[trianglesToDraw - 1] = triangleProjected;
-		}
-	}
+      triangle_projected.verts[1].x *= 0.5 * width;
+      triangle_projected.verts[1].y *= 0.5 * height;
 
-	qsort(sortedTriangles, trianglesToDraw, sizeof(triangle_t), compareZ);
+      triangle_projected.verts[2].x *= 0.5 * width;
+      triangle_projected.verts[2].y *= 0.5 * height;
 
-	queue_t *clippedTrianglesToDraw = createQueue();
+      triangles_to_draw++;
+      sorted_triangles = (triangle_t *)realloc(
+          sorted_triangles, sizeof(triangle_t) * triangles_to_draw);
+      sorted_triangles[triangles_to_draw - 1] = triangle_projected;
+    }
+  }
 
-	for (int i = 0; i < trianglesToDraw; i++)
-	{
-		triangle_t clipped[2];
+  qsort(sorted_triangles, triangles_to_draw, sizeof(triangle_t), compareZ);
 
-		queue_t *queue = createQueue();
-		enqueue(queue, sortedTriangles[i]);
+  queue_t *clipped_triangles_to_draw = create_queue();
 
-		int nNewTriangles = 1;
+  for (int i = 0; i < triangles_to_draw; i++) {
+    triangle_t clipped[2];
 
-		for (int p = 0; p < 4; p++)
-		{
-			int trianglesToAdd = 1;
-			while (nNewTriangles > 0)
-			{
-				nNewTriangles--;
-				if (isEmpty(queue))
-					continue;
-				triangle_t test = dequeue(queue);
+    queue_t *queue = create_queue();
+    enqueue(queue, sorted_triangles[i]);
 
-				switch (p)
-				{
-				case 0:
-					trianglesToAdd = triangle_clipAgainstPlane(
-						&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){0, -1, 0, 1}), &test,
-						&clipped[0], &clipped[1]); // TOP
-					break;
+    int n_new_triangles = 1;
 
-				case 1:
-					trianglesToAdd = triangle_clipAgainstPlane(
-						&((vec3d_t){0, -width, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test,
-						&clipped[0], &clipped[1]); // BOTTOM
-					break;
+    for (int p = 0; p < 4; p++) {
+      int triangles_to_add = 1;
+      while (n_new_triangles > 0) {
+        n_new_triangles--;
+        if (is_empty(queue)) {
+          continue;
+        }
+        triangle_t test = dequeue(queue);
 
-				case 2:
-					trianglesToAdd = triangle_clipAgainstPlane(
-						&((vec3d_t){0, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test,
-						&clipped[0], &clipped[1]); // LEFT
-					break;
+        switch (p) {
+        case 0:
+          triangles_to_add = triangle_clip_against_plane(
+              &((vec3d_t){0, 0, 0, 1}), &((vec3d_t){0, -1, 0, 1}), &test,
+              &clipped[0], &clipped[1]); // TOP
+          break;
 
-				case 3:
-					trianglesToAdd = triangle_clipAgainstPlane(
-						&((vec3d_t){-height, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test,
-						&clipped[0], &clipped[1]); // RIGHT
-					break;
+        case 1:
+          triangles_to_add = triangle_clip_against_plane(
+              &((vec3d_t){0, -width, 0, 1}), &((vec3d_t){0, 1, 0, 1}), &test,
+              &clipped[0], &clipped[1]); // BOTTOM
+          break;
 
-				default:
-					break;
-				}
+        case 2:
+          triangles_to_add = triangle_clip_against_plane(
+              &((vec3d_t){0, 0, 0, 1}), &((vec3d_t){-1, 0, 0, 1}), &test,
+              &clipped[0], &clipped[1]); // LEFT
+          break;
 
-				for (int t = 0; t < trianglesToAdd; t++)
-				{
-					enqueue(queue, clipped[t]);
-				}
-			}
-			nNewTriangles = queue->len;
-		}
-		while (!isEmpty(queue))
-		{
-			enqueue(clippedTrianglesToDraw, dequeue(queue));
-		}
+        case 3:
+          triangles_to_add = triangle_clip_against_plane(
+              &((vec3d_t){-height, 0, 0, 1}), &((vec3d_t){1, 0, 0, 1}), &test,
+              &clipped[0], &clipped[1]); // RIGHT
+          break;
 
-		free(queue);
-	}
+        default:
+          break;
+        }
 
-	while (!isEmpty(clippedTrianglesToDraw))
-	{
-		triangle_t t = dequeue(clippedTrianglesToDraw);
-		DrawTriangle(renderer, &t, texture);
-	}
-	free(sortedTriangles);
-	free(clippedTrianglesToDraw);
+        for (int t = 0; t < triangles_to_add; t++) {
+          enqueue(queue, clipped[t]);
+        }
+      }
+      n_new_triangles = queue->len;
+    }
+    while (!is_empty(queue)) {
+      enqueue(clipped_triangles_to_draw, dequeue(queue));
+    }
+
+    free(queue);
+  }
+
+  while (!is_empty(clipped_triangles_to_draw)) {
+    triangle_t t = dequeue(clipped_triangles_to_draw);
+    draw_triangle(renderer, &t, texture);
+  }
+  free(sorted_triangles);
+  free(clipped_triangles_to_draw);
 }
 
-void DrawTriangle(SDL_Renderer *renderer, triangle_t *triangle,
-				  SDL_Surface *texture)
-{
-	vec3d_t normal, l1, l2;
-	l1 = vec3_sub(&triangle->verts[1], &triangle->verts[0]);
+void draw_triangle(SDL_Renderer *renderer, triangle_t *triangle,
+                   SDL_Surface *texture) {
+  vec3d_t normal, l1, l2;
+  l1 = vec3_sub(&triangle->verts[1], &triangle->verts[0]);
 
-	l2 = vec3_sub(&triangle->verts[2], &triangle->verts[0]);
+  l2 = vec3_sub(&triangle->verts[2], &triangle->verts[0]);
 
-	normal = vec3_cross(&l1, &l2);
+  normal = vec3_cross(&l1, &l2);
 
-	float length = sqrt(pow(normal.x, 2) + pow(normal.y, 2) + pow(normal.z, 2));
-	normal = vec3_div(&normal, length);
+  float length = sqrt(pow(normal.x, 2) + pow(normal.y, 2) + pow(normal.z, 2));
+  normal = vec3_div(&normal, length);
 
-	vec3d_t light_direction = {0, 0, -1};
-	float l = sqrt(vec3_dot(&light_direction, &light_direction));
-	light_direction = vec3_div(&light_direction, l);
+  vec3d_t light_direction = {0, 0, -1};
+  float l = sqrt(vec3_dot(&light_direction, &light_direction));
+  light_direction = vec3_div(&light_direction, l);
 
-	float dp = vec3_dot(&normal, &light_direction);
+  float dp = vec3_dot(&normal, &light_direction);
 
-	SDL_SetRenderDrawColor(renderer, triangle->color.r, triangle->color.g,
-						   triangle->color.b, SDL_ALPHA_OPAQUE);
-	FillTriangle(renderer, triangle);
-	FillTriangleWithTexture(renderer, triangle, texture);
-	SDL_SetRenderDrawColor(renderer, 250, 250, 250, SDL_ALPHA_OPAQUE);
-	DrawWireframeTriangle(renderer, triangle);
+  SDL_SetRenderDrawColor(renderer, triangle->color.r, triangle->color.g,
+                         triangle->color.b, SDL_ALPHA_OPAQUE);
+
+  switch (options.display_type) {
+  case WIREFRAME:
+    SDL_SetRenderDrawColor(renderer, 250, 250, 250, SDL_ALPHA_OPAQUE);
+    draw_wireframe_triangle(renderer, triangle);
+    break;
+
+  case MONOCHROME:
+    fill_triangle(renderer, triangle);
+    break;
+
+  case TEXTURE:
+    fill_triangle_with_texture(renderer, triangle, texture);
+    break;
+  }
 }
 
-void DrawWireframeTriangle(SDL_Renderer *renderer, triangle_t *triangle)
-{
-	SDL_RenderDrawLine(renderer, triangle->verts[0].x, triangle->verts[0].y,
-					   triangle->verts[1].x, triangle->verts[1].y);
-	SDL_RenderDrawLine(renderer, triangle->verts[1].x, triangle->verts[1].y,
-					   triangle->verts[2].x, triangle->verts[2].y);
-	SDL_RenderDrawLine(renderer, triangle->verts[2].x, triangle->verts[2].y,
-					   triangle->verts[0].x, triangle->verts[0].y);
+void draw_wireframe_triangle(SDL_Renderer *renderer, triangle_t *triangle) {
+  SDL_RenderDrawLine(renderer, triangle->verts[0].x, triangle->verts[0].y,
+                     triangle->verts[1].x, triangle->verts[1].y);
+  SDL_RenderDrawLine(renderer, triangle->verts[1].x, triangle->verts[1].y,
+                     triangle->verts[2].x, triangle->verts[2].y);
+  SDL_RenderDrawLine(renderer, triangle->verts[2].x, triangle->verts[2].y,
+                     triangle->verts[0].x, triangle->verts[0].y);
 }
 
-void FillTriangle(SDL_Renderer *renderer, triangle_t *triangle)
-{
-	int maxY = 0;
-	int minY = 0;
-	for (int i = 1; i < 3; i++)
-	{
-		if (triangle->verts[i].y >= triangle->verts[maxY].y)
-		{
-			maxY = i;
-		}
-		else if (triangle->verts[i].y <= triangle->verts[minY].y)
-		{
-			minY = i;
-		}
-	}
-	int midY = 3 - minY - maxY; // it works!
+void fill_triangle(SDL_Renderer *renderer, triangle_t *triangle) {
+  int max_y = 0;
+  int min_y = 0;
+  for (int i = 1; i < 3; i++) {
+    if (triangle->verts[i].y >= triangle->verts[max_y].y) {
+      max_y = i;
+    } else if (triangle->verts[i].y <= triangle->verts[min_y].y) {
+      min_y = i;
+    }
+  }
+  int mid_y = 3 - min_y - max_y; // it works!
 
-	vec3d_t vMax = {triangle->verts[maxY].x, triangle->verts[maxY].y, 0};
+  vec3d_t v_max = {triangle->verts[max_y].x, triangle->verts[max_y].y, 0};
 
-	vec3d_t vMid = {triangle->verts[midY].x, triangle->verts[midY].y, 0};
+  vec3d_t v_mid = {triangle->verts[mid_y].x, triangle->verts[mid_y].y, 0};
 
-	vec3d_t vMin = {triangle->verts[minY].x, triangle->verts[minY].y, 0};
+  vec3d_t v_min = {triangle->verts[min_y].x, triangle->verts[min_y].y, 0};
 
-	float slopeHypot = (vMax.x - vMin.x) / (vMax.y - vMin.y);
-	float xHyp = vMin.x;
+  float slope_hypot = (v_max.x - v_min.x) / (v_max.y - v_min.y);
+  float x_hyp = v_min.x;
 
-	FillTriangleHalf(renderer, &vMin, &vMid, slopeHypot, &xHyp, 1);
+  fill_triangle_half(renderer, &v_min, &v_mid, slope_hypot, &x_hyp, 1);
 
-	FillTriangleHalf(renderer, &vMid, &vMax, slopeHypot, &xHyp, 0);
+  fill_triangle_half(renderer, &v_mid, &v_max, slope_hypot, &x_hyp, 0);
 }
 
-void FillTriangleHalf(SDL_Renderer *renderer, vec3d_t *v1, vec3d_t *v2,
-					 float slopeHyp, float *xHyp, int isTop)
-{
-	if (v2->y - v1->y < 1)
-		return;
+void fill_triangle_half(SDL_Renderer *renderer, vec3d_t *v1, vec3d_t *v2,
+                        float slope_hyp, float *x_hyp, int isTop) {
+  if (v2->y - v1->y < 1) {
+    return;
+  }
 
-	float slopeA = (v1->x - v2->x) / (v1->y - v2->y);
-	float x1 = v1->x;
-	float *a, *b;
-	int result = 0;
-	if (isTop)
-	{
-		result = slopeA < slopeHyp;
-	}
-	else
-	{
-		result = slopeA > slopeHyp;
-	}
-	if (result)
-	{
-		a = &x1;
-		b = xHyp;
-	}
-	else
-	{
-		a = xHyp;
-		b = &x1;
-	}
+  float slope_a = (v1->x - v2->x) / (v1->y - v2->y);
+  float x1 = v1->x;
+  float *a, *b;
+  int result = 0;
+  if (isTop) {
+    result = slope_a < slope_hyp;
+  } else {
+    result = slope_a > slope_hyp;
+  }
+  if (result) {
+    a = &x1;
+    b = x_hyp;
+  } else {
+    a = x_hyp;
+    b = &x1;
+  }
 
-	for (int y = v1->y; y < v2->y; y++)
-	{
-		for (int x = *a; x < *b; x++)
-		{
-			SDL_RenderDrawPoint(renderer, x, y);
-		}
-		x1 += slopeA;
-		*xHyp += slopeHyp;
-	}
+  for (int y = v1->y; y < v2->y; y++) {
+    for (int x = *a; x < *b; x++) {
+      SDL_RenderDrawPoint(renderer, x, y);
+    }
+    x1 += slope_a;
+    *x_hyp += slope_hyp;
+  }
 }
 
+void fill_triangle_with_texture(SDL_Renderer *renderer, triangle_t *triangle,
+                                SDL_Surface *texture) {
+  unsigned char *pixels = (unsigned char *)texture->pixels;
 
-void FillTriangleWithTexture(SDL_Renderer *renderer, triangle_t *triangle,
-							 SDL_Surface *texture)
-{
-	unsigned char *pixels = (unsigned char *)texture->pixels;
+  int max_y = 0;
+  int min_y = 0;
+  for (int i = 1; i < 3; i++) {
+    if (triangle->verts[i].y >= triangle->verts[max_y].y) {
+      max_y = i;
+    } else if (triangle->verts[i].y <= triangle->verts[min_y].y) {
+      min_y = i;
+    }
+  }
+  int mid_y = 3 - min_y - max_y; // it works!
 
-	int maxY = 0;
-	int minY = 0;
-	for (int i = 1; i < 3; i++)
-	{
-		if (triangle->verts[i].y >= triangle->verts[maxY].y)
-			maxY = i;
-		else if (triangle->verts[i].y <= triangle->verts[minY].y)
-			minY = i;
-	}
-	int midY = 3 - minY - maxY; // it works!
+  vec3d_t v_max = {triangle->verts[max_y].x, triangle->verts[max_y].y, 0};
+  vec2d_t t_max = {triangle->texture[max_y].u, triangle->texture[max_y].v,
+                   triangle->texture[max_y].w};
 
-	vec3d_t vMax = {triangle->verts[maxY].x, triangle->verts[maxY].y, 0};
-	vec2d_t tMax = {triangle->texture[maxY].u, triangle->texture[maxY].v,
-					triangle->texture[maxY].w};
+  vec3d_t v_mid = {triangle->verts[mid_y].x, triangle->verts[mid_y].y, 0};
+  vec2d_t t_mid = {triangle->texture[mid_y].u, triangle->texture[mid_y].v,
+                   triangle->texture[mid_y].w};
 
-	vec3d_t vMid = {triangle->verts[midY].x, triangle->verts[midY].y, 0};
-	vec2d_t tMid = {triangle->texture[midY].u, triangle->texture[midY].v,
-					triangle->texture[midY].w};
+  vec3d_t v_min = {triangle->verts[min_y].x, triangle->verts[min_y].y, 0};
+  vec2d_t t_min = {triangle->texture[min_y].u, triangle->texture[min_y].v,
+                   triangle->texture[min_y].w};
 
-	vec3d_t vMin = {triangle->verts[minY].x, triangle->verts[minY].y, 0};
-	vec2d_t tMin = {triangle->texture[minY].u, triangle->texture[minY].v,
-					triangle->texture[minY].w};
+  int dx1 = v_mid.x - v_min.x;
+  int dy1 = v_mid.y - v_min.y;
+  float du1 = t_mid.u - t_min.u;
+  float dv1 = t_mid.v - t_min.v;
+  float dw1 = t_mid.w - t_min.w;
 
-	int dx1 = vMid.x - vMin.x;
-	int dy1 = vMid.y - vMin.y;
-	float du1 = tMid.u - tMin.u;
-	float dv1 = tMid.v - tMin.v;
-	float dw1 = tMid.w - tMin.w;
+  int dx2 = v_max.x - v_min.x;
+  int dy2 = v_max.y - v_min.y;
+  float du2 = t_max.u - t_min.u;
+  float dv2 = t_max.v - t_min.v;
+  float dw2 = t_max.w - t_min.w;
+  float texu, texv, texw;
 
-	int dx2 = vMax.x - vMin.x;
-	int dy2 = vMax.y - vMin.y;
-	float du2 = tMax.u - tMin.u;
-	float dv2 = tMax.v - tMin.v;
-	float dw2 = tMax.w - tMin.w;
-	float texu, texv, texw;
+  float dx1_step = 0, dx2_step = 0, du1_step = 0, du2_step = 0, dv1_step = 0,
+        dv2_step = 0, dw1_step = 0, dw2_step = 0;
 
-	float dx1_step = 0, dx2_step = 0, du1_step = 0, du2_step = 0, dv1_step = 0,
-		  dv2_step = 0, dw1_step = 0, dw2_step = 0;
+  if (dy1) {
+    dx1_step = dx1 / (float)abs(dy1);
+  }
+  if (dy2) {
+    dx2_step = dx2 / (float)abs(dy2);
+  }
 
-	if (dy1)
-		dx1_step = dx1 / (float)abs(dy1);
-	if (dy2)
-		dx2_step = dx2 / (float)abs(dy2);
+  if (dy1) {
+    du1_step = du1 / (float)abs(dy1);
+  }
+  if (dy2) {
+    du2_step = du2 / (float)abs(dy2);
+  }
 
-	if (dy1)
-		du1_step = du1 / (float)abs(dy1);
-	if (dy2)
-		du2_step = du2 / (float)abs(dy2);
+  if (dy1) {
+    dv1_step = dv1 / (float)abs(dy1);
+  }
+  if (dy2) {
+    dv2_step = dv2 / (float)abs(dy2);
+  }
 
-	if (dy1)
-		dv1_step = dv1 / (float)abs(dy1);
-	if (dy2)
-		dv2_step = dv2 / (float)abs(dy2);
+  if (dy1) {
+    dw1_step = dw1 / (float)abs(dy1);
+  }
+  if (dy2) {
+    dw2_step = dw2 / (float)abs(dy2);
+  }
 
-	if (dy1)
-		dw1_step = dw1 / (float)abs(dy1);
-	if (dy2)
-		dw2_step = dw2 / (float)abs(dy2);
+  if (dy1) {
+    for (int i = v_min.y; i <= v_mid.y; i++) {
+      int x1 = v_min.x + (float)(i - (int)v_min.y) * dx1_step;
+      int x2 = v_min.x + (float)(i - (int)v_min.y) * dx2_step;
 
-	if (dy1)
-	{
-		for (int i = vMin.y; i <= vMid.y; i++)
-		{
-			int x1 = vMin.x + (float)(i - (int)vMin.y) * dx1_step;
-			int x2 = vMin.x + (float)(i - (int)vMin.y) * dx2_step;
+      float su = t_min.u + (float)(i - (int)v_min.y) * du1_step;
+      float eu = t_min.u + (float)(i - (int)v_min.y) * du2_step;
 
-			float su = tMin.u + (float)(i - (int)vMin.y) * du1_step;
-			float eu = tMin.u + (float)(i - (int)vMin.y) * du2_step;
+      float sv = t_min.v + (float)(i - (int)v_min.y) * dv1_step;
+      float ev = t_min.v + (float)(i - (int)v_min.y) * dv2_step;
 
-			float sv = tMin.v + (float)(i - (int)vMin.y) * dv1_step;
-			float ev = tMin.v + (float)(i - (int)vMin.y) * dv2_step;
+      float sw = t_min.w + (float)(i - (int)v_min.y) * dw1_step;
+      float ew = t_min.w + (float)(i - (int)v_min.y) * dw2_step;
 
-			float sw = tMin.w + (float)(i - (int)vMin.y) * dw1_step;
-			float ew = tMin.w + (float)(i - (int)vMin.y) * dw2_step;
+      if (x1 > x2) {
+        int temp = x1;
+        x1 = x2;
+        x2 = temp;
 
-			if (x1 > x2)
-			{
-				int temp = x1;
-				x1 = x2;
-				x2 = temp;
+        float tempu = su;
+        su = eu;
+        eu = tempu;
 
-				float tempu = su;
-				su = eu;
-				eu = tempu;
+        float tempv = sv;
+        sv = ev;
+        ev = tempv;
 
-				float tempv = sv;
-				sv = ev;
-				ev = tempv;
+        float tempw = sw;
+        sw = ew;
+        ew = tempw;
+      }
+      texu = su;
+      texv = sv;
+      texw = sw;
 
-				float tempw = sw;
-				sw = ew;
-				ew = tempw;
-			}
-			texu = su;
-			texv = sv;
-			texw = sw;
+      float t_step = 1 / ((float)(x2 - x1));
+      float t = 0;
+      for (int j = x1; j < x2; j++) {
+        texu = (1 - t) * su + t * eu;
+        texv = (1 - t) * sv + t * ev;
+        texw = (1 - t) * sw + t * ew;
 
-			float tStep = 1 / ((float)(x2 - x1));
-			float t = 0;
-			for (int j = x1; j < x2; j++)
-			{
-				texu = (1 - t) * su + t * eu;
-				texv = (1 - t) * sv + t * ev;
-				texw = (1 - t) * sw + t * ew;
+        int u = (texture->w * (texu / texw));
+        int v = (texture->h * (texv / texw));
 
-				int u = (texture->w * (texu / texw));
-				int v = (texture->h * (texv / texw));
+        SDL_Color rgb;
+        Uint32 pixel = get_pixel(texture, u, v);
+        SDL_GetRGB(pixel, texture->format, &rgb.r, &rgb.g, &rgb.b);
+        Uint8 alpha = SDL_ALPHA_OPAQUE;
 
-				SDL_Color rgb;
-				Uint32 pixel = GetPixel(texture, u, v);
-				SDL_GetRGB(pixel, texture->format, &rgb.r, &rgb.g, &rgb.b);
-				Uint8 alpha = SDL_ALPHA_OPAQUE; // or use SDL_GetRGBA() if you need the alpha value
+        if (texw <= depth_buffer[i * width + j]) {
+          SDL_SetRenderDrawColor(renderer, rgb.r, rgb.g, rgb.b, rgb.a);
+          SDL_RenderDrawPoint(renderer, j, i);
+          depth_buffer[i * width + j] = texw;
+        }
+        t += t_step;
+      }
+    }
+  }
 
-				if (texw <= depthBuffer[i * width + j])
-				{
-					SDL_SetRenderDrawColor(renderer, rgb.r, rgb.g, rgb.b, rgb.a);
-					SDL_RenderDrawPoint(renderer, j, i);
-					depthBuffer[i * width + j] = texw;
-				}
-				t += tStep;
-			}
-		}
-	}
+  dy1 = v_max.y - v_mid.y;
+  dx1 = v_max.x - v_mid.x;
+  du1 = t_max.u - t_mid.u;
+  dv1 = t_max.v - t_mid.v;
+  dw1 = t_max.w - t_mid.w;
 
-	dy1 = vMax.y - vMid.y;
-	dx1 = vMax.x - vMid.x;
-	du1 = tMax.u - tMid.u;
-	dv1 = tMax.v - tMid.v;
-	dw1 = tMax.w - tMid.w;
+  if (dy1) {
+    dx1_step = dx1 / (float)abs(dy1);
+  }
 
-	if (dy1)
-		dx1_step = dx1 / (float)abs(dy1);
+  if (dy1) {
+    du1_step = du1 / (float)abs(dy1);
+  }
 
-	if (dy1)
-		du1_step = du1 / (float)abs(dy1);
+  if (dy1) {
+    dv1_step = dv1 / (float)abs(dy1);
+  }
 
-	if (dy1)
-		dv1_step = dv1 / (float)abs(dy1);
+  if (dy1) {
+    dw1_step = dw1 / (float)abs(dy1);
+  }
 
-	if (dy1)
-		dw1_step = dw1 / (float)abs(dy1);
+  if (dy1) {
+    for (int i = v_mid.y; i <= v_max.y; i++) {
+      int x1 = v_mid.x + (float)(i - v_mid.y) * dx1_step;
+      int x2 = v_min.x + (float)(i - v_min.y) * dx2_step;
 
-	if (dy1)
-	{
-		for (int i = vMid.y; i <= vMax.y; i++)
-		{
-			int x1 = vMid.x + (float)(i - vMid.y) * dx1_step;
-			int x2 = vMin.x + (float)(i - vMin.y) * dx2_step;
+      float su = t_mid.u + (float)(i - v_mid.y) * du1_step;
+      float eu = t_min.u + (float)(i - v_min.y) * du2_step;
 
-			float su = tMid.u + (float)(i - vMid.y) * du1_step;
-			float eu = tMin.u + (float)(i - vMin.y) * du2_step;
+      float sv = t_mid.v + (float)(i - v_mid.y) * dv1_step;
+      float ev = t_min.v + (float)(i - v_min.y) * dv2_step;
 
-			float sv = tMid.v + (float)(i - vMid.y) * dv1_step;
-			float ev = tMin.v + (float)(i - vMin.y) * dv2_step;
+      float sw = t_mid.w + (float)(i - (int)v_mid.y) * dw1_step;
+      float ew = t_min.w + (float)(i - (int)v_min.y) * dw2_step;
 
-			float sw = tMid.w + (float)(i - (int)vMid.y) * dw1_step;
-			float ew = tMin.w + (float)(i - (int)vMin.y) * dw2_step;
+      if (x1 > x2) {
+        int temp = x1;
+        x1 = x2;
+        x2 = temp;
 
-			if (x1 > x2)
-			{
-				int temp = x1;
-				x1 = x2;
-				x2 = temp;
+        float tempu = su;
+        su = eu;
+        eu = tempu;
 
-				float tempu = su;
-				su = eu;
-				eu = tempu;
+        float tempv = sv;
+        sv = ev;
+        ev = tempv;
 
-				float tempv = sv;
-				sv = ev;
-				ev = tempv;
+        float tempw = sw;
+        sw = ew;
+        ew = tempw;
+      }
+      texu = su;
+      texv = sv;
+      texw = sw;
 
-				float tempw = sw;
-				sw = ew;
-				ew = tempw;
-			}
-			texu = su;
-			texv = sv;
-			texw = sw;
+      float t_step = 1 / ((float)(x2 - x1));
+      float t = 0;
+      for (int j = x1; j < x2; j++) {
+        texu = (1 - t) * su + t * eu;
+        texv = (1 - t) * sv + t * ev;
+        texw = (1 - t) * sw + t * ew;
 
-			float tStep = 1 / ((float)(x2 - x1));
-			float t = 0;
-			for (int j = x1; j < x2; j++)
-			{
-				texu = (1 - t) * su + t * eu;
-				texv = (1 - t) * sv + t * ev;
-				texw = (1 - t) * sw + t * ew;
+        int u = (texture->w * (texu / texw));
+        int v = (texture->h * (texv / texw));
 
-				int u = (texture->w * (texu / texw));
-				int v = (texture->h * (texv / texw));
+        SDL_Color rgb;
+        Uint32 pixel = get_pixel(texture, u, v);
+        SDL_GetRGB(pixel, texture->format, &rgb.r, &rgb.g, &rgb.b);
+        Uint8 alpha = SDL_ALPHA_OPAQUE; // or use SDL_GetRGBA() if you need the
+                                        // alpha value
 
-				SDL_Color rgb;
-				Uint32 pixel = GetPixel(texture, u, v);
-				SDL_GetRGB(pixel, texture->format, &rgb.r, &rgb.g, &rgb.b);
-				Uint8 alpha = SDL_ALPHA_OPAQUE; // or use SDL_GetRGBA() if you need the alpha value
-
-				if (texw <= depthBuffer[i * width + j])
-				{
-					SDL_SetRenderDrawColor(renderer, rgb.r, rgb.g, rgb.b, rgb.a);
-					SDL_RenderDrawPoint(renderer, j, i);
-					depthBuffer[i * width + j] = texw;
-				}
-				t += tStep;
-			}
-		}
-	}
+        if (texw <= depth_buffer[i * width + j]) {
+          SDL_SetRenderDrawColor(renderer, rgb.r, rgb.g, rgb.b, rgb.a);
+          SDL_RenderDrawPoint(renderer, j, i);
+          depth_buffer[i * width + j] = texw;
+        }
+        t += t_step;
+      }
+    }
+  }
 }
 
-Uint32 GetPixel(SDL_Surface *surface, int x, int y)
-{
-	Uint32 *pixels = (Uint32 *)surface->pixels;
-	Uint32 pixel = pixels[y * surface->w + x];
-	return pixel;
+Uint32 get_pixel(SDL_Surface *surface, int x, int y) {
+  Uint32 *pixels = (Uint32 *)surface->pixels;
+  Uint32 pixel = pixels[y * surface->w + x];
+  return pixel;
 }
