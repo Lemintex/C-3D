@@ -5,15 +5,20 @@
 #include "options.h"
 #include "renderer.h"
 
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_video.h>
-#include <stdio.h>
+#include <dirent.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_events.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_video.h>
 
+char *get_extension(char *file);
+void read_mash_files(char **mesh_string, char **texture_string);
 void init();
 void init_camera();
 void init_options();
@@ -43,14 +48,28 @@ int main(int argc, char **argv) {
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
   SDL_Surface *screen = SDL_GetWindowSurface(window);
+  // get the paths of the mesh and texture
+  char *mesh_string;
+  char *texture_string;
+  read_mash_files(&mesh_string, &texture_string);
+  char *full_mesh_string =
+      (char *)malloc(sizeof(char) * (strlen("res/") + strlen(mesh_string)) + 1);
+  char *full_texture_string = (char *)malloc(
+      sizeof(char) * (strlen("res/") + strlen(texture_string)) + 1);
+  strcpy(full_mesh_string, "res/");
+  strcat(full_mesh_string, mesh_string);
+  strcpy(full_texture_string, "res/");
+  strcat(full_texture_string, texture_string);
 
-  mesh_t *ship = read_mesh_from_file("res/A001_Spyro.obj", 1);
-  SDL_Surface *texture = IMG_Load("res/A001_Spyro.png");
+  mesh_t *ship = read_mesh_from_file(full_mesh_string, 1);
+  SDL_Surface *texture = IMG_Load(full_texture_string);
 
+  free(full_mesh_string);
+  free(full_texture_string);
   while (1) {
     SDL_Event event;
 
-        bool mouse_moved = false;
+    bool mouse_moved = false;
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
       case SDL_QUIT:
@@ -66,12 +85,13 @@ int main(int argc, char **argv) {
         break;
       case SDL_MOUSEMOTION:
         handle_mouse_input(&event, &camera.look);
-          mouse_moved = true;
+        mouse_moved = true;
         break;
       }
     }
-    
-    // if the mouse want's moved, the user isn't looking with the camera and all look bits should be 0
+
+    // if the mouse want's moved, the user isn't looking with the camera and all
+    // look bits should be 0
     if (!mouse_moved) {
       camera.look &= 0;
     }
@@ -81,7 +101,6 @@ int main(int argc, char **argv) {
                  SDL_GetPerformanceFrequency();
     previous_frame_time = current_frame_time;
 
-    camera_update();
     memset(depth_buffer, 0, width * height);
     for (int i = 0; i < width * height; i++) {
       depth_buffer[i] = 1;
@@ -112,4 +131,42 @@ void init_camera() {
 void init_options() {
   options.movement_speed = 0;
   options.display_type = WIREFRAME;
+}
+
+void read_mash_files(char **mesh_string, char **texture_string) {
+  bool obj_found = false;
+  bool texture_found = false;
+
+  struct dirent **file_list;
+  int files = 0;
+
+  files = scandir("./res", &file_list, NULL, alphasort);
+  while (files > 2) { // we don't care about "."  or ".."
+    files--;
+    char *file_name = file_list[files]->d_name;
+    char *ext = get_extension(file_name);
+
+    if (!obj_found && !strcmp(ext, "obj")) {
+      obj_found = true;
+      *mesh_string = (char *)malloc(sizeof(char) * strlen(file_name) + 1);
+      strcpy(*mesh_string, file_name);
+    }
+
+    if (!texture_found && !strcmp(ext, "png")) {
+      texture_found = true;
+      *texture_string = (char *)malloc(sizeof(char) * strlen(file_name) + 1);
+      strcpy(*texture_string, file_name);
+    }
+
+    free(file_list[files]);
+  }
+}
+
+char *get_extension(char *ext) {
+
+  char *dot_position = strchr(ext, '.');
+  if (dot_position) {
+    dot_position++;
+  }
+  return dot_position;
 }

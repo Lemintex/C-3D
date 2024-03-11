@@ -15,7 +15,7 @@ typedef struct camera {
   look_t look_dir;
   unsigned short mov;
   unsigned short look;
-  float pitch,yaw; 
+  float pitch, yaw;
   int pitch_speed, yaw_speed;
 } camera_t;
 
