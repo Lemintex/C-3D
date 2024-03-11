@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
   SDL_Surface *screen = SDL_GetWindowSurface(window);
-
+  // get the paths of the mesh and texture
   char *mesh_string;
   char *texture_string;
   read_mash_files(&mesh_string, &texture_string);
@@ -101,7 +101,6 @@ int main(int argc, char **argv) {
                  SDL_GetPerformanceFrequency();
     previous_frame_time = current_frame_time;
 
-    camera_update();
     memset(depth_buffer, 0, width * height);
     for (int i = 0; i < width * height; i++) {
       depth_buffer[i] = 1;

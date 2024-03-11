@@ -23,35 +23,40 @@ void camera_update() {
 
 void camera_move() {
   unsigned short movement_speed = options.movement_speed;
+  vec3d_t forward_speed = vec3_mul(&camera.look_dir.forward, movement_speed / 100.0);
+  vec3d_t right_speed = vec3_mul(&camera.look_dir.right, movement_speed / 100.0);
+  vec3d_t up_speed = vec3_mul(&camera.look_dir.up, movement_speed / 100.0);
 
+  camera.look_dir.forward = vec3_mul(&camera.look_dir.forward, movement_speed / 100.00);
+  
   // FORWARD
   if (camera_get_movement_bit(1)) {
-    camera.pos = vec3_add(&camera.pos, &camera.look_dir.forward);
+    camera.pos = vec3_add(&camera.pos, &forward_speed);
   }
 
   // BACK
   if (camera_get_movement_bit(2)) {
-    camera.pos = vec3_sub(&camera.pos, &camera.look_dir.forward);
+    camera.pos = vec3_sub(&camera.pos, &forward_speed);
   }
 
   // LEFT
   if (camera_get_movement_bit(3)) {
-    camera.pos = vec3_sub(&camera.pos, &camera.look_dir.right);
+    camera.pos = vec3_sub(&camera.pos, &right_speed);
   }
 
   // RIGHT
   if (camera_get_movement_bit(4)) {
-    camera.pos = vec3_add(&camera.pos, &camera.look_dir.right);
+    camera.pos = vec3_add(&camera.pos, &right_speed);
   }
 
   // UP
   if (camera_get_movement_bit(5)) {
-    camera.pos = vec3_add(&camera.pos, &camera.look_dir.up);
+    camera.pos = vec3_add(&camera.pos, &up_speed);
   }
 
   // DOWN
   if (camera_get_movement_bit(6)) {
-    camera.pos = vec3_sub(&camera.pos, &camera.look_dir.up);
+    camera.pos = vec3_sub(&camera.pos, &up_speed);
   }
 }
 
