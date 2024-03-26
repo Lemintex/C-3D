@@ -71,7 +71,8 @@ void handle_movement(SDL_Event *e, unsigned short *mov) {
   if (e->key.repeat) {
     return;
   }
-  *mov ^= 1UL << bit;
+  camera.mov ^= 1UL << bit;
+  camera_move();
 }
 
 void handle_speed(SDL_Event *e) {
