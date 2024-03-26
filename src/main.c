@@ -77,7 +77,8 @@ int main(int argc, char **argv) {
         return 0;
       case SDL_KEYUP:
       case SDL_KEYDOWN:
-        handle_keyboard_input(&event, &camera.mov);
+        handle_keyboard_input(&event, &options.movement_speed);
+        camera_move();
         if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
           SDL_DestroyWindow(window);
           return 0;
