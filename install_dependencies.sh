@@ -1,1 +1,2 @@
-sudo apt-get install SDL2 SDL2_image math
+sudo apt update
+sudo apt install libsdl2-2.0-0 libsdl2-image-dev
